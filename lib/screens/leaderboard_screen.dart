@@ -22,9 +22,20 @@ class LeaderboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final stats = ref.watch(statsProvider);
-    
-    // Mock global players
+    final statsAsync = ref.watch(statsProvider);
+    return statsAsync.when(
+      loading: () => const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(color: GameTheme.neonCyan),
+        ),
+      ),
+      error: (err, stack) => Scaffold(
+        body: Center(
+          child: Text('Error: $err', style: const TextStyle(color: Colors.red)),
+        ),
+      ),
+      data: (stats) {
+        // Mock global players
     final List<LeaderboardPlayer> globalPlayers = [
       const LeaderboardPlayer(name: 'SpadeKing ♠', coins: 154500, winRate: '72%'),
       const LeaderboardPlayer(name: 'NeonTrump', coins: 89000, winRate: '68%'),
@@ -71,7 +82,7 @@ class LeaderboardScreen extends ConsumerWidget {
                       icon: const Icon(Icons.arrow_back_rounded, color: GameTheme.textWhite),
                       onPressed: () => Navigator.pop(context),
                       style: IconButton.styleFrom(
-                        backgroundColor: Colors.white.withOpacity(0.05),
+                        backgroundColor: Colors.white.withValues(alpha: 0.05),
                         padding: const EdgeInsets.all(12),
                       ),
                     ),
@@ -85,7 +96,7 @@ class LeaderboardScreen extends ConsumerWidget {
                         letterSpacing: 1.5,
                         shadows: [
                           Shadow(
-                            color: GameTheme.neonCyan.withOpacity(0.5),
+                            color: GameTheme.neonCyan.withValues(alpha: 0.5),
                             blurRadius: 10,
                           ),
                         ],
@@ -95,9 +106,9 @@ class LeaderboardScreen extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: GameTheme.goldAccent.withOpacity(0.1),
+                        color: GameTheme.goldAccent.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: GameTheme.goldAccent.withOpacity(0.4)),
+                        border: Border.all(color: GameTheme.goldAccent.withValues(alpha: 0.4)),
                       ),
                       child: Row(
                         children: [
@@ -122,9 +133,9 @@ class LeaderboardScreen extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.02),
+                    color: Colors.white.withValues(alpha: 0.02),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.white.withOpacity(0.04)),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.04)),
                   ),
                   child: const Row(
                     children: [
@@ -146,8 +157,8 @@ class LeaderboardScreen extends ConsumerWidget {
                       final rank = index + 1;
                       
                       // Theme-specific styles
-                      Color rowBorderColor = Colors.white.withOpacity(0.04);
-                      Color rowBgColor = Colors.white.withOpacity(0.01);
+                      Color rowBorderColor = Colors.white.withValues(alpha: 0.04);
+                      Color rowBgColor = Colors.white.withValues(alpha: 0.01);
                       Widget rankWidget = Text(
                         '#$rank',
                         style: TextStyle(
@@ -158,22 +169,22 @@ class LeaderboardScreen extends ConsumerWidget {
                       );
 
                       if (rank == 1) {
-                        rowBorderColor = GameTheme.goldAccent.withOpacity(0.3);
-                        rowBgColor = GameTheme.goldAccent.withOpacity(0.02);
+                        rowBorderColor = GameTheme.goldAccent.withValues(alpha: 0.3);
+                        rowBgColor = GameTheme.goldAccent.withValues(alpha: 0.02);
                         rankWidget = const Icon(Icons.emoji_events_rounded, color: GameTheme.goldAccent, size: 22);
                       } else if (rank == 2) {
-                        rowBorderColor = Colors.grey.withOpacity(0.3);
-                        rowBgColor = Colors.grey.withOpacity(0.02);
+                        rowBorderColor = Colors.grey.withValues(alpha: 0.3);
+                        rowBgColor = Colors.grey.withValues(alpha: 0.02);
                         rankWidget = const Icon(Icons.emoji_events_rounded, color: Colors.grey, size: 20);
                       } else if (rank == 3) {
-                        rowBorderColor = Colors.brown.withOpacity(0.4);
-                        rowBgColor = Colors.brown.withOpacity(0.02);
+                        rowBorderColor = Colors.brown.withValues(alpha: 0.4);
+                        rowBgColor = Colors.brown.withValues(alpha: 0.02);
                         rankWidget = const Icon(Icons.emoji_events_rounded, color: Colors.brown, size: 18);
                       }
 
                       if (player.isUser) {
-                        rowBorderColor = GameTheme.neonCyan.withOpacity(0.6);
-                        rowBgColor = GameTheme.neonCyan.withOpacity(0.05);
+                        rowBorderColor = GameTheme.neonCyan.withValues(alpha: 0.6);
+                        rowBgColor = GameTheme.neonCyan.withValues(alpha: 0.05);
                       }
 
                       return Container(
@@ -201,13 +212,13 @@ class LeaderboardScreen extends ConsumerWidget {
                                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                       margin: const EdgeInsets.only(right: 8),
                                       decoration: BoxDecoration(
-                                        color: GameTheme.neonCyan.withOpacity(0.15),
+                                        color: GameTheme.neonCyan.withValues(alpha: 0.15),
                                         borderRadius: BorderRadius.circular(4),
-                                        border: Border.all(color: GameTheme.neonCyan.withOpacity(0.4)),
+                                        border: Border.all(color: GameTheme.neonCyan.withValues(alpha: 0.4)),
                                       ),
                                       child: const Text(
                                         'YOU',
-                                        style: TextStyle(color: GameTheme.neonCyan, fontSize: 8, fontWeight: FontWeight.bold),
+                                        style: TextStyle(color: GameTheme.neonCyan, fontSize: 11, fontWeight: FontWeight.bold),
                                       ),
                                     ),
                                   ],
@@ -256,6 +267,8 @@ class LeaderboardScreen extends ConsumerWidget {
           ),
         ),
       ),
+    );
+      },
     );
   }
 }

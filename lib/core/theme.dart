@@ -43,12 +43,12 @@ class GameTheme {
   static List<BoxShadow> neonGlow(Color color, {double blurRadius = 8}) {
     return [
       BoxShadow(
-        color: color.withOpacity(0.4),
+        color: color.withValues(alpha: 0.4),
         blurRadius: blurRadius,
         spreadRadius: 1,
       ),
       BoxShadow(
-        color: color.withOpacity(0.2),
+        color: color.withValues(alpha: 0.2),
         blurRadius: blurRadius * 2,
         spreadRadius: 2,
       ),
@@ -63,15 +63,15 @@ class GameTheme {
     Color borderColor = Colors.white,
   }) {
     return BoxDecoration(
-      color: Colors.white.withOpacity(opacity),
+      color: Colors.white.withValues(alpha: opacity),
       borderRadius: BorderRadius.circular(radius),
       border: Border.all(
-        color: borderColor.withOpacity(borderOpacity),
+        color: borderColor.withValues(alpha: borderOpacity),
         width: 1.5,
       ),
       boxShadow: [
         BoxShadow(
-          color: Colors.black.withOpacity(0.2),
+          color: Colors.black.withValues(alpha: 0.2),
           blurRadius: 10,
           spreadRadius: -2,
         ),

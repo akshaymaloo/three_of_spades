@@ -5,26 +5,35 @@ import '../models/multiplayer_state.dart';
 import 'game_notifier.dart';
 import 'stats_provider.dart';
 
-class MultiplayerNotifier extends StateNotifier<MultiplayerState> {
-  final Ref ref;
+class MultiplayerNotifier extends Notifier<MultiplayerState> {
   Timer? _searchTimer;
   Timer? _countdownTimer;
+  final List<Timer> _simulatedTimers = [];
   final Random _random = Random();
 
-  MultiplayerNotifier(this.ref) : super(MultiplayerState.initial());
-
   @override
-  void dispose() {
-    _searchTimer?.cancel();
-    _countdownTimer?.cancel();
-    super.dispose();
+  MultiplayerState build() {
+    ref.onDispose(() {
+      _searchTimer?.cancel();
+      _countdownTimer?.cancel();
+      _clearSimulatedTimers();
+    });
+    return MultiplayerState.initial();
+  }
+
+  void _clearSimulatedTimers() {
+    for (final timer in _simulatedTimers) {
+      timer.cancel();
+    }
+    _simulatedTimers.clear();
   }
 
   void startMatchmaking() {
     _searchTimer?.cancel();
     _countdownTimer?.cancel();
+    _clearSimulatedTimers();
 
-    final userName = ref.read(statsProvider).name;
+    final userName = ref.read(statsProvider).value?.name ?? 'Guest Player';
     state = MultiplayerState.initial().copyWith(
       status: MultiplayerStatus.searching,
       lobbyPlayers: [userName],
@@ -32,7 +41,6 @@ class MultiplayerNotifier extends StateNotifier<MultiplayerState> {
 
     int elapsedSeconds = 0;
     _searchTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (!mounted) return;
       elapsedSeconds++;
       state = state.copyWith(searchTimer: elapsedSeconds);
 
@@ -51,14 +59,16 @@ class MultiplayerNotifier extends StateNotifier<MultiplayerState> {
   void cancelMatchmaking() {
     _searchTimer?.cancel();
     _countdownTimer?.cancel();
+    _clearSimulatedTimers();
     state = MultiplayerState.initial();
   }
 
   void createPrivateRoom() {
     _searchTimer?.cancel();
     _countdownTimer?.cancel();
+    _clearSimulatedTimers();
 
-    final userName = ref.read(statsProvider).name;
+    final userName = ref.read(statsProvider).value?.name ?? 'Guest Player';
     final code = 'TS-${_random.nextInt(900000) + 100000}';
     state = MultiplayerState.initial().copyWith(
       status: MultiplayerStatus.found,
@@ -67,21 +77,21 @@ class MultiplayerNotifier extends StateNotifier<MultiplayerState> {
     );
 
     // Simulate other players joining the private room after short delays
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted && state.roomCode == code && state.lobbyPlayers.length < 4) {
+    _simulatedTimers.add(Timer(const Duration(seconds: 2), () {
+      if (state.roomCode == code && state.lobbyPlayers.length < 4) {
         _addLobbyPlayer(_randomPeerName());
       }
-    });
-    Future.delayed(const Duration(seconds: 4), () {
-      if (mounted && state.roomCode == code && state.lobbyPlayers.length < 4) {
+    }));
+    _simulatedTimers.add(Timer(const Duration(seconds: 4), () {
+      if (state.roomCode == code && state.lobbyPlayers.length < 4) {
         _addLobbyPlayer(_randomPeerName());
       }
-    });
-    Future.delayed(const Duration(seconds: 5), () {
-      if (mounted && state.roomCode == code && state.lobbyPlayers.length < 4) {
+    }));
+    _simulatedTimers.add(Timer(const Duration(seconds: 5), () {
+      if (state.roomCode == code && state.lobbyPlayers.length < 4) {
         _addLobbyPlayer(_randomPeerName());
       }
-    });
+    }));
   }
 
   void fillWithBots() {
@@ -96,8 +106,9 @@ class MultiplayerNotifier extends StateNotifier<MultiplayerState> {
   void joinPrivateRoom(String code) {
     _searchTimer?.cancel();
     _countdownTimer?.cancel();
+    _clearSimulatedTimers();
 
-    final userName = ref.read(statsProvider).name;
+    final userName = ref.read(statsProvider).value?.name ?? 'Guest Player';
     state = MultiplayerState.initial().copyWith(
       status: MultiplayerStatus.searching,
       roomCode: code,
@@ -105,19 +116,18 @@ class MultiplayerNotifier extends StateNotifier<MultiplayerState> {
     );
 
     // Simulate quick loading and joining room with existing players
-    Future.delayed(const Duration(milliseconds: 1500), () {
-      if (!mounted) return;
+    _simulatedTimers.add(Timer(const Duration(milliseconds: 1500), () {
       state = state.copyWith(
         status: MultiplayerStatus.found,
         lobbyPlayers: [userName, _randomPeerName(), _randomPeerName(), _randomPeerName()],
       );
-    });
+    }));
   }
 
   void sendMessage(String text) {
     if (text.trim().isEmpty) return;
 
-    final userName = ref.read(statsProvider).name;
+    final userName = ref.read(statsProvider).value?.name ?? 'Guest Player';
     final userMsg = ChatMessage(
       sender: userName,
       text: text,
@@ -129,8 +139,7 @@ class MultiplayerNotifier extends StateNotifier<MultiplayerState> {
     );
 
     // Trigger simulated reply from other players
-    Future.delayed(Duration(milliseconds: 1000 + _random.nextInt(1500)), () {
-      if (!mounted) return;
+    _simulatedTimers.add(Timer(Duration(milliseconds: 1000 + _random.nextInt(1500)), () {
       final peers = state.lobbyPlayers.where((name) => name != userName).toList();
       if (peers.isNotEmpty) {
         final responder = peers[_random.nextInt(peers.length)];
@@ -144,7 +153,7 @@ class MultiplayerNotifier extends StateNotifier<MultiplayerState> {
           chatMessages: [...state.chatMessages, peerMsg],
         );
       }
-    });
+    }));
   }
 
   void triggerSystemMessage(String text) {
@@ -160,7 +169,7 @@ class MultiplayerNotifier extends StateNotifier<MultiplayerState> {
   }
 
   void triggerPeerReaction() {
-    final userName = ref.read(statsProvider).name;
+    final userName = ref.read(statsProvider).value?.name ?? 'Guest Player';
     final peers = state.lobbyPlayers.where((name) => name != userName).toList();
     if (peers.isEmpty) return;
     
@@ -177,6 +186,7 @@ class MultiplayerNotifier extends StateNotifier<MultiplayerState> {
   void startGameDirectly() {
     _searchTimer?.cancel();
     _countdownTimer?.cancel();
+    _clearSimulatedTimers();
     _startGameplay();
   }
 
@@ -195,7 +205,6 @@ class MultiplayerNotifier extends StateNotifier<MultiplayerState> {
     );
 
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (!mounted) return;
       final currentCount = state.countdownTimer - 1;
       state = state.copyWith(countdownTimer: currentCount);
 
@@ -255,6 +264,6 @@ class MultiplayerNotifier extends StateNotifier<MultiplayerState> {
   }
 }
 
-final multiplayerProvider = StateNotifierProvider<MultiplayerNotifier, MultiplayerState>((ref) {
-  return MultiplayerNotifier(ref);
+final multiplayerProvider = NotifierProvider<MultiplayerNotifier, MultiplayerState>(() {
+  return MultiplayerNotifier();
 });

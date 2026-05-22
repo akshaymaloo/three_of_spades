@@ -1,0 +1,125 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/game_state.dart';
+import '../models/player_model.dart';
+import '../core/theme.dart';
+import 'playing_card_widget.dart';
+import '../providers/game_notifier.dart';
+
+class PlayerHandPanel extends ConsumerStatefulWidget {
+  final GameState game;
+  final PlayerModel humanPlayer;
+
+  const PlayerHandPanel({
+    super.key,
+    required this.game,
+    required this.humanPlayer,
+  });
+
+  @override
+  ConsumerState<PlayerHandPanel> createState() => _PlayerHandPanelState();
+}
+
+class _PlayerHandPanelState extends ConsumerState<PlayerHandPanel> {
+  int? _selectedCardIndex;
+
+  @override
+  void didUpdateWidget(covariant PlayerHandPanel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Reset selection if it's no longer the human player's turn to play
+    if (widget.game.activePlayerIndex != 0 || widget.game.phase != GamePhase.playing) {
+      _selectedCardIndex = null;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final hand = widget.humanPlayer.hand;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.4),
+        border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.05))),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: SizedBox(
+              height: 96,
+              child: hand.isEmpty
+                  ? const Center(child: Text('No Cards', style: TextStyle(color: GameTheme.textGrey)))
+                  : ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: hand.length,
+                      itemBuilder: (context, index) {
+                        final card = hand[index];
+                        // Validate if playable
+                        bool isPlayable = true;
+                        if (widget.game.phase == GamePhase.playing && widget.game.activePlayerIndex == 0 && widget.game.gameTurn > 1) {
+                          final hasLedSuit = hand.any((c) => c.suit == widget.game.trumpStart);
+                          if (hasLedSuit && card.suit != widget.game.trumpStart) {
+                            isPlayable = false;
+                          }
+                        }
+
+                        final isSelected = _selectedCardIndex == index;
+
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 6.0),
+                          child: PlayingCardWidget(
+                            card: card,
+                            isSelected: isSelected,
+                            isPlayable: isPlayable,
+                            width: 56,
+                            height: 80,
+                            selectionOffset: 14,
+                            onTap: () {
+                              if (widget.game.activePlayerIndex != 0) return;
+
+                              if (isSelected) {
+                                final played = ref.read(gameProvider.notifier).playCard(card);
+                                if (played) {
+                                  setState(() {
+                                    _selectedCardIndex = null;
+                                  });
+                                }
+                              } else {
+                                setState(() {
+                                  _selectedCardIndex = index;
+                                });
+                              }
+                            },
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ),
+          if (widget.game.activePlayerIndex == 0 && widget.game.phase == GamePhase.playing && _selectedCardIndex != null)
+            Padding(
+              padding: const EdgeInsets.only(left: 12.0),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: GameTheme.neonGreen,
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                onPressed: () {
+                  final card = hand[_selectedCardIndex!];
+                  final played = ref.read(gameProvider.notifier).playCard(card);
+                  if (played) {
+                    setState(() {
+                      _selectedCardIndex = null;
+                    });
+                  }
+                },
+                child: const Text('PLAY CARD', style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}

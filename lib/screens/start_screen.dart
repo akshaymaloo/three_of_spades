@@ -40,7 +40,7 @@ class StartScreen extends ConsumerWidget {
                       color: GameTheme.textWhite,
                       shadows: [
                         Shadow(
-                          color: GameTheme.neonPink.withOpacity(0.5),
+                          color: GameTheme.neonPink.withValues(alpha: 0.5),
                           blurRadius: 10,
                         ),
                       ],

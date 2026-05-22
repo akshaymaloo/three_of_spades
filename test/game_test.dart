@@ -40,5 +40,16 @@ void main() {
       }
       expect(totalPoints, 350);
     });
+
+    test('CardModel equality and hashCode are based on suit and rank', () {
+      final card1 = const CardModel(id: 1, suit: 'S', rank: 14, points: 20, assetPath: 'path1');
+      final card2 = const CardModel(id: 2, suit: 'S', rank: 14, points: 20, assetPath: 'path2');
+      final card3 = const CardModel(id: 3, suit: 'H', rank: 14, points: 20, assetPath: 'path3');
+
+      expect(card1 == card2, isTrue);
+      expect(card1 == card3, isFalse);
+      expect(card1.hashCode, card2.hashCode);
+      expect(card1.hashCode != card3.hashCode, isTrue);
+    });
   });
 }

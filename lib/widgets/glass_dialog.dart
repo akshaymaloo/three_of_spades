@@ -30,10 +30,10 @@ class GlassDialog extends StatelessWidget {
           width: double.maxFinite,
           constraints: const BoxConstraints(maxWidth: 420),
           decoration: BoxDecoration(
-            color: GameTheme.darkBackground.withOpacity(0.85),
+            color: GameTheme.darkBackground.withValues(alpha: 0.85),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: glowColor.withOpacity(0.3),
+              color: glowColor.withValues(alpha: 0.3),
               width: 1.5,
             ),
             boxShadow: GameTheme.neonGlow(glowColor, blurRadius: 15),
@@ -48,7 +48,7 @@ class GlassDialog extends StatelessWidget {
                 decoration: BoxDecoration(
                   border: Border(
                     bottom: BorderSide(
-                      color: Colors.white.withOpacity(0.05),
+                      color: Colors.white.withValues(alpha: 0.05),
                       width: 1.0,
                     ),
                   ),
@@ -65,7 +65,7 @@ class GlassDialog extends StatelessWidget {
                         letterSpacing: 1.5,
                         shadows: [
                           Shadow(
-                            color: glowColor.withOpacity(0.8),
+                            color: glowColor.withValues(alpha: 0.8),
                             blurRadius: 8,
                           ),
                         ],
@@ -90,7 +90,7 @@ class GlassDialog extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.02),
+                    color: Colors.white.withValues(alpha: 0.02),
                     borderRadius: const BorderRadius.only(
                       bottomLeft: Radius.circular(20),
                       bottomRight: Radius.circular(20),
@@ -113,61 +113,4 @@ class GlassDialog extends StatelessWidget {
     );
   }
 
-  // Quick helper to show alerts
-  static void showComingSoon(BuildContext context, String feature) {
-    showDialog(
-      context: context,
-      builder: (context) => GlassDialog(
-        title: 'Coming Soon',
-        glowColor: GameTheme.neonPink,
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: GameTheme.neonPink.withOpacity(0.1),
-                border: Border.all(color: GameTheme.neonPink.withOpacity(0.3)),
-              ),
-              child: const Icon(
-                Icons.bolt,
-                size: 40,
-                color: GameTheme.neonPink,
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              '$feature multiplayer is under development!',
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 15,
-                color: GameTheme.textWhite,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Compete in global rankings, match with active players online, and set up custom tables soon.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 13,
-                color: GameTheme.textGrey,
-                height: 1.4,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text(
-              'ACKNOWLEDGE',
-              style: TextStyle(color: GameTheme.neonPink, fontWeight: FontWeight.bold),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }

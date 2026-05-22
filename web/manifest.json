@@ -1,12 +1,12 @@
 {
-    "name": "three_of_spades_flutter",
-    "short_name": "three_of_spades_flutter",
+    "name": "Kaali Ki Teeggi",
+    "short_name": "Kaali Ki Teeggi",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
-    "orientation": "portrait-primary",
+    "background_color": "#0F0F16",
+    "theme_color": "#00E5FF",
+    "description": "Kaali Ki Teeggi (Three of Spades) - Cyberpunk card game with multiplayer and offline modes.",
+    "orientation": "landscape",
     "prefer_related_applications": false,
     "icons": [
         {

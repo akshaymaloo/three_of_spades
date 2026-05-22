@@ -81,7 +81,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
                   color: GameTheme.textWhite,
                   shadows: [
                     Shadow(
-                      color: GameTheme.neonCyan.withOpacity(0.8),
+                      color: GameTheme.neonCyan.withValues(alpha: 0.8),
                       blurRadius: 10,
                     ),
                   ],
@@ -103,7 +103,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(2),
                   child: LinearProgressIndicator(
-                    backgroundColor: Colors.white.withOpacity(0.05),
+                    backgroundColor: Colors.white.withValues(alpha: 0.05),
                     color: GameTheme.neonCyan,
                     minHeight: 4,
                   ),

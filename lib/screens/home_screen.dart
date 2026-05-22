@@ -3,100 +3,238 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/theme.dart';
 import '../providers/stats_provider.dart';
 import '../providers/game_notifier.dart';
+import '../core/sound_manager.dart';
 import '../widgets/glass_dialog.dart';
 import 'matchmaking_screen.dart';
 import 'private_room_screen.dart';
 import 'leaderboard_screen.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
-  void _showSettings(BuildContext context, WidgetRef ref) {
+  @override
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  ProviderSubscription<AsyncValue<UserStats>>? _statsSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _statsSubscription = ref.listenManual<AsyncValue<UserStats>>(
+          statsProvider,
+          (previous, next) {
+            if (next is AsyncData<UserStats>) {
+              final stats = next.value;
+              SoundManager().setEnabled(stats.soundEnabled);
+              SoundManager().setMusicEnabled(stats.musicEnabled);
+              if (stats.musicEnabled && stats.soundEnabled) {
+                SoundManager().playBackgroundMusic();
+              }
+            }
+          },
+          fireImmediately: true,
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _statsSubscription?.close();
+    super.dispose();
+  }
+
+  void _showSettings(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) {
-        final game = ref.watch(gameProvider);
+        return Consumer(
+          builder: (context, ref, child) {
+            final statsAsync = ref.watch(statsProvider);
+            return statsAsync.when(
+              loading: () => const Center(
+                child: CircularProgressIndicator(color: GameTheme.neonCyan),
+              ),
+              error: (err, stack) => Center(
+                child: Text('Error: $err', style: const TextStyle(color: Colors.red)),
+              ),
+              data: (stats) {
+                return GlassDialog(
+                  title: 'Settings',
+                  glowColor: GameTheme.neonCyan,
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Sound toggle
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text('Sound Effects', style: TextStyle(color: GameTheme.textWhite)),
+                        trailing: Switch(
+                          value: stats.soundEnabled,
+                          activeThumbColor: GameTheme.neonCyan,
+                          onChanged: (val) {
+                            ref.read(statsProvider.notifier).toggleSound(val);
+                            ref.read(gameProvider.notifier).toggleSound(val);
+                          },
+                        ),
+                      ),
+                      const Divider(color: Colors.white10),
+                      // Music toggle
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text('Background Music', style: TextStyle(color: GameTheme.textWhite)),
+                        trailing: Switch(
+                          value: stats.musicEnabled,
+                          activeThumbColor: GameTheme.neonCyan,
+                          onChanged: (val) {
+                            ref.read(statsProvider.notifier).toggleMusic(val);
+                          },
+                        ),
+                      ),
+                      const Divider(color: Colors.white10),
+                      const SizedBox(height: 12),
+                      // Reset stats button
+                      InkWell(
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (subContext) => GlassDialog(
+                              title: 'Reset Stats?',
+                              glowColor: GameTheme.neonPink,
+                              content: const Text(
+                                'This will reset your coins back to 5,000 and wipe out your win history. This action is irreversible.',
+                                style: TextStyle(color: GameTheme.textWhite, fontSize: 14),
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(subContext),
+                                  child: const Text('CANCEL', style: TextStyle(color: GameTheme.textGrey)),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    ref.read(statsProvider.notifier).resetStats();
+                                    Navigator.pop(subContext); // pop confirm
+                                    Navigator.pop(context); // pop settings
+                                  },
+                                  child: const Text('RESET', style: TextStyle(color: GameTheme.neonPink, fontWeight: FontWeight.bold)),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                        borderRadius: BorderRadius.circular(8),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: GameTheme.neonPink.withValues(alpha: 0.5)),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.restore_outlined, color: GameTheme.neonPink, size: 20),
+                              SizedBox(width: 8),
+                              Text('RESET GUEST STATS', style: TextStyle(color: GameTheme.neonPink, fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showNameEditor(BuildContext context, String currentName) {
+    final controller = TextEditingController(text: currentName);
+    showDialog(
+      context: context,
+      builder: (context) {
         return GlassDialog(
-          title: 'Settings',
+          title: 'Edit Name',
           glowColor: GameTheme.neonCyan,
           content: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Sound toggle
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Sound Effects', style: TextStyle(color: GameTheme.textWhite)),
-                trailing: Switch(
-                  value: game.soundEnabled,
-                  activeColor: GameTheme.neonCyan,
-                  onChanged: (val) {
-                    ref.read(gameProvider.notifier).toggleSound();
-                  },
-                ),
+              const Text(
+                'Enter your alias:',
+                style: TextStyle(color: GameTheme.textGrey, fontSize: 13),
               ),
-              const Divider(color: Colors.white10),
               const SizedBox(height: 12),
-              // Reset stats button
-              InkWell(
-                onTap: () {
-                  showDialog(
-                    context: context,
-                    builder: (subContext) => GlassDialog(
-                      title: 'Reset Stats?',
-                      glowColor: GameTheme.neonPink,
-                      content: const Text(
-                        'This will reset your coins back to 5,000 and wipe out your win history. This action is irreversible.',
-                        style: TextStyle(color: GameTheme.textWhite, fontSize: 14),
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(subContext),
-                          child: const Text('CANCEL', style: TextStyle(color: GameTheme.textGrey)),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            ref.read(statsProvider.notifier).resetStats();
-                            Navigator.pop(subContext); // pop confirm
-                            Navigator.pop(context); // pop settings
-                          },
-                          child: const Text('RESET', style: TextStyle(color: GameTheme.neonPink, fontWeight: FontWeight.bold)),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-                borderRadius: BorderRadius.circular(8),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: GameTheme.neonPink.withOpacity(0.5)),
+              TextField(
+                controller: controller,
+                autofocus: true,
+                style: const TextStyle(color: GameTheme.textWhite),
+                decoration: InputDecoration(
+                  hintText: 'Alias',
+                  hintStyle: const TextStyle(color: Colors.white24),
+                  filled: true,
+                  fillColor: Colors.white.withValues(alpha: 0.05),
+                  enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: GameTheme.neonCyan.withValues(alpha: 0.3)),
                   ),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.restore_outlined, color: GameTheme.neonPink, size: 20),
-                      SizedBox(width: 8),
-                      Text('RESET GUEST STATS', style: TextStyle(color: GameTheme.neonPink, fontWeight: FontWeight.bold)),
-                    ],
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: GameTheme.neonCyan),
                   ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 ),
+                maxLength: 15,
               ),
             ],
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('CANCEL', style: TextStyle(color: GameTheme.textGrey)),
+            ),
+            TextButton(
+              onPressed: () {
+                final newName = controller.text.trim();
+                if (newName.isNotEmpty) {
+                  ref.read(statsProvider.notifier).updateName(newName);
+                }
+                Navigator.pop(context);
+              },
+              child: const Text('SAVE', style: TextStyle(color: GameTheme.neonCyan, fontWeight: FontWeight.bold)),
+            ),
+          ],
         );
       },
     );
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final stats = ref.watch(statsProvider);
-    final winRate = stats.gamesPlayed > 0 
-        ? '${(stats.gamesWon / stats.gamesPlayed * 100).toStringAsFixed(1)}%'
-        : '0.0%';
+  Widget build(BuildContext context) {
+    final statsAsync = ref.watch(statsProvider);
+    return statsAsync.when(
+      loading: () => const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(color: GameTheme.neonCyan),
+        ),
+      ),
+      error: (err, stack) => Scaffold(
+        body: Center(
+          child: Text('Error: $err', style: const TextStyle(color: Colors.red)),
+        ),
+      ),
+      data: (stats) {
+        final winRate = stats.gamesPlayed > 0 
+            ? '${(stats.gamesWon / stats.gamesPlayed * 100).toStringAsFixed(1)}%'
+            : '0.0%';
 
-    return Scaffold(
+        return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
           gradient: GameTheme.backgroundGradient,
@@ -130,12 +268,26 @@ class HomeScreen extends ConsumerWidget {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              stats.name,
-                              style: const TextStyle(
-                                color: GameTheme.textWhite,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
+                            GestureDetector(
+                              onTap: () => _showNameEditor(context, stats.name),
+                              behavior: HitTestBehavior.opaque,
+                              child: Row(
+                                children: [
+                                  Text(
+                                    stats.name,
+                                    style: const TextStyle(
+                                      color: GameTheme.textWhite,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  const Icon(
+                                    Icons.edit_rounded,
+                                    color: GameTheme.neonCyan,
+                                    size: 16,
+                                  ),
+                                ],
                               ),
                             ),
                             Row(
@@ -160,9 +312,9 @@ class HomeScreen extends ConsumerWidget {
                       children: [
                         IconButton(
                           icon: const Icon(Icons.settings, color: GameTheme.textWhite, size: 24),
-                          onPressed: () => _showSettings(context, ref),
+                          onPressed: () => _showSettings(context),
                           style: IconButton.styleFrom(
-                            backgroundColor: Colors.white.withOpacity(0.05),
+                            backgroundColor: Colors.white.withValues(alpha: 0.05),
                             padding: const EdgeInsets.all(12),
                           ),
                         ),
@@ -233,12 +385,12 @@ class HomeScreen extends ConsumerWidget {
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
                                       colors: [
-                                        GameTheme.cardTableColor.withOpacity(0.3),
-                                        GameTheme.cardTableColor.withOpacity(0.1),
+                                        GameTheme.cardTableColor.withValues(alpha: 0.3),
+                                        GameTheme.cardTableColor.withValues(alpha: 0.1),
                                       ],
                                     ),
                                     borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(color: GameTheme.neonGreen.withOpacity(0.3), width: 1.5),
+                                    border: Border.all(color: GameTheme.neonGreen.withValues(alpha: 0.3), width: 1.5),
                                     boxShadow: GameTheme.neonGlow(GameTheme.neonGreen, blurRadius: 10),
                                   ),
                                   child: Stack(
@@ -266,9 +418,9 @@ class HomeScreen extends ConsumerWidget {
                                             Container(
                                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                               decoration: BoxDecoration(
-                                                color: GameTheme.neonGreen.withOpacity(0.15),
+                                                color: GameTheme.neonGreen.withValues(alpha: 0.15),
                                                 borderRadius: BorderRadius.circular(6),
-                                                border: Border.all(color: GameTheme.neonGreen.withOpacity(0.4)),
+                                                border: Border.all(color: GameTheme.neonGreen.withValues(alpha: 0.4)),
                                               ),
                                               child: const Text(
                                                 'OFFLINE PLAY',
@@ -372,15 +524,17 @@ class HomeScreen extends ConsumerWidget {
         ),
       ),
     );
+      },
+    );
   }
 
   Widget _buildStatTile(String label, String value, IconData icon) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.02),
+        color: Colors.white.withValues(alpha: 0.02),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.04)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.04)),
       ),
       child: Row(
         children: [
@@ -388,7 +542,7 @@ class HomeScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: GameTheme.neonCyan.withOpacity(0.08),
+              color: GameTheme.neonCyan.withValues(alpha: 0.08),
             ),
             child: Icon(icon, color: GameTheme.neonCyan, size: 18),
           ),
@@ -426,12 +580,12 @@ class HomeScreen extends ConsumerWidget {
       borderRadius: BorderRadius.circular(12),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.02),
+          color: Colors.white.withValues(alpha: 0.02),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: glowColor.withOpacity(0.2)),
+          border: Border.all(color: glowColor.withValues(alpha: 0.2)),
           boxShadow: [
             BoxShadow(
-              color: glowColor.withOpacity(0.05),
+              color: glowColor.withValues(alpha: 0.05),
               blurRadius: 6,
               spreadRadius: 1,
             )
@@ -446,7 +600,7 @@ class HomeScreen extends ConsumerWidget {
               title,
               style: const TextStyle(
                 color: GameTheme.textWhite,
-                fontSize: 10,
+                fontSize: 11,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.0,
               ),
@@ -455,14 +609,14 @@ class HomeScreen extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: glowColor.withOpacity(0.1),
+                color: glowColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
                 title == 'LEADERBOARD' ? 'STATS' : 'LIVE',
                 style: TextStyle(
                   color: glowColor,
-                  fontSize: 8,
+                  fontSize: 11,
                   fontWeight: FontWeight.bold,
                 ),
               ),

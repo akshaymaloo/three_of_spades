@@ -12,6 +12,11 @@ enum GamePhase {
   roundOver,
 }
 
+class Nullable<T> {
+  final T value;
+  const Nullable(this.value);
+}
+
 class GameState {
   final GamePhase phase;
   final List<PlayerModel> players;
@@ -27,7 +32,6 @@ class GameState {
   final int? trickWinnerIndex;  // 0..3
   final String message;
   final bool soundEnabled;
-  final bool vibrationEnabled;
   final bool isMultiplayer;
 
   const GameState({
@@ -45,7 +49,6 @@ class GameState {
     this.trickWinnerIndex,
     required this.message,
     this.soundEnabled = true,
-    this.vibrationEnabled = true,
     this.isMultiplayer = false,
   });
 
@@ -58,13 +61,12 @@ class GameState {
     int? gameTurn,
     String? trumpStart,
     String? trump,
-    CardModel? partnerCard,
+    Nullable<CardModel?>? partnerCard,
     int? winningBid,
-    int? bidderIndex,
-    int? trickWinnerIndex,
+    Nullable<int?>? bidderIndex,
+    Nullable<int?>? trickWinnerIndex,
     String? message,
     bool? soundEnabled,
-    bool? vibrationEnabled,
     bool? isMultiplayer,
   }) {
     return GameState(
@@ -76,13 +78,12 @@ class GameState {
       gameTurn: gameTurn ?? this.gameTurn,
       trumpStart: trumpStart ?? this.trumpStart,
       trump: trump ?? this.trump,
-      partnerCard: partnerCard ?? this.partnerCard,
+      partnerCard: partnerCard != null ? partnerCard.value : this.partnerCard,
       winningBid: winningBid ?? this.winningBid,
-      bidderIndex: bidderIndex ?? this.bidderIndex,
-      trickWinnerIndex: trickWinnerIndex ?? this.trickWinnerIndex,
+      bidderIndex: bidderIndex != null ? bidderIndex.value : this.bidderIndex,
+      trickWinnerIndex: trickWinnerIndex != null ? trickWinnerIndex.value : this.trickWinnerIndex,
       message: message ?? this.message,
       soundEnabled: soundEnabled ?? this.soundEnabled,
-      vibrationEnabled: vibrationEnabled ?? this.vibrationEnabled,
       isMultiplayer: isMultiplayer ?? this.isMultiplayer,
     );
   }

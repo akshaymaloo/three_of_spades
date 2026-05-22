@@ -40,8 +40,8 @@ void main() {
       final container = await createInitializedContainer();
       addTearDown(container.dispose);
 
-      final stats = container.read(statsProvider);
-      expect(stats.name, 'TestHero');
+      final stats = container.read(statsProvider).value;
+      expect(stats?.name, 'TestHero');
 
       final notifier = container.read(multiplayerProvider.notifier);
       notifier.startMatchmaking();

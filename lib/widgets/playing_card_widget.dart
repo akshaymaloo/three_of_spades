@@ -30,50 +30,63 @@ class PlayingCardWidget extends StatelessWidget {
     Widget cardBody;
 
     if (showBack) {
-      cardBody = SvgPicture.asset(
-        'assets/cards/back_side_blue.svg',
-        fit: BoxFit.fill,
-        placeholderBuilder: (context) => _buildCardBackFallback(),
+      cardBody = ExcludeSemantics(
+        child: SvgPicture.asset(
+          'assets/cards/back_side_blue.svg',
+          fit: BoxFit.fill,
+          placeholderBuilder: (context) => _buildCardBackFallback(),
+        ),
       );
     } else {
-      cardBody = SvgPicture.asset(
-        card.assetPath,
-        fit: BoxFit.fill,
-        placeholderBuilder: (context) => _buildCardFrontFallback(),
+      cardBody = ExcludeSemantics(
+        child: SvgPicture.asset(
+          card.assetPath,
+          fit: BoxFit.fill,
+          placeholderBuilder: (context) => _buildCardFrontFallback(),
+        ),
       );
     }
 
-    return GestureDetector(
-      onTap: isPlayable ? onTap : null,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOut,
-        width: width,
-        height: height,
-        margin: EdgeInsets.only(bottom: isSelected ? selectionOffset : 0),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: isSelected
-              ? GameTheme.neonGlow(GameTheme.neonCyan, blurRadius: 10)
-              : [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.3),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  )
-                ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: isPlayable
-              ? cardBody
-              : ColorFiltered(
-                  colorFilter: ColorFilter.mode(
-                    Colors.black.withOpacity(0.5),
-                    BlendMode.dstATop,
+    final String labelStr = showBack
+        ? 'Face down card'
+        : '${card.name}${card.points > 0 ? ", ${card.points} points" : ""}${isSelected ? ", selected" : ""}${!isPlayable ? ", unplayable" : ""}';
+
+    return Semantics(
+      label: labelStr,
+      button: isPlayable && onTap != null,
+      enabled: isPlayable,
+      child: GestureDetector(
+        onTap: isPlayable ? onTap : null,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+          width: width,
+          height: height,
+          margin: EdgeInsets.only(bottom: isSelected ? selectionOffset : 0),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: isSelected
+                ? GameTheme.neonGlow(GameTheme.neonCyan, blurRadius: 10)
+                : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.3),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    )
+                  ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: isPlayable
+                ? cardBody
+                : ColorFiltered(
+                    colorFilter: ColorFilter.mode(
+                      Colors.black.withValues(alpha: 0.5),
+                      BlendMode.dstATop,
+                    ),
+                    child: cardBody,
                   ),
-                  child: cardBody,
-                ),
+          ),
         ),
       ),
     );

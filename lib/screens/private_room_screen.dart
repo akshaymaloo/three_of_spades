@@ -79,7 +79,7 @@ class _PrivateRoomScreenState extends ConsumerState<PrivateRoomScreen> {
                         Navigator.pop(context);
                       },
                       style: IconButton.styleFrom(
-                        backgroundColor: Colors.white.withOpacity(0.05),
+                        backgroundColor: Colors.white.withValues(alpha: 0.05),
                         padding: const EdgeInsets.all(12),
                       ),
                     ),
@@ -93,7 +93,7 @@ class _PrivateRoomScreenState extends ConsumerState<PrivateRoomScreen> {
                         letterSpacing: 1.5,
                         shadows: [
                           Shadow(
-                            color: GameTheme.neonCyan.withOpacity(0.5),
+                            color: GameTheme.neonCyan.withValues(alpha: 0.5),
                             blurRadius: 10,
                           ),
                         ],
@@ -144,7 +144,7 @@ class _PrivateRoomScreenState extends ConsumerState<PrivateRoomScreen> {
                       width: 1.5,
                     ),
                     borderRadius: BorderRadius.circular(8),
-                    color: _isCreating ? GameTheme.neonCyan.withOpacity(0.05) : Colors.transparent,
+                    color: _isCreating ? GameTheme.neonCyan.withValues(alpha: 0.05) : Colors.transparent,
                   ),
                   child: Center(
                     child: Text(
@@ -172,7 +172,7 @@ class _PrivateRoomScreenState extends ConsumerState<PrivateRoomScreen> {
                       width: 1.5,
                     ),
                     borderRadius: BorderRadius.circular(8),
-                    color: !_isCreating ? GameTheme.neonCyan.withOpacity(0.05) : Colors.transparent,
+                    color: !_isCreating ? GameTheme.neonCyan.withValues(alpha: 0.05) : Colors.transparent,
                   ),
                   child: Center(
                     child: Text(
@@ -238,21 +238,21 @@ class _PrivateRoomScreenState extends ConsumerState<PrivateRoomScreen> {
             decoration: InputDecoration(
               hintText: 'TS-XXXXXX',
               hintStyle: TextStyle(
-                color: GameTheme.textGrey.withOpacity(0.3),
+                color: GameTheme.textGrey.withValues(alpha: 0.3),
                 fontSize: 22,
                 fontWeight: FontWeight.normal,
                 letterSpacing: 4,
               ),
               contentPadding: const EdgeInsets.symmetric(vertical: 14),
               enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: GameTheme.neonCyan.withOpacity(0.3), width: 1.5),
+                borderSide: BorderSide(color: GameTheme.neonCyan.withValues(alpha: 0.3), width: 1.5),
                 borderRadius: BorderRadius.circular(12),
               ),
               focusedBorder: OutlineInputBorder(
                 borderSide: const BorderSide(color: GameTheme.neonCyan, width: 2.0),
                 borderRadius: BorderRadius.circular(12),
               ),
-              fillColor: Colors.white.withOpacity(0.01),
+              fillColor: Colors.white.withValues(alpha: 0.01),
               filled: true,
             ),
           ),
@@ -293,9 +293,9 @@ class _PrivateRoomScreenState extends ConsumerState<PrivateRoomScreen> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             decoration: BoxDecoration(
-              color: GameTheme.neonCyan.withOpacity(0.08),
+              color: GameTheme.neonCyan.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: GameTheme.neonCyan.withOpacity(0.4)),
+              border: Border.all(color: GameTheme.neonCyan.withValues(alpha: 0.4)),
               boxShadow: GameTheme.neonGlow(GameTheme.neonCyan, blurRadius: 4),
             ),
             child: Row(
@@ -332,12 +332,12 @@ class _PrivateRoomScreenState extends ConsumerState<PrivateRoomScreen> {
               margin: const EdgeInsets.only(bottom: 8),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.01),
+                color: Colors.white.withValues(alpha: 0.01),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
                   color: hasPlayer 
-                      ? (isUser ? GameTheme.neonCyan : GameTheme.neonGreen).withOpacity(0.3)
-                      : Colors.white.withOpacity(0.05),
+                      ? (isUser ? GameTheme.neonCyan : GameTheme.neonGreen).withValues(alpha: 0.3)
+                      : Colors.white.withValues(alpha: 0.05),
                 ),
               ),
               child: Row(
@@ -346,14 +346,14 @@ class _PrivateRoomScreenState extends ConsumerState<PrivateRoomScreen> {
                     hasPlayer ? Icons.person_rounded : Icons.add_circle_outline_rounded,
                     color: hasPlayer 
                         ? (isUser ? GameTheme.neonCyan : GameTheme.neonGreen)
-                        : GameTheme.textGrey.withOpacity(0.3),
+                        : GameTheme.textGrey.withValues(alpha: 0.3),
                     size: 20,
                   ),
                   const SizedBox(width: 16),
                   Text(
                     name,
                     style: TextStyle(
-                      color: hasPlayer ? GameTheme.textWhite : GameTheme.textGrey.withOpacity(0.3),
+                      color: hasPlayer ? GameTheme.textWhite : GameTheme.textGrey.withValues(alpha: 0.3),
                       fontWeight: hasPlayer ? FontWeight.bold : FontWeight.normal,
                       fontSize: 14,
                     ),
@@ -364,7 +364,7 @@ class _PrivateRoomScreenState extends ConsumerState<PrivateRoomScreen> {
                       isUser ? 'HOST' : 'READY',
                       style: TextStyle(
                         color: isUser ? GameTheme.neonCyan : GameTheme.neonGreen,
-                        fontSize: 10,
+                        fontSize: 11,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 1.0,
                       ),
@@ -373,8 +373,8 @@ class _PrivateRoomScreenState extends ConsumerState<PrivateRoomScreen> {
                     Text(
                       'WAITING...',
                       style: TextStyle(
-                        color: GameTheme.textGrey.withOpacity(0.2),
-                        fontSize: 10,
+                        color: GameTheme.textGrey.withValues(alpha: 0.2),
+                        fontSize: 11,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -418,7 +418,7 @@ class _PrivateRoomScreenState extends ConsumerState<PrivateRoomScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     decoration: BoxDecoration(
                       gradient: isFull ? GameTheme.neonCyanGradient : null,
-                      color: isFull ? null : Colors.white.withOpacity(0.05),
+                      color: isFull ? null : Colors.white.withValues(alpha: 0.05),
                       borderRadius: BorderRadius.circular(8),
                       boxShadow: isFull ? GameTheme.neonGlow(GameTheme.neonCyan) : null,
                     ),

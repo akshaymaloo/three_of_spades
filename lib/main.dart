@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'core/theme.dart';
-import 'models/game_state.dart';
-import 'providers/game_notifier.dart';
-import 'screens/splash_screen.dart';
-import 'screens/start_screen.dart';
-import 'screens/home_screen.dart';
-import 'screens/game_screen.dart';
+import 'core/router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,13 +21,15 @@ void main() async {
   );
 }
 
-class ThreeOfSpadesApp extends StatelessWidget {
+class ThreeOfSpadesApp extends ConsumerWidget {
   const ThreeOfSpadesApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Three of Spades (Kaali Ki Teeggi)',
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(routerProvider);
+
+    return MaterialApp.router(
+      title: 'Kaali Ki Teeggi (Three of Spades)',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark,
@@ -41,33 +39,9 @@ class ThreeOfSpadesApp extends StatelessWidget {
           secondary: GameTheme.neonPink,
           surface: GameTheme.darkBackground,
         ),
-        fontFamily: 'Outfit', // Uses fallback if Google Fonts is not present locally
+        textTheme: GoogleFonts.outfitTextTheme(ThemeData.dark().textTheme),
       ),
-      home: const GamePhaseRouter(),
+      routerConfig: router,
     );
-  }
-}
-
-class GamePhaseRouter extends ConsumerWidget {
-  const GamePhaseRouter({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final phase = ref.watch(gameProvider.select((state) => state.phase));
-
-    switch (phase) {
-      case GamePhase.splash:
-        return const SplashScreen();
-      case GamePhase.start:
-        return const StartScreen();
-      case GamePhase.home:
-        return const HomeScreen();
-      case GamePhase.dealing:
-      case GamePhase.bidding:
-      case GamePhase.declaring:
-      case GamePhase.playing:
-      case GamePhase.roundOver:
-        return const GameScreen();
-    }
   }
 }

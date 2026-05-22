@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:flutter/semantics.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/card_model.dart';
 import '../models/player_model.dart';
@@ -8,10 +10,37 @@ import '../core/sound_manager.dart';
 import 'stats_provider.dart';
 import 'multiplayer_notifier.dart';
 
-class GameNotifier extends StateNotifier<GameState> {
-  final Ref ref;
+class GameNotifier extends Notifier<GameState> {
+  Timer? _trickEvaluationTimer;
+  Timer? _redealTimer;
+  Timer? _botActionTimer;
 
-  GameNotifier(this.ref) : super(_createInitialState());
+  @override
+  set state(GameState value) {
+    final oldMsg = state.message;
+    super.state = value;
+    if (value.message != oldMsg && value.message.isNotEmpty) {
+      _announce(value.message);
+    }
+  }
+
+  void _announce(String message) {
+    try {
+      SemanticsService.announce(message, TextDirection.ltr);
+    } catch (_) {
+      // Fallback for tests/non-UI environments
+    }
+  }
+
+  @override
+  GameState build() {
+    ref.onDispose(() {
+      _trickEvaluationTimer?.cancel();
+      _redealTimer?.cancel();
+      _botActionTimer?.cancel();
+    });
+    return _createInitialState();
+  }
 
   static GameState _createInitialState() {
     return GameState(
@@ -33,14 +62,18 @@ class GameNotifier extends StateNotifier<GameState> {
     );
   }
 
-  void toggleSound() {
-    final enabled = !state.soundEnabled;
-    SoundManager().setEnabled(enabled);
-    state = state.copyWith(soundEnabled: enabled);
+  void toggleSound([bool? enabled]) {
+    final newEnabled = enabled ?? !state.soundEnabled;
+    SoundManager().setEnabled(newEnabled);
+    state = state.copyWith(soundEnabled: newEnabled);
+    final statsVal = ref.read(statsProvider).value;
+    if (statsVal != null && statsVal.soundEnabled != newEnabled) {
+      ref.read(statsProvider.notifier).toggleSound(newEnabled);
+    }
   }
 
   void goToHome() {
-    final userCoins = ref.read(statsProvider).coins;
+    final userCoins = ref.read(statsProvider).value?.coins ?? 5000;
     // Update player 0 coins from stats
     final updatedPlayers = List<PlayerModel>.from(state.players);
     updatedPlayers[0] = updatedPlayers[0].copyWith(coins: userCoins);
@@ -59,9 +92,8 @@ class GameNotifier extends StateNotifier<GameState> {
     state = state.copyWith(phase: GamePhase.start);
   }
 
-  void startNewGame() {
-    final userCoins = ref.read(statsProvider).coins;
-    final preserveMultiplayer = state.isMultiplayer;
+  void _initializeGame({bool isMultiplayer = false, List<String>? multiplayerNames}) {
+    final userCoins = ref.read(statsProvider).value?.coins ?? 5000;
     
     // Generate fresh deck and shuffle
     final deck = CardModel.generateDeck();
@@ -91,88 +123,25 @@ class GameNotifier extends StateNotifier<GameState> {
     // Update player models
     final updatedPlayers = <PlayerModel>[];
     for (int i = 0; i < 4; i++) {
-      final p = state.players[i];
-      updatedPlayers.add(PlayerModel(
-        id: p.id,
-        name: p.id == 0 ? ref.read(statsProvider).name : p.name,
-        avatarPath: p.avatarPath,
-        coins: p.id == 0 ? userCoins : p.coins,
-        isHuman: p.isHuman,
-        hand: hands[i],
-        currentBid: null,
-        hasPassed: false,
-        playedCard: null,
-        roundPoints: 0,
-        isBidder: false,
-        isPartner: false,
-        isPartnerRevealed: false,
-      ));
-    }
+      String name;
+      int coins;
+      bool isHuman = i == 0;
+      
+      if (isMultiplayer && multiplayerNames != null && multiplayerNames.length > i) {
+        name = multiplayerNames[i];
+        coins = i == 0 ? userCoins : 5000;
+      } else {
+        final p = state.players[i];
+        name = i == 0 ? (ref.read(statsProvider).value?.name ?? 'You') : p.name;
+        coins = i == 0 ? userCoins : p.coins;
+      }
 
-    // Bidding starts with the player next to the dealer
-    final int nextDealer = (state.dealerIndex + 1) % 4;
-    final int firstBidder = (nextDealer + 1) % 4;
-
-    state = state.copyWith(
-      phase: GamePhase.bidding,
-      players: updatedPlayers,
-      activePlayerIndex: firstBidder,
-      dealerIndex: nextDealer,
-      roundNumber: 1,
-      gameTurn: 1,
-      trumpStart: 'x',
-      trump: 'x',
-      partnerCard: null,
-      winningBid: 0,
-      bidderIndex: null,
-      trickWinnerIndex: null,
-      isMultiplayer: preserveMultiplayer,
-      message: preserveMultiplayer 
-          ? 'Match restarted! Bidding begins. Minimum bid is 175.'
-          : 'Bidding started. Minimum bid is 175.',
-    );
-
-    // If active player is bot, trigger bot bidding
-    _triggerBotActionIfNeeded();
-  }
-
-  void startNewMultiplayerGame(List<String> names) {
-    final userCoins = ref.read(statsProvider).coins;
-    
-    // Generate fresh deck and shuffle
-    final deck = CardModel.generateDeck();
-    deck.shuffle(Random());
-
-    // Play shuffle sound
-    SoundManager().playSound('sounds/card_shuffle.mp3');
-
-    // Distribute 13 cards to 4 players
-    final List<List<CardModel>> hands = [[], [], [], []];
-    for (int i = 0; i < 52; i++) {
-      hands[i % 4].add(deck[i]);
-    }
-
-    // Sort each hand by suit and rank
-    final suitOrder = {'S': 0, 'H': 1, 'C': 2, 'D': 3};
-    for (int i = 0; i < 4; i++) {
-      hands[i].sort((a, b) {
-        if (a.suit != b.suit) {
-          return suitOrder[a.suit]!.compareTo(suitOrder[b.suit]!);
-        }
-        return b.rank.compareTo(a.rank);
-      });
-    }
-
-    // Update player models with multiplayer names
-    final updatedPlayers = <PlayerModel>[];
-    for (int i = 0; i < 4; i++) {
-      final name = names.length > i ? names[i] : 'Player $i';
       updatedPlayers.add(PlayerModel(
         id: i,
         name: name,
         avatarPath: 'assets/images/guest_avatar.png',
-        coins: i == 0 ? userCoins : 5000,
-        isHuman: i == 0,
+        coins: coins,
+        isHuman: isHuman,
         hand: hands[i],
         currentBid: null,
         hasPassed: false,
@@ -188,8 +157,10 @@ class GameNotifier extends StateNotifier<GameState> {
     final int nextDealer = (state.dealerIndex + 1) % 4;
     final int firstBidder = (nextDealer + 1) % 4;
 
+    final soundEnabled = ref.read(statsProvider).value?.soundEnabled ?? true;
+
     state = state.copyWith(
-      phase: GamePhase.bidding,
+      phase: GamePhase.dealing,
       players: updatedPlayers,
       activePlayerIndex: firstBidder,
       dealerIndex: nextDealer,
@@ -197,15 +168,35 @@ class GameNotifier extends StateNotifier<GameState> {
       gameTurn: 1,
       trumpStart: 'x',
       trump: 'x',
-      partnerCard: null,
+      partnerCard: const Nullable(null),
       winningBid: 0,
-      bidderIndex: null,
-      trickWinnerIndex: null,
-      isMultiplayer: true,
-      message: 'Match started! Bidding begins. Minimum bid is 175.',
+      bidderIndex: const Nullable(null),
+      trickWinnerIndex: const Nullable(null),
+      isMultiplayer: isMultiplayer,
+      soundEnabled: soundEnabled,
+      message: 'Dealing cards...',
+    );
+  }
+
+  void completeDealing() {
+    if (state.phase != GamePhase.dealing) return;
+
+    state = state.copyWith(
+      phase: GamePhase.bidding,
+      message: state.isMultiplayer 
+          ? 'Match restarted! Bidding begins. Minimum bid is 175.'
+          : 'Bidding started. Minimum bid is 175.',
     );
 
     _triggerBotActionIfNeeded();
+  }
+
+  void startNewGame() {
+    _initializeGame(isMultiplayer: state.isMultiplayer);
+  }
+
+  void startNewMultiplayerGame(List<String> names) {
+    _initializeGame(isMultiplayer: true, multiplayerNames: names);
   }
 
   void placeBid(int amount) {
@@ -224,7 +215,7 @@ class GameNotifier extends StateNotifier<GameState> {
     state = state.copyWith(
       players: updatedPlayers,
       winningBid: amount,
-      bidderIndex: player.id,
+      bidderIndex: Nullable(player.id),
       message: '${player.name} bid $amount points.',
     );
 
@@ -281,15 +272,16 @@ class GameNotifier extends StateNotifier<GameState> {
           state = state.copyWith(
             players: updatedPlayers,
             winningBid: 175,
-            bidderIndex: winner.id,
+            bidderIndex: Nullable(winner.id),
             message: '${winner.name} is forced to bid 175.',
           );
         }
       }
 
       // Bidding complete! The winner declares Trump and Partner card
+      final bidderIdx = state.bidderIndex!;
       final finalPlayers = state.players.map((p) {
-        if (p.id == state.bidderIndex) {
+        if (p.id == bidderIdx) {
           return p.copyWith(isBidder: true);
         }
         return p;
@@ -298,8 +290,8 @@ class GameNotifier extends StateNotifier<GameState> {
       state = state.copyWith(
         phase: GamePhase.declaring,
         players: finalPlayers,
-        activePlayerIndex: state.bidderIndex!,
-        message: '${state.players[state.bidderIndex!].name} won the bid with ${state.winningBid}! Declaring Trump & Partner...',
+        activePlayerIndex: bidderIdx,
+        message: '${state.players[bidderIdx].name} won the bid with ${state.winningBid}! Declaring Trump & Partner...',
       );
 
       SoundManager().playSound('sounds/success.mp3');
@@ -312,8 +304,9 @@ class GameNotifier extends StateNotifier<GameState> {
       state = state.copyWith(
         message: 'All players passed. Redealing...',
       );
-      Future.delayed(const Duration(milliseconds: 1500), () {
-        if (mounted) startNewGame();
+      _redealTimer?.cancel();
+      _redealTimer = Timer(const Duration(milliseconds: 1500), () {
+        startNewGame();
       });
       return;
     }
@@ -344,7 +337,7 @@ class GameNotifier extends StateNotifier<GameState> {
       phase: GamePhase.playing,
       players: updatedPlayers,
       trump: trumpSuit,
-      partnerCard: partnerCard,
+      partnerCard: Nullable(partnerCard),
       activePlayerIndex: state.bidderIndex!, // Bidder leads first trick
       roundNumber: 1,
       gameTurn: 1,
@@ -457,9 +450,6 @@ class GameNotifier extends StateNotifier<GameState> {
           isNewBetter = true;
         } else {
           // Both are trump. Compare ranks.
-          // Note: Spade 3 is 30 points, but does rank change?
-          // In standard Kaali Ki Teeggi, Spade 3 rank is standard (3), but holds point values.
-          // Highest rank wins.
           if (card.rank > bestCard.rank) {
             isNewBetter = true;
           }
@@ -489,7 +479,7 @@ class GameNotifier extends StateNotifier<GameState> {
     return bestIndex;
   }
 
-  Future<void> _evaluateTrick() async {
+  void _evaluateTrick() {
     final winnerIndex = _determineTrickWinnerIndex();
     final winner = state.players[winnerIndex];
 
@@ -509,7 +499,7 @@ class GameNotifier extends StateNotifier<GameState> {
 
     state = state.copyWith(
       players: updatedPlayers,
-      trickWinnerIndex: winnerIndex,
+      trickWinnerIndex: Nullable(winnerIndex),
       message: '${winner.name} wins the trick with ${state.players[winnerIndex].playedCard!.name} (+$trickPoints pts)!',
     );
 
@@ -517,9 +507,13 @@ class GameNotifier extends StateNotifier<GameState> {
     SoundManager().playSound('sounds/card_collect.mp3');
 
     // Wait 2.5 seconds so player can inspect
-    await Future.delayed(const Duration(milliseconds: 2500));
-    if (!mounted) return;
+    _trickEvaluationTimer?.cancel();
+    _trickEvaluationTimer = Timer(const Duration(milliseconds: 2500), () {
+      _resolveTrickWinner(winnerIndex);
+    });
+  }
 
+  void _resolveTrickWinner(int winnerIndex) {
     // Clear played cards
     final clearedPlayers = state.players.map((p) => p.clearPlayedCard()).toList();
 
@@ -530,7 +524,7 @@ class GameNotifier extends StateNotifier<GameState> {
         gameTurn: 1,
         trumpStart: 'x',
         activePlayerIndex: winnerIndex,
-        trickWinnerIndex: null,
+        trickWinnerIndex: const Nullable(null),
         message: '${state.players[winnerIndex].name}\'s turn to lead.',
       );
       _triggerBotActionIfNeeded();
@@ -559,24 +553,30 @@ class GameNotifier extends StateNotifier<GameState> {
 
     final isBidWon = totalBidderPoints >= state.winningBid;
 
-    // Determine coin changes
-    // Bidder won: Bidder gets +300, Partner gets +150, Defenders get -150 each
-    // Bidder lost: Bidder gets -300, Partner gets -150, Defenders get +150 each
+    final bid = state.winningBid;
     final coinDelta = List<int>.filled(4, 0);
     if (isBidWon) {
-      coinDelta[bidderIndex] = 300;
-      coinDelta[partnerIndex] = bidderIndex == partnerIndex ? 300 : 150;
+      final bidderReward = bid * 2;
+      final partnerReward = bidderIndex == partnerIndex ? bidderReward : bid;
+      final defenderLoss = -(bid ~/ 2);
+      
+      coinDelta[bidderIndex] = bidderReward;
+      coinDelta[partnerIndex] = partnerReward;
       for (int i = 0; i < 4; i++) {
         if (i != bidderIndex && i != partnerIndex) {
-          coinDelta[i] = -150;
+          coinDelta[i] = defenderLoss;
         }
       }
     } else {
-      coinDelta[bidderIndex] = -300;
-      coinDelta[partnerIndex] = bidderIndex == partnerIndex ? -300 : -150;
+      final bidderLoss = -(bid * 1.5).floor();
+      final partnerLoss = bidderIndex == partnerIndex ? bidderLoss : -(bid * 0.75).floor();
+      final defenderReward = (bid * 0.75).floor();
+      
+      coinDelta[bidderIndex] = bidderLoss;
+      coinDelta[partnerIndex] = partnerLoss;
       for (int i = 0; i < 4; i++) {
         if (i != bidderIndex && i != partnerIndex) {
-          coinDelta[i] = 150;
+          coinDelta[i] = defenderReward;
         }
       }
     }
@@ -622,14 +622,13 @@ class GameNotifier extends StateNotifier<GameState> {
   }
 
   void _triggerBotActionIfNeeded() {
-    if (!mounted) return;
+    _botActionTimer?.cancel();
     
     if (state.phase == GamePhase.bidding) {
       final activePlayer = state.players[state.activePlayerIndex];
       if (!activePlayer.isHuman && !activePlayer.hasPassed) {
         final delayMs = state.isMultiplayer ? 1500 + Random().nextInt(1500) : 1200;
-        Future.delayed(Duration(milliseconds: delayMs), () {
-          if (!mounted) return;
+        _botActionTimer = Timer(Duration(milliseconds: delayMs), () {
           _botBid();
         });
       }
@@ -637,8 +636,7 @@ class GameNotifier extends StateNotifier<GameState> {
       final bidder = state.players[state.bidderIndex!];
       if (!bidder.isHuman) {
         final delayMs = state.isMultiplayer ? 2000 + Random().nextInt(1500) : 1500;
-        Future.delayed(Duration(milliseconds: delayMs), () {
-          if (!mounted) return;
+        _botActionTimer = Timer(Duration(milliseconds: delayMs), () {
           _botDeclare();
         });
       }
@@ -646,8 +644,7 @@ class GameNotifier extends StateNotifier<GameState> {
       final activePlayer = state.players[state.activePlayerIndex];
       if (!activePlayer.isHuman) {
         final delayMs = state.isMultiplayer ? 1500 + Random().nextInt(1500) : 1200;
-        Future.delayed(Duration(milliseconds: delayMs), () {
-          if (!mounted) return;
+        _botActionTimer = Timer(Duration(milliseconds: delayMs), () {
           _botPlayCard();
         });
       }
@@ -685,23 +682,23 @@ class GameNotifier extends StateNotifier<GameState> {
       }
     });
 
-    int strength = maxCount * 15;
+    int strength = maxCount * 12;
     for (var card in hand) {
       if (card.suit == longestSuit) {
-        if (card.rank == 14) strength += 20; // Ace
-        if (card.rank == 13) strength += 15; // King
-        if (card.rank == 12) strength += 10; // Queen
-        if (card.rank == 11) strength += 8;  // Jack
-        if (card.rank == 10) strength += 5;  // 10
+        if (card.rank == 14) strength += 25; // Ace of trump
+        if (card.rank == 13) strength += 20; // King of trump
+        if (card.rank == 12) strength += 15; // Queen of trump
+        if (card.rank == 11) strength += 12; // Jack of trump
+        if (card.rank == 10) strength += 10; // 10 of trump
         if (card.suit == 'S' && card.rank == 3) strength += 30; // 3 of Spades
       } else {
-        if (card.rank == 14) strength += 10;
-        if (card.rank == 13) strength += 5;
-        if (card.suit == 'S' && card.rank == 3) strength += 25;
+        if (card.rank == 14) strength += 12; // Off-suit Ace
+        if (card.rank == 13) strength += 8;  // Off-suit King
+        if (card.suit == 'S' && card.rank == 3) strength += 25; // 3 of Spades
       }
     }
 
-    int calculatedBid = 175 + (strength * 0.65).toInt();
+    int calculatedBid = 175 + (strength * 0.7).toInt();
     calculatedBid = (calculatedBid ~/ 5) * 5;
 
     if (calculatedBid > 310) calculatedBid = 310;
@@ -730,10 +727,7 @@ class GameNotifier extends StateNotifier<GameState> {
       }
     });
 
-    // Nominate partner card: highest rank card of selectedTrump suit that bot does NOT hold
     final allCards = CardModel.generateDeck();
-    
-    // Sort all cards in trump suit descending rank
     final trumpCardsInDeck = allCards.where((c) => c.suit == selectedTrump).toList();
     trumpCardsInDeck.sort((a, b) => b.rank.compareTo(a.rank));
 
@@ -746,13 +740,21 @@ class GameNotifier extends StateNotifier<GameState> {
       }
     }
 
-    // If bot somehow holds all cards of that suit (rare/impossible), look for other suits
     if (selectedPartnerCard == null) {
-      for (var card in allCards) {
+      final nonTrumpAces = allCards.where((c) => c.suit != selectedTrump && c.rank == 14).toList();
+      for (var card in nonTrumpAces) {
         final botHasIt = bot.hand.any((c) => c.suit == card.suit && c.rank == card.rank);
         if (!botHasIt) {
           selectedPartnerCard = card;
           break;
+        }
+      }
+      
+      if (selectedPartnerCard == null) {
+        final remainingDeck = allCards.where((c) => !bot.hand.any((bh) => bh.suit == c.suit && bh.rank == c.rank)).toList();
+        remainingDeck.sort((a, b) => b.rank.compareTo(a.rank));
+        if (remainingDeck.isNotEmpty) {
+          selectedPartnerCard = remainingDeck.first;
         }
       }
     }
@@ -760,43 +762,193 @@ class GameNotifier extends StateNotifier<GameState> {
     declareTrumpAndPartner(selectedTrump, selectedPartnerCard!);
   }
 
+  int _getCurrentlyWinningPlayerIndex() {
+    final int ledCount = state.gameTurn - 1;
+    if (ledCount == 0) return state.activePlayerIndex;
+
+    final int leaderIndex = (state.activePlayerIndex - ledCount + 4) % 4;
+    int bestIndex = leaderIndex;
+    CardModel bestCard = state.players[leaderIndex].playedCard!;
+
+    for (int i = 0; i < 4; i++) {
+      final card = state.players[i].playedCard;
+      if (card == null || i == leaderIndex) continue;
+
+      bool isNewBetter = false;
+
+      if (card.suit == state.trump) {
+        if (bestCard.suit != state.trump) {
+          isNewBetter = true;
+        } else {
+          if (card.rank > bestCard.rank) {
+            isNewBetter = true;
+          }
+        }
+      } else {
+        if (bestCard.suit != state.trump && card.suit == state.trumpStart) {
+          if (bestCard.suit != state.trumpStart) {
+            isNewBetter = true;
+          } else {
+            if (card.rank > bestCard.rank) {
+              isNewBetter = true;
+            }
+          }
+        }
+      }
+
+      if (isNewBetter) {
+        bestIndex = i;
+        bestCard = card;
+      }
+    }
+
+    return bestIndex;
+  }
+
+  bool _isAllied(PlayerModel bot, int otherId) {
+    if (bot.id == otherId) return true;
+    
+    if (bot.id == state.bidderIndex) {
+      final other = state.players[otherId];
+      return other.isPartner && other.isPartnerRevealed;
+    }
+    
+    if (bot.isPartner) {
+      return otherId == state.bidderIndex;
+    }
+    
+    if (otherId == state.bidderIndex) return false;
+    
+    final partner = state.players.firstWhere((p) => p.isPartner, orElse: () => state.players[0]);
+    if (partner.isPartner && partner.isPartnerRevealed) {
+      return otherId != partner.id;
+    }
+    
+    return false;
+  }
+
   void _botPlayCard() {
     if (state.phase != GamePhase.playing) return;
 
     final bot = state.players[state.activePlayerIndex];
+    if (bot.hand.isEmpty) return;
     CardModel? cardToPlay;
 
     if (state.gameTurn == 1) {
-      // Bot is leading. Heuristic: play a non-trump high card, or random
-      // Let's just play a random card from hand to fulfill rule-based random start
-      final random = Random();
-      cardToPlay = bot.hand[random.nextInt(bot.hand.length)];
-    } else {
-      // Must follow suit if possible
-      final matchingCards = bot.hand.where((c) => c.suit == state.trumpStart).toList();
-      if (matchingCards.isNotEmpty) {
-        // Play highest card of matching suit
-        matchingCards.sort((a, b) => b.rank.compareTo(a.rank));
-        cardToPlay = matchingCards.first;
-      } else {
-        // Void in starting suit, try to play Trump
-        final trumpCards = bot.hand.where((c) => c.suit == state.trump).toList();
-        if (trumpCards.isNotEmpty) {
-          // Play highest trump card
-          trumpCards.sort((a, b) => b.rank.compareTo(a.rank));
-          cardToPlay = trumpCards.first;
+      // Leading a trick
+      final isBidderOrPartner = bot.id == state.bidderIndex || bot.isPartner;
+      if (isBidderOrPartner) {
+        final highNonTrumps = bot.hand.where((c) => c.suit != state.trump && c.rank >= 13).toList();
+        if (highNonTrumps.isNotEmpty) {
+          highNonTrumps.sort((a, b) => b.rank.compareTo(a.rank));
+          cardToPlay = highNonTrumps.first;
         } else {
-          // Void in starting suit and trump, play a random card
-          final random = Random();
-          cardToPlay = bot.hand[random.nextInt(bot.hand.length)];
+          final trumps = bot.hand.where((c) => c.suit == state.trump).toList();
+          if (trumps.length >= 4) {
+            trumps.sort((a, b) => b.rank.compareTo(a.rank));
+            cardToPlay = trumps.first;
+          }
+        }
+      } else {
+        final nonTrumps = bot.hand.where((c) => c.suit != state.trump).toList();
+        if (nonTrumps.isNotEmpty) {
+          nonTrumps.sort((a, b) => b.rank.compareTo(a.rank));
+          cardToPlay = nonTrumps.first;
+        }
+      }
+
+      if (cardToPlay == null) {
+        final sortedHand = List<CardModel>.from(bot.hand)..sort((a, b) => b.rank.compareTo(a.rank));
+        cardToPlay = sortedHand.first;
+      }
+    } else {
+      // Following a trick
+      final matchingCards = bot.hand.where((c) => c.suit == state.trumpStart).toList();
+      final winningIdx = _getCurrentlyWinningPlayerIndex();
+      final alliedWinning = _isAllied(bot, winningIdx);
+
+      if (matchingCards.isNotEmpty) {
+        if (alliedWinning) {
+          final isLastTurn = state.gameTurn == 4;
+          if (isLastTurn) {
+            matchingCards.sort((a, b) => b.points.compareTo(a.points));
+            cardToPlay = matchingCards.last;
+          } else {
+            matchingCards.sort((a, b) => a.rank.compareTo(b.rank));
+            cardToPlay = matchingCards.first;
+          }
+        } else {
+          final winningCard = state.players[winningIdx].playedCard!;
+          final isTrumpStartTrump = state.trumpStart == state.trump;
+          final isWinningCardTrump = winningCard.suit == state.trump;
+          
+          List<CardModel> winningOptions = [];
+          if (!isWinningCardTrump || isTrumpStartTrump) {
+            winningOptions = matchingCards.where((c) => c.rank > winningCard.rank).toList();
+          }
+
+          if (winningOptions.isNotEmpty) {
+            winningOptions.sort((a, b) => a.rank.compareTo(b.rank));
+            cardToPlay = winningOptions.first;
+          } else {
+            matchingCards.sort((a, b) => a.rank.compareTo(b.rank));
+            cardToPlay = matchingCards.first;
+          }
+        }
+      } else {
+        if (alliedWinning) {
+          final nonTrumps = bot.hand.where((c) => c.suit != state.trump).toList();
+          if (nonTrumps.isNotEmpty) {
+            final isLastTurn = state.gameTurn == 4;
+            if (isLastTurn) {
+              nonTrumps.sort((a, b) => b.points.compareTo(a.points));
+              cardToPlay = nonTrumps.first;
+            } else {
+              nonTrumps.sort((a, b) => a.rank.compareTo(b.rank));
+              cardToPlay = nonTrumps.first;
+            }
+          }
+        } else {
+          final trumps = bot.hand.where((c) => c.suit == state.trump).toList();
+          if (trumps.isNotEmpty) {
+            final winningCard = state.players[winningIdx].playedCard!;
+            final isWinningCardTrump = winningCard.suit == state.trump;
+            
+            List<CardModel> trumpOptions = [];
+            if (isWinningCardTrump) {
+              trumpOptions = trumps.where((c) => c.rank > winningCard.rank).toList();
+            } else {
+              trumpOptions = trumps;
+            }
+
+            if (trumpOptions.isNotEmpty) {
+              trumpOptions.sort((a, b) => a.rank.compareTo(b.rank));
+              cardToPlay = trumpOptions.first;
+            }
+          }
+        }
+
+        if (cardToPlay == null) {
+          final nonTrumps = bot.hand.where((c) => c.suit != state.trump).toList();
+          if (nonTrumps.isNotEmpty) {
+            nonTrumps.sort((a, b) => a.rank.compareTo(b.rank));
+            cardToPlay = nonTrumps.first;
+          } else {
+            final sortedHand = List<CardModel>.from(bot.hand)..sort((a, b) => a.rank.compareTo(b.rank));
+            cardToPlay = sortedHand.first;
+          }
         }
       }
     }
 
     playCard(cardToPlay);
   }
+
+  void triggerBotAction() {
+    _triggerBotActionIfNeeded();
+  }
 }
 
-final gameProvider = StateNotifierProvider<GameNotifier, GameState>((ref) {
-  return GameNotifier(ref);
+final gameProvider = NotifierProvider<GameNotifier, GameState>(() {
+  return GameNotifier();
 });

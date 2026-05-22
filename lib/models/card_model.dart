@@ -30,12 +30,40 @@ class CardModel {
     }
   }
 
+  // Full name representation of rank (e.g. "Jack", "Queen")
+  String get rankName {
+    if (rank <= 10) return rank.toString();
+    switch (rank) {
+      case 11:
+        return 'Jack';
+      case 12:
+        return 'Queen';
+      case 13:
+        return 'King';
+      case 14:
+        return 'Ace';
+      default:
+        return '';
+    }
+  }
+
   // Get full readable name (e.g., "Ace of Spades")
   String get name {
     final suitName = getSuitName(suit);
-    final rankName = rankLabel;
-    return '$rankName of ${suitName}s';
+    final rankText = rankName;
+    return '$rankText of ${suitName}s';
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CardModel &&
+          runtimeType == other.runtimeType &&
+          suit == other.suit &&
+          rank == other.rank;
+
+  @override
+  int get hashCode => suit.hashCode ^ rank.hashCode;
 
   static String getSuitName(String suitChar) {
     switch (suitChar) {

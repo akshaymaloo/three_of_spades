@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../core/theme.dart';
 import '../models/multiplayer_state.dart';
 import '../providers/multiplayer_notifier.dart';
@@ -29,16 +30,18 @@ class _MatchmakingScreenState extends ConsumerState<MatchmakingScreen> {
     // Pop the screen automatically if state has transitioned to playing
     if (mState.status == MultiplayerStatus.playing) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (Navigator.canPop(context)) {
-          Navigator.pop(context);
+        if (context.mounted) {
+          context.pop();
         }
       });
     }
 
-    return WillPopScope(
-      onWillPop: () async {
-        ref.read(multiplayerProvider.notifier).cancelMatchmaking();
-        return true;
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) {
+          ref.read(multiplayerProvider.notifier).cancelMatchmaking();
+        }
       },
       child: Scaffold(
         body: Container(
@@ -71,7 +74,7 @@ class _MatchmakingScreenState extends ConsumerState<MatchmakingScreen> {
                                 Shadow(
                                   color: (mState.status == MultiplayerStatus.searching 
                                       ? GameTheme.neonCyan 
-                                      : GameTheme.neonGreen).withOpacity(0.5),
+                                      : GameTheme.neonGreen).withValues(alpha: 0.5),
                                   blurRadius: 10,
                                 ),
                               ],
@@ -92,7 +95,7 @@ class _MatchmakingScreenState extends ConsumerState<MatchmakingScreen> {
                                         color: GameTheme.neonGreen,
                                         shadows: [
                                           Shadow(
-                                            color: GameTheme.neonGreen.withOpacity(0.6),
+                                            color: GameTheme.neonGreen.withValues(alpha: 0.6),
                                             blurRadius: 20,
                                           ),
                                         ],
@@ -105,13 +108,13 @@ class _MatchmakingScreenState extends ConsumerState<MatchmakingScreen> {
                             InkWell(
                               onTap: () {
                                 ref.read(multiplayerProvider.notifier).cancelMatchmaking();
-                                Navigator.pop(context);
+                                context.pop();
                               },
                               borderRadius: BorderRadius.circular(8),
                               child: Container(
                                 padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
                                 decoration: BoxDecoration(
-                                  border: Border.all(color: GameTheme.neonPink.withOpacity(0.5)),
+                                  border: Border.all(color: GameTheme.neonPink.withValues(alpha: 0.5)),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: const Text(
@@ -183,13 +186,13 @@ class _MatchmakingScreenState extends ConsumerState<MatchmakingScreen> {
                                         boxShadow: hasPlayer 
                                             ? GameTheme.neonGlow(isUser ? GameTheme.neonCyan : GameTheme.neonGreen, blurRadius: 4)
                                             : null,
-                                        color: Colors.white.withOpacity(0.02),
+                                        color: Colors.white.withValues(alpha: 0.02),
                                       ),
                                       child: Icon(
                                         hasPlayer ? Icons.person_rounded : Icons.hourglass_empty_rounded,
                                         color: hasPlayer 
                                             ? (isUser ? GameTheme.neonCyan : GameTheme.neonGreen)
-                                            : GameTheme.textGrey.withOpacity(0.3),
+                                            : GameTheme.textGrey.withValues(alpha: 0.3),
                                         size: 16,
                                       ),
                                     ),
@@ -200,7 +203,7 @@ class _MatchmakingScreenState extends ConsumerState<MatchmakingScreen> {
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
-                                          color: hasPlayer ? GameTheme.textWhite : GameTheme.textGrey.withOpacity(0.4),
+                                          color: hasPlayer ? GameTheme.textWhite : GameTheme.textGrey.withValues(alpha: 0.4),
                                           fontSize: 11,
                                           fontWeight: hasPlayer ? FontWeight.bold : FontWeight.normal,
                                         ),
@@ -275,14 +278,14 @@ class RadarPainter extends CustomPainter {
 
     // Draw concentric circles
     final paint = Paint()
-      ..color = GameTheme.neonCyan.withOpacity(0.3)
+      ..color = GameTheme.neonCyan.withValues(alpha: 0.3)
       ..strokeWidth = 1.5
       ..style = PaintingStyle.stroke;
 
     for (int i = 1; i <= 3; i++) {
       final radius = maxRadius * ((animationValue + (i / 3)) % 1.0);
       final opacity = 1.0 - (radius / maxRadius);
-      paint.color = GameTheme.neonCyan.withOpacity(opacity * 0.4);
+      paint.color = GameTheme.neonCyan.withValues(alpha: opacity * 0.4);
       canvas.drawCircle(center, radius, paint);
     }
 
@@ -290,9 +293,9 @@ class RadarPainter extends CustomPainter {
     final sweepPaint = Paint()
       ..shader = SweepGradient(
         colors: [
-          GameTheme.neonCyan.withOpacity(0.0),
-          GameTheme.neonCyan.withOpacity(0.3),
-          GameTheme.neonCyan.withOpacity(0.0),
+          GameTheme.neonCyan.withValues(alpha: 0.0),
+          GameTheme.neonCyan.withValues(alpha: 0.3),
+          GameTheme.neonCyan.withValues(alpha: 0.0),
         ],
         stops: const [0.0, 0.5, 1.0],
         transform: GradientRotation(animationValue * 2 * pi),
