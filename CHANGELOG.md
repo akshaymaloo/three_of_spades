@@ -1,22 +1,21 @@
 # Changelog
 
-All notable changes to the **Kaali Ki Teeggi (Three of Spades) — Cyberpunk Edition** project will be documented in this file.
+All notable changes to the **Kaali Ki Teeggi (Three of Spades)** Flutter project will be documented in this file.
 
-## [1.1.0] - 2026-05-23
+## [1.0.0] - 2026-05-23
 
-### Fixed
-- **GlassDialog Layout & Keyboard Overflow**:
-  - Wrapped dialog `Column` in a `SingleChildScrollView` to allow scrolling when contents exceed the screen height.
-  - Dynamically read `MediaQuery.viewInsetsOf(context).bottom` to adjust the `insetPadding` of the `AlertDialog`, shifting the dialog upward when the soft keyboard is open.
-  - Constrained the max height of the dialog container to prevent overflows behind the keyboard.
-- **Main Screen (Home Screen) Layout Adjustments**:
-  - Reduced vertical paddings and sized boxes on the "Offline Play" card to prevent a 10px vertical layout overflow on smaller landscape devices.
-- **Save / Name Edit Functionality**:
-  - Verified and guaranteed that name saving through the custom text dialog correctly updates Riverpod's `StatsNotifier` and persists changes.
+This is a major production-ready release bringing the Flutter codebase to feature parity with the native reference Android application.
 
 ### Added
-- **GlassDialog Widget Tests**:
-  - `renders title, content and actions`
-  - `SAVE button is tappable even in constrained height` (simulated landscape viewport with vertical scroll interaction check)
-  - `X button dismisses dialog`
-- Total test suite coverage increased from 25 to 28 passing tests.
+- **Config-Driven Online/Simulation Toggle**: Allows toggling between Online (Firebase live) and Simulation (offline mock) modes directly from settings. Fallback mechanisms automatically downgrade to Simulation Mode if Firebase initialization fails on startup.
+- **Firebase Infrastructure Integration**: Added Firebase Core, Firebase Authentication, Cloud Firestore, and Firebase Messaging (FCM) configurations.
+- **Google Mobile Ads (AdMob)**: Configured mobile ads with preloaded Interstitial ads (showing after every 3rd game round) and Rewarded ads (awarding +500 coins on completion).
+- **Daily Rewards System**: A consecutive 7-day reward schedule matching the original app (500 to 5000 coins) with custom highlighted UI cards and automatic checkmarks for claimed days.
+- **Facebook Authentication**: Added Facebook login support on the start screen alongside Anonymous Guest login when in Online Mode.
+- **Leaderboards**: Integrated a two-tab global leaderboard screen supporting "DAILY" and "ALL-TIME" rankings, fetching real-time data from Firestore.
+- **Push Notifications (FCM)**: Added support for version update notifications and room invite payloads with topics subscription settings.
+- **Unit & Integration Tests**: Expanded the test suite to 44 fully passing tests covering new service providers, mock behaviors, daily rewards calculations, and config toggles.
+
+### Fixed
+- Resolved overlapping banner text on the game table.
+- Corrected imports alignment to satisfy Dart compiling constraints.

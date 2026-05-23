@@ -5,6 +5,7 @@ import '../models/game_state.dart';
 import '../core/theme.dart';
 import '../core/scoring_utils.dart';
 import '../providers/game_notifier.dart';
+import '../providers/ad_provider.dart';
 
 class ScoreboardOverlay extends ConsumerWidget {
   final GameState game;
@@ -163,8 +164,12 @@ class ScoreboardOverlay extends ConsumerWidget {
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           ),
-                          onPressed: () {
-                            ref.read(gameProvider.notifier).goToHome();
+                          onPressed: () async {
+                            ref.read(adProvider.notifier).incrementGameCount();
+                            await ref.read(adProvider.notifier).showInterstitialIfReady();
+                            if (context.mounted) {
+                              ref.read(gameProvider.notifier).goToHome();
+                            }
                           },
                           child: const Text('QUIT', style: TextStyle(color: GameTheme.textWhite, fontWeight: FontWeight.bold)),
                         ),
@@ -178,8 +183,12 @@ class ScoreboardOverlay extends ConsumerWidget {
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           ),
-                          onPressed: () {
-                            ref.read(gameProvider.notifier).startNewGame();
+                          onPressed: () async {
+                            ref.read(adProvider.notifier).incrementGameCount();
+                            await ref.read(adProvider.notifier).showInterstitialIfReady();
+                            if (context.mounted) {
+                              ref.read(gameProvider.notifier).startNewGame();
+                            }
                           },
                           child: const Text('PLAY AGAIN', style: TextStyle(fontWeight: FontWeight.bold)),
                         ),

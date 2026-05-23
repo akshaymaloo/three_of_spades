@@ -2,8 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'core/theme.dart';
 import 'core/router.dart';
+import 'firebase_options.dart';
+import 'providers/config_provider.dart';
+import 'providers/notification_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,9 +19,37 @@ void main() async {
     DeviceOrientation.landscapeRight,
   ]);
 
+  final container = ProviderContainer();
+
+  bool firebaseAvailable = false;
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    firebaseAvailable = true;
+    
+    // Initialize MobileAds
+    await MobileAds.instance.initialize();
+  } catch (e, stack) {
+    debugPrint('Firebase/Ads init failed, running in simulation mode: $e\n$stack');
+  }
+
+  // Update ConfigNotifier state
+  container.read(configProvider.notifier).setFirebaseAvailable(firebaseAvailable);
+
+  // Initialize notifications if Firebase is available
+  if (firebaseAvailable) {
+    try {
+      await container.read(notificationProvider.notifier).initialize();
+    } catch (e, stack) {
+      debugPrint('Failed to initialize notifications on startup: $e\n$stack');
+    }
+  }
+
   runApp(
-    const ProviderScope(
-      child: ThreeOfSpadesApp(),
+    ProviderScope(
+      parent: container,
+      child: const ThreeOfSpadesApp(),
     ),
   );
 }

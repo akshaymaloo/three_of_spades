@@ -1,9 +1,13 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/multiplayer_state.dart';
 import 'game_notifier.dart';
 import 'stats_provider.dart';
+import 'config_provider.dart';
+import 'service_providers.dart';
 
 class MultiplayerNotifier extends Notifier<MultiplayerState> {
   Timer? _searchTimer;
@@ -11,12 +15,19 @@ class MultiplayerNotifier extends Notifier<MultiplayerState> {
   final List<Timer> _simulatedTimers = [];
   final Random _random = Random();
 
+  StreamSubscription? _lobbyPlayersSubscription;
+  StreamSubscription? _chatSubscription;
+  StreamSubscription? _gameStateSubscription;
+
   @override
   MultiplayerState build() {
     ref.onDispose(() {
       _searchTimer?.cancel();
       _countdownTimer?.cancel();
       _clearSimulatedTimers();
+      _lobbyPlayersSubscription?.cancel();
+      _chatSubscription?.cancel();
+      _gameStateSubscription?.cancel();
     });
     return MultiplayerState.initial();
   }
@@ -32,6 +43,13 @@ class MultiplayerNotifier extends Notifier<MultiplayerState> {
     _searchTimer?.cancel();
     _countdownTimer?.cancel();
     _clearSimulatedTimers();
+    _lobbyPlayersSubscription?.cancel();
+
+    final config = ref.read(configProvider);
+    if (config.onlineMode) {
+      _startMatchmakingLive();
+      return;
+    }
 
     final userName = ref.read(statsProvider).value?.name ?? 'Guest Player';
     state = MultiplayerState.initial().copyWith(
@@ -56,10 +74,93 @@ class MultiplayerNotifier extends Notifier<MultiplayerState> {
     });
   }
 
+  Future<void> _startMatchmakingLive() async {
+    final userName = ref.read(statsProvider).value?.name ?? 'Guest Player';
+    state = MultiplayerState.initial().copyWith(
+      status: MultiplayerStatus.searching,
+      lobbyPlayers: [userName],
+    );
+
+    try {
+      final service = ref.read(multiplayerSyncServiceProvider);
+
+      // Query rooms
+      final firestore = FirebaseFirestore.instance;
+      final roomsQuery = await firestore
+          .collection('rooms')
+          .where('status', isEqualTo: 'waiting')
+          .orderBy('createdAt', descending: false)
+          .limit(10)
+          .get();
+
+      String? joinedCode;
+      for (final doc in roomsQuery.docs) {
+        final code = doc.data()['code'] as String;
+        final success = await service.joinRoom(code, userName);
+        if (success) {
+          joinedCode = code;
+          break;
+        }
+      }
+
+      if (joinedCode == null) {
+        joinedCode = await service.createRoom(userName);
+      }
+
+      state = state.copyWith(roomCode: joinedCode);
+      _startListeningToChat(joinedCode);
+
+      _lobbyPlayersSubscription = service.listenToLobbyPlayers(joinedCode).listen((players) {
+        state = state.copyWith(lobbyPlayers: players);
+        if (players.length == 4 && state.status == MultiplayerStatus.searching) {
+          _startStartCountdownLive(joinedCode!);
+        }
+      });
+    } catch (e, stack) {
+      debugPrint('Failed live matchmaking: $e\n$stack');
+      triggerSystemMessage('Connection failed. Switching to Simulation Mode.');
+      // fallback to mock
+      ref.read(configProvider.notifier).setFirebaseAvailable(false);
+      startMatchmaking();
+    }
+  }
+
+  void _startStartCountdownLive(String code) {
+    _searchTimer?.cancel();
+    state = state.copyWith(
+      status: MultiplayerStatus.found,
+      countdownTimer: 3,
+    );
+
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      final currentCount = state.countdownTimer - 1;
+      state = state.copyWith(countdownTimer: currentCount);
+
+      if (currentCount <= 0) {
+        _countdownTimer?.cancel();
+        _startGameplayLive(code);
+      }
+    });
+  }
+
+  void _startGameplayLive(String code) {
+    state = state.copyWith(status: MultiplayerStatus.playing);
+    final players = state.lobbyPlayers;
+    ref.read(gameProvider.notifier).startNewMultiplayerGame(players);
+  }
+
   void cancelMatchmaking() {
     _searchTimer?.cancel();
     _countdownTimer?.cancel();
     _clearSimulatedTimers();
+    _lobbyPlayersSubscription?.cancel();
+    _chatSubscription?.cancel();
+
+    final config = ref.read(configProvider);
+    if (config.onlineMode && state.roomCode != null) {
+      ref.read(multiplayerSyncServiceProvider).leaveRoom(state.roomCode!);
+    }
+
     state = MultiplayerState.initial();
   }
 
@@ -67,8 +168,16 @@ class MultiplayerNotifier extends Notifier<MultiplayerState> {
     _searchTimer?.cancel();
     _countdownTimer?.cancel();
     _clearSimulatedTimers();
+    _lobbyPlayersSubscription?.cancel();
 
     final userName = ref.read(statsProvider).value?.name ?? 'Guest Player';
+    final config = ref.read(configProvider);
+
+    if (config.onlineMode) {
+      _createPrivateRoomLive(userName);
+      return;
+    }
+
     final code = 'TS-${_random.nextInt(900000) + 100000}';
     state = MultiplayerState.initial().copyWith(
       status: MultiplayerStatus.found,
@@ -94,6 +203,28 @@ class MultiplayerNotifier extends Notifier<MultiplayerState> {
     }));
   }
 
+  Future<void> _createPrivateRoomLive(String userName) async {
+    try {
+      final service = ref.read(multiplayerSyncServiceProvider);
+      final code = await service.createRoom(userName);
+      state = MultiplayerState.initial().copyWith(
+        status: MultiplayerStatus.found,
+        roomCode: code,
+        lobbyPlayers: [userName],
+      );
+      _startListeningToChat(code);
+
+      _lobbyPlayersSubscription = service.listenToLobbyPlayers(code).listen((players) {
+        state = state.copyWith(lobbyPlayers: players);
+      });
+    } catch (e, stack) {
+      debugPrint('Failed to create private room live: $e\n$stack');
+      triggerSystemMessage('Connection failed. Switching to Simulation Mode.');
+      ref.read(configProvider.notifier).setFirebaseAvailable(false);
+      createPrivateRoom();
+    }
+  }
+
   void fillWithBots() {
     if (state.lobbyPlayers.length >= 4) return;
     final currentPlayers = List<String>.from(state.lobbyPlayers);
@@ -107,8 +238,16 @@ class MultiplayerNotifier extends Notifier<MultiplayerState> {
     _searchTimer?.cancel();
     _countdownTimer?.cancel();
     _clearSimulatedTimers();
+    _lobbyPlayersSubscription?.cancel();
 
     final userName = ref.read(statsProvider).value?.name ?? 'Guest Player';
+    final config = ref.read(configProvider);
+
+    if (config.onlineMode) {
+      _joinPrivateRoomLive(code, userName);
+      return;
+    }
+
     state = MultiplayerState.initial().copyWith(
       status: MultiplayerStatus.searching,
       roomCode: code,
@@ -122,6 +261,59 @@ class MultiplayerNotifier extends Notifier<MultiplayerState> {
         lobbyPlayers: [userName, _randomPeerName(), _randomPeerName(), _randomPeerName()],
       );
     }));
+  }
+
+  Future<void> _joinPrivateRoomLive(String code, String userName) async {
+    state = MultiplayerState.initial().copyWith(
+      status: MultiplayerStatus.searching,
+      roomCode: code,
+      lobbyPlayers: [userName],
+    );
+
+    try {
+      final service = ref.read(multiplayerSyncServiceProvider);
+      final success = await service.joinRoom(code, userName);
+      if (success) {
+        state = state.copyWith(
+          status: MultiplayerStatus.found,
+        );
+        _startListeningToChat(code);
+
+        _lobbyPlayersSubscription = service.listenToLobbyPlayers(code).listen((players) {
+          state = state.copyWith(lobbyPlayers: players);
+        });
+      } else {
+        triggerSystemMessage('Failed to join room: Room full or does not exist.');
+        state = MultiplayerState.initial();
+      }
+    } catch (e, stack) {
+      debugPrint('Failed to join private room live: $e\n$stack');
+      triggerSystemMessage('Connection failed. Switching to Simulation Mode.');
+      ref.read(configProvider.notifier).setFirebaseAvailable(false);
+      joinPrivateRoom(code);
+    }
+  }
+
+  void _startListeningToChat(String code) {
+    _chatSubscription?.cancel();
+    final service = ref.read(multiplayerSyncServiceProvider);
+    _chatSubscription = service.listenToChat(code).listen((chatMap) {
+      if (chatMap.isNotEmpty) {
+        final newMsg = ChatMessage(
+          sender: chatMap['sender'] as String,
+          text: chatMap['text'] as String,
+          timestamp: chatMap['timestamp'] as DateTime,
+        );
+        if (!state.chatMessages.any((m) =>
+            m.sender == newMsg.sender &&
+            m.text == newMsg.text &&
+            m.timestamp.difference(newMsg.timestamp).inSeconds.abs() < 2)) {
+          state = state.copyWith(
+            chatMessages: [...state.chatMessages, newMsg],
+          );
+        }
+      }
+    });
   }
 
   void sendMessage(String text) {
@@ -138,7 +330,13 @@ class MultiplayerNotifier extends Notifier<MultiplayerState> {
       chatMessages: [...state.chatMessages, userMsg],
     );
 
-    // Trigger simulated reply from other players
+    final config = ref.read(configProvider);
+    if (config.onlineMode && state.roomCode != null) {
+      ref.read(multiplayerSyncServiceProvider).sendChat(state.roomCode!, userName, text);
+      return;
+    }
+
+    // Trigger simulated reply from other players in mock mode
     _simulatedTimers.add(Timer(Duration(milliseconds: 1000 + _random.nextInt(1500)), () {
       final peers = state.lobbyPlayers.where((name) => name != userName).toList();
       if (peers.isNotEmpty) {

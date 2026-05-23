@@ -1,7 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../core/sound_manager.dart';
+import 'config_provider.dart';
+import 'service_providers.dart';
 
 class UserStats {
   final String name;
@@ -107,6 +110,18 @@ class StatsNotifier extends AsyncNotifier<UserStats> {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('guest_name', name);
+
+      final config = ref.read(configProvider);
+      if (config.onlineMode) {
+        final authService = ref.read(authServiceProvider);
+        final user = authService.currentUser;
+        if (user != null && user.uid != null) {
+          await FirebaseFirestore.instance.collection('users').doc(user.uid!).set({
+            'name': name,
+            'lastUpdated': FieldValue.serverTimestamp(),
+          }, SetOptions(merge: true));
+        }
+      }
     } catch (e, stack) {
       debugPrint('Failed to save name: $e\n$stack');
     }
@@ -126,10 +141,24 @@ class StatsNotifier extends AsyncNotifier<UserStats> {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt('guest_coins', newCoins);
+
+      final config = ref.read(configProvider);
+      if (config.onlineMode) {
+        final authService = ref.read(authServiceProvider);
+        final user = authService.currentUser;
+        if (user != null && user.uid != null) {
+          await ref.read(leaderboardServiceProvider).submitScore(user.uid!, newCoins);
+          await FirebaseFirestore.instance.collection('users').doc(user.uid!).set({
+            'name': current.name,
+          }, SetOptions(merge: true));
+        }
+      }
     } catch (e, stack) {
       debugPrint('Failed to save coins: $e\n$stack');
     }
   }
+
+  Future<void> addCoins(int amount) => updateCoins(amount);
 
   Future<void> recordGame(bool won, int bidValue) async {
     final current = state.value ?? const UserStats(

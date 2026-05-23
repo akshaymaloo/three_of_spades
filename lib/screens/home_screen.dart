@@ -5,6 +5,11 @@ import '../providers/stats_provider.dart';
 import '../providers/game_notifier.dart';
 import '../core/sound_manager.dart';
 import '../widgets/glass_dialog.dart';
+import '../providers/config_provider.dart';
+import '../providers/daily_reward_provider.dart';
+import '../providers/ad_provider.dart';
+import '../providers/notification_provider.dart';
+import '../widgets/daily_reward_dialog.dart';
 import 'matchmaking_screen.dart';
 import 'private_room_screen.dart';
 import 'leaderboard_screen.dart';
@@ -38,8 +43,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           },
           fireImmediately: true,
         );
+        _checkDailyReward();
       }
     });
+  }
+
+  void _checkDailyReward() {
+    final rewardState = ref.read(dailyRewardProvider);
+    if (!rewardState.todayClaimed) {
+      DailyRewardDialog.show(
+        context,
+        onClaim: (amount) {
+          ref.read(statsProvider.notifier).addCoins(amount);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('🎁 Claimed $amount daily reward coins!'),
+              backgroundColor: GameTheme.goldAccent,
+            ),
+          );
+        },
+      );
+    }
   }
 
   @override
@@ -96,6 +120,54 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ),
                       ),
                       const Divider(color: Colors.white10),
+                      // Online Mode toggle
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text('Online Mode (Firebase)', style: TextStyle(color: GameTheme.textWhite)),
+                        subtitle: Text(
+                          ref.watch(configProvider).onlineMode 
+                              ? 'Active (Needs Firebase setup)' 
+                              : 'Simulation / Offline Only',
+                          style: const TextStyle(color: GameTheme.textGrey, fontSize: 11),
+                        ),
+                        trailing: Switch(
+                          value: ref.watch(configProvider).onlineMode,
+                          activeThumbColor: GameTheme.neonCyan,
+                          onChanged: (val) async {
+                            await ref.read(configProvider.notifier).toggleOnlineMode();
+                            if (context.mounted) {
+                              final currentMode = ref.read(configProvider).onlineMode;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    currentMode
+                                        ? 'Switched to Online Mode! Needs Firebase config.'
+                                        : 'Switched to Simulation Mode (Offline/Mock).',
+                                  ),
+                                  duration: const Duration(seconds: 2),
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                      const Divider(color: Colors.white10),
+                      // Push Notifications toggle
+                      if (ref.watch(configProvider).onlineMode) ...[
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text('Push Notifications', style: TextStyle(color: GameTheme.textWhite)),
+                          subtitle: const Text('Get room invites and updates', style: TextStyle(color: GameTheme.textGrey, fontSize: 11)),
+                          trailing: Switch(
+                            value: ref.watch(notificationProvider).notificationsEnabled,
+                            activeThumbColor: GameTheme.neonCyan,
+                            onChanged: (val) {
+                              ref.read(notificationProvider.notifier).toggleNotifications();
+                            },
+                          ),
+                        ),
+                        const Divider(color: Colors.white10),
+                      ],
                       const SizedBox(height: 12),
                       // Reset stats button
                       InkWell(
@@ -218,6 +290,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final statsAsync = ref.watch(statsProvider);
+    final config = ref.watch(configProvider);
     return statsAsync.when(
       loading: () => const Scaffold(
         body: Center(
@@ -300,6 +373,56 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     color: GameTheme.goldAccent,
                                     fontSize: 13,
                                     fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                InkWell(
+                                  onTap: () async {
+                                    final reward = await ref.read(adProvider.notifier).showRewardedAd();
+                                    if (reward > 0) {
+                                      await ref.read(statsProvider.notifier).addCoins(reward);
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text('🪙 Earned $reward coins!'),
+                                            backgroundColor: GameTheme.neonGreen,
+                                          ),
+                                        );
+                                      }
+                                    } else {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                            content: Text('Ad failed or skipped'),
+                                            backgroundColor: GameTheme.neonPink,
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  },
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: GameTheme.neonCyan.withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: GameTheme.neonCyan.withValues(alpha: 0.3)),
+                                    ),
+                                    child: const Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.play_circle_outline, color: GameTheme.neonCyan, size: 12),
+                                        SizedBox(width: 2),
+                                        Text(
+                                          '+500 COINS',
+                                          style: TextStyle(
+                                            color: GameTheme.neonCyan,
+                                            fontSize: 9,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ],
@@ -471,6 +594,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       'ONLINE PLAY', 
                                       Icons.wifi_rounded,
                                       GameTheme.neonCyan,
+                                      config.onlineMode,
                                       () {
                                         Navigator.push(
                                           context,
@@ -486,6 +610,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       'PRIVATE ROOM', 
                                       Icons.vpn_key_rounded,
                                       Colors.purpleAccent,
+                                      config.onlineMode,
                                       () {
                                         Navigator.push(
                                           context,
@@ -501,6 +626,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       'LEADERBOARD', 
                                       Icons.leaderboard_rounded,
                                       GameTheme.goldAccent,
+                                      true,
                                       () {
                                         Navigator.push(
                                           context,
@@ -574,54 +700,78 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildModeCard(BuildContext context, String title, IconData icon, Color glowColor, VoidCallback onTap) {
+  Widget _buildModeCard(
+    BuildContext context,
+    String title,
+    IconData icon,
+    Color glowColor,
+    bool enabled,
+    VoidCallback onTap,
+  ) {
+    final finalColor = enabled ? glowColor : GameTheme.textGrey;
     return InkWell(
-      onTap: onTap,
+      onTap: enabled
+          ? onTap
+          : () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Enable Online Mode in Settings to play online.'),
+                  duration: Duration(seconds: 2),
+                ),
+              );
+            },
       borderRadius: BorderRadius.circular(12),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.02),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: glowColor.withValues(alpha: 0.2)),
-          boxShadow: [
-            BoxShadow(
-              color: glowColor.withValues(alpha: 0.05),
-              blurRadius: 6,
-              spreadRadius: 1,
-            )
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: glowColor, size: 22),
-            const SizedBox(height: 8),
-            Text(
-              title,
-              style: const TextStyle(
-                color: GameTheme.textWhite,
-                fontSize: 11,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.0,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: glowColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                title == 'LEADERBOARD' ? 'STATS' : 'LIVE',
+      child: Opacity(
+        opacity: enabled ? 1.0 : 0.4,
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.02),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: finalColor.withValues(alpha: 0.2)),
+            boxShadow: enabled
+                ? [
+                    BoxShadow(
+                      color: finalColor.withValues(alpha: 0.05),
+                      blurRadius: 6,
+                      spreadRadius: 1,
+                    )
+                  ]
+                : null,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: finalColor, size: 22),
+              const SizedBox(height: 8),
+              Text(
+                title,
                 style: TextStyle(
-                  color: glowColor,
+                  color: enabled ? GameTheme.textWhite : GameTheme.textGrey,
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
+                  letterSpacing: 1.0,
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 2),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: finalColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  title == 'LEADERBOARD'
+                      ? 'STATS'
+                      : (enabled ? 'LIVE' : 'OFFLINE'),
+                  style: TextStyle(
+                    color: finalColor,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
