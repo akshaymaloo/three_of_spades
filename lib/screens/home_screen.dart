@@ -410,13 +410,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         ),
                                       ),
                                       Padding(
-                                        padding: const EdgeInsets.all(24.0),
+                                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: [
                                             Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                               decoration: BoxDecoration(
                                                 color: GameTheme.neonGreen.withValues(alpha: 0.15),
                                                 borderRadius: BorderRadius.circular(6),
@@ -432,22 +432,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                                 ),
                                               ),
                                             ),
-                                            const SizedBox(height: 12),
+                                            const SizedBox(height: 6),
                                             const Text(
                                               'Play vs Intelligent Bots',
                                               style: TextStyle(
                                                 color: GameTheme.textWhite,
-                                                fontSize: 20,
+                                                fontSize: 16,
                                                 fontWeight: FontWeight.bold,
                                               ),
                                             ),
-                                            const SizedBox(height: 4),
+                                            const SizedBox(height: 2),
                                             const Text(
                                               'Practice your bidding strategies and trick estimation with zero network wait times.',
                                               style: TextStyle(
                                                 color: GameTheme.textGrey,
-                                                fontSize: 12,
-                                                height: 1.3,
+                                                fontSize: 11,
+                                                height: 1.2,
                                               ),
                                             ),
                                           ],

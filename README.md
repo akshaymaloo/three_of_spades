@@ -120,9 +120,9 @@ flutter run -d emulator-5554
 ```
 
 ### Executing Tests
-We maintain 100% success across all game loop logic and Bot decision engines:
+We maintain 100% success across all game loop logic, widget rendering, and Bot decision engines:
 ```bash
-# Run all unit/widget tests
+# Run all unit/widget tests (28 tests total)
 flutter test
 
 # Run tests with HTML coverage reports
