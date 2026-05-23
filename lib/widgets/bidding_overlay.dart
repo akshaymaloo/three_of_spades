@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/game_state.dart';
 import '../core/theme.dart';
 import '../providers/game_notifier.dart';
+import '../l10n/app_localizations.dart';
 
 class BiddingOverlay extends ConsumerStatefulWidget {
   final GameState game;
@@ -80,20 +81,20 @@ class _BiddingOverlayState extends ConsumerState<BiddingOverlay> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text(
-                    'YOUR TURN TO BID',
-                    style: TextStyle(color: GameTheme.neonCyan, fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1.5),
+                  Text(
+                    AppLocalizations.of(context)?.biddingTitle ?? 'YOUR TURN TO BID',
+                    style: const TextStyle(color: GameTheme.neonCyan, fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1.5),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Current Bid: ${widget.game.winningBid == 0 ? "None" : widget.game.winningBid}',
+                    AppLocalizations.of(context)?.biddingSubtitle(widget.game.winningBid) ?? 'Current Bid: ${widget.game.winningBid}',
                     style: const TextStyle(color: GameTheme.textWhite, fontSize: 13),
                   ),
                   const SizedBox(height: 24),
 
                   if (_sliderBid <= 350) ...[
                     Text(
-                      'Your Bid: $_sliderBid',
+                      AppLocalizations.of(context)?.bidButton(_sliderBid) ?? 'BID $_sliderBid',
                       style: const TextStyle(color: GameTheme.neonGreen, fontSize: 24, fontWeight: FontWeight.bold),
                     ),
                     Slider(
@@ -125,7 +126,7 @@ class _BiddingOverlayState extends ConsumerState<BiddingOverlay> {
                           onPressed: () {
                             ref.read(gameProvider.notifier).passBid();
                           },
-                          child: const Text('PASS', style: TextStyle(color: GameTheme.neonPink, fontWeight: FontWeight.bold)),
+                          child: Text(AppLocalizations.of(context)?.pass.toUpperCase() ?? 'PASS', style: const TextStyle(color: GameTheme.neonPink, fontWeight: FontWeight.bold)),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -140,7 +141,7 @@ class _BiddingOverlayState extends ConsumerState<BiddingOverlay> {
                           onPressed: () {
                             ref.read(gameProvider.notifier).placeBid(_sliderBid);
                           },
-                          child: const Text('BID', style: TextStyle(fontWeight: FontWeight.bold)),
+                          child: Text(AppLocalizations.of(context)?.bidButton(_sliderBid).toUpperCase() ?? 'BID $_sliderBid', style: const TextStyle(fontWeight: FontWeight.bold)),
                         ),
                       ),
                     ],

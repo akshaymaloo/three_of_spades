@@ -1,0 +1,408 @@
+{
+  "settings": "सेटिंग्स",
+  "soundEffects": "ध्वनि प्रभाव",
+  "backgroundMusic": "पृष्ठभूमि संगीत",
+  "onlineModeFirebase": "ऑनलाइन मोड (Firebase)",
+  "onlineModeActive": "सक्रिय (Firebase सेटअप आवश्यक)",
+  "onlineModeOffline": "सिमुलेशन / केवल ऑफ़लाइन",
+  "switchedOnlineMode": "ऑनलाइन मोड में स्विच किया गया! Firebase कॉन्फ़िगरेशन आवश्यक है।",
+  "switchedOfflineMode": "सिमुलेशन मोड (ऑफ़लाइन/मॉक) में स्विच किया गया।",
+  "pushNotifications": "पुश सूचनाएं",
+  "pushNotificationsSubtitle": "कमरे के निमंत्रण और अपडेट प्राप्त करें",
+  "resetStatsTitle": "आँकड़े रीसेट करें?",
+  "resetStatsBody": "यह आपके सिक्कों को 5,000 पर वापस कर देगा और आपके जीत के इतिहास को मिटा देगा। इस कार्रवाई को पूर्ववत नहीं किया जा सकता है।",
+  "cancel": "रद्द करें",
+  "reset": "रीसेट",
+  "resetGuestStats": "अतिथि आँकड़े रीसेट करें",
+  "editNameTitle": "नाम संपादित करें",
+  "editNameSubtitle": "अपना उपनाम दर्ज करें:",
+  "alias": "उपनाम",
+  "save": "सहेजें",
+  "coins": "सिक्के",
+  "earnedCoins": "{amount} सिक्के कमाए!",
+  "@earnedCoins": {
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "adFailed": "विज्ञापन विफल रहा या छोड़ दिया गया",
+  "statistics": "आँकड़े",
+  "played": "खेले गए",
+  "won": "जीते",
+  "winRate": "जीतने की दर",
+  "bestBid": "सर्वश्रेष्ठ बोली",
+  "offlinePlay": "ऑफ़लाइन खेलें",
+  "playVsIntelligentBots": "बुद्धिमान बॉट्स के खिलाफ खेलें",
+  "practiceBiddingDesc": "शून्य नेटवर्क प्रतीक्षा समय के साथ अपनी बोली लगाने की रणनीतियों और चाल के अनुमान का अभ्यास करें।",
+  "onlinePlay": "ऑनलाइन खेलें",
+  "privateRoom": "निजी कमरा",
+  "leaderboard": "लीडरबोर्ड",
+  "live": "लाइव",
+  "offline": "ऑफ़लाइन",
+  "stats": "आँकड़े",
+  "enableOnlineToPlay": "ऑनलाइन खेलने के लिए सेटिंग्स में ऑनलाइन मोड सक्षम करें।",
+  "language": "भाषा",
+  "english": "English",
+  "hindi": "हिन्दी",
+
+  "threeOfSpades": "थ्री ऑफ स्पेड्स",
+  "classicFourPlayerGame": "क्लासिक 4-खिलाड़ियों का कार्ड गेम",
+  "playOffline": "ऑफ़लाइन खेलें",
+  "signInAsGuest": "अतिथि के रूप में साइन इन करें",
+  "signInWithFacebook": "फेसबुक के साथ साइन इन करें",
+  "signInGlobalMatchmaking": "वैश्विक मैचमेकिंग तक पहुँचने के लिए साइन इन करें",
+  "enterAsGuestCoins": "अतिथि के रूप में प्रवेश करें और 5,000 मुफ्त सिक्के प्राप्त करें",
+  "onlineMode": "ऑनलाइन मोड",
+  "simulationMode": "सिमुलेशन मोड",
+
+  "howToPlay": "कैसे खेलें",
+  "skip": "छोड़ें",
+  "next": "अगला",
+  "letsPlay": "चलो खेलते हैं!",
+  "welcomeTitle": "थ्री ऑफ स्पेड्स में आपका स्वागत है",
+  "welcomeDesc": "काली की तिग्गी के रूप में भी जाना जाने वाला, यह दक्षिण एशिया में लोकप्रिय एक रणनीतिक कार्ड गेम है। इस आधुनिक संस्करण में, आप बुद्धिमान बॉट्स या ऑनलाइन खिलाड़ियों के खिलाफ बोली लगाने, घोषणाओं और रणनीतिक खेल की लड़ाई में खेलते हैं।",
+  "objectiveTitle": "उद्देश्य और बोली",
+  "objectiveDesc": "खिलाड़ी अपने हाथ की ताकत के आधार पर अंकों (175 से 350 तक) की बोली लगाते हैं। उच्चतम बोली लगाने वाला बोली जीतता है और उतने अंक बनाने की कोशिश करता है। बोलियां केवल लगाई या पास की जा सकती हैं, और बोली 5 के अंतराल में आगे बढ़ती है।",
+  "minBidLabel": "न्यूनतम बोली: 175",
+  "maxBidLabel": "अधिकतम बोली: 350",
+  "scoringTitle": "स्कोरिंग और पॉइंट कार्ड",
+  "scoringDesc": "मानक कार्ड गेम के विपरीत, केवल विशिष्ट कार्डों में अंक होते हैं। इन कार्डों वाली चालें जीतने पर अंक मिलते हैं:",
+  "totalPointsLabel": "कुल अंक: 350",
+  "scoringTeamDesc": "जीतने के लिए बोली लगाने वाले + भागीदार टीम को अपनी बोली के बराबर या उससे अधिक अंक वाले कार्ड वाली चालें जीतनी होंगी!",
+  "gameplayFlowTitle": "गेमप्ले का प्रवाह",
+  "flowStep1Title": "बोली लगाना",
+  "flowStep1Desc": "खिलाड़ी अंकों की बोली लगाते हैं",
+  "flowStep2Title": "घोषणा",
+  "flowStep2Desc": "बोली लगाने वाला ट्रम्प और भागीदार कार्ड चुनता है",
+  "flowStep3Title": "चाल खेल",
+  "flowStep3Desc": "चालें जीतने के लिए सूट का पालन करें",
+  "flowStep4Title": "स्कोरिंग",
+  "flowStep4Desc": "जीती गई चालों से अंक जोड़ें",
+  "tipsTitle": "टिप्स और नियम",
+  "tip1": "यदि आपके हाथ में वह सूट है तो आपको उसका पालन करना चाहिए।",
+  "tip2": "यदि आपके पास नेतृत्व वाला सूट नहीं है, तो आप चाल जीतने के लिए ट्रम्प सहित कोई भी कार्ड खेल सकते हैं।",
+  "tip3": "भागीदार गुप्त है! घोषित भागीदार कार्ड खेले जाने पर ही भागीदार की पहचान उजागर होती है।",
+
+  "matchmaking": "मैचमेकिंग",
+  "matchFound": "मैच मिला!",
+  "cancelMatch": "मैच रद्द करें",
+  "searchingPlayers": "खिलाड़ियों की खोज की जा रही है... (समय: {seconds}s)",
+  "@searchingPlayers": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "startingGameIn": "{seconds} सेकंड में गेम शुरू हो रहा है...",
+  "@startingGameIn": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "searching": "खोज रहे हैं...",
+
+  "privateLobby": "निजी लॉबी",
+  "createRoom": "कमरा बनाएं",
+  "joinRoom": "कमरे में शामिल हों",
+  "createLobbyDesc": "एक निजी लॉबी कोड बनाएं। आप अपने दोस्तों को इस लॉबी में शामिल होने के लिए आमंत्रित कर सकते हैं या बॉट्स के साथ सीटें भर सकते हैं।",
+  "generateRoom": "कमरा उत्पन्न करें",
+  "enterRoomCodeDesc": "सक्रिय निजी लॉबी में शामिल होने के लिए 6-अक्षर का कमरा कोड दर्ज करें।",
+  "roomCodeLabel": "कमरा कोड: ",
+  "joinLobby": "लॉबी में शामिल हों",
+  "seatedPlayers": "बैठे हुए खिलाड़ी (अधिकतम 4)",
+  "emptySeat": "खाली सीट",
+  "host": "मेजबान",
+  "ready": "तैयार",
+  "waiting": "प्रतीक्षा कर रहे हैं...",
+  "addBots": "बॉट्स जोड़ें",
+  "startMatch": "मैच शुरू करें",
+  "invalidRoomCode": "कृपया एक वैध कमरा कोड दर्ज करें।",
+
+  "leaderboards": "लीडरबोर्ड",
+  "daily": "दैनिक",
+  "allTime": "सर्वकालिक",
+  "rank": "रैंक",
+  "player": "खिलाड़ी",
+  "gamesWon": "जीते गए खेल",
+  "you": "आप",
+  "noEntries": "अभी तक कोई लीडरबोर्ड प्रविष्टियाँ नहीं हैं।",
+  "failedToLoadLeaderboard": "लीडरबोर्ड लोड करने में विफल: {error}",
+  "@failedToLoadLeaderboard": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+
+  "dailyReward": "दैनिक पुरस्कार",
+  "dayNumber": "दिन {day}",
+  "@dayNumber": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "alreadyClaimed": "पहले ही दावा किया जा चुका है ✓",
+  "claimCoins": "{amount} सिक्के प्राप्त करें!",
+  "@claimCoins": {
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "claimedDailyReward": "🎁 {amount} दैनिक पुरस्कार सिक्के प्राप्त किए!",
+  "@claimedDailyReward": {
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+
+  "landscapeRequired": "लैंडस्केप मोड आवश्यक है",
+  "rotateDeviceDesc": "खेलने के लिए कृपया अपने डिवाइस को घुमाएं या अपनी ब्राउज़र विंडो को चौड़ा करें।",
+
+  "biddingTitle": "अपनी बोली लगाएं",
+  "biddingSubtitle": "वर्तमान बोली: {bid}",
+  "@biddingSubtitle": {
+    "placeholders": {
+      "bid": {
+        "type": "int"
+      }
+    }
+  },
+  "pass": "पास",
+  "bidButton": "बोली {bid}",
+  "@bidButton": {
+    "placeholders": {
+      "bid": {
+        "type": "int"
+      }
+    }
+  },
+
+  "declareTrumpTitle": "ट्रम्प सूट घोषित करें",
+  "declarePartnerTitle": "भागीदार कार्ड चुनें",
+  "declareSubmit": "घोषणा की पुष्टि करें",
+
+  "victory": "जीत",
+  "defeat": "हार",
+  "bidderLabel": "बोली लगाने वाला: {name} ({identity})",
+  "@bidderLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "identity": {
+        "type": "String"
+      }
+    }
+  },
+  "partnerLabel": "भागीदार: {name} ({identity})",
+  "@partnerLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "identity": {
+        "type": "String"
+      }
+    }
+  },
+  "youIdentity": "आप",
+  "botIdentity": "बॉट",
+  "themselves": "स्वयं",
+  "bidValue": "बोली का मूल्य",
+  "collected": "एकत्रित",
+  "coinRewardsPenalties": "सिक्का पुरस्कार / दंड:",
+  "quit": "बाहर निकलें",
+  "playAgain": "फिर से खेलें",
+
+  "gameChat": "गेम चैट",
+  "typeMessage": "संदेश टाइप करें...",
+
+  "trumpLabel": "ट्रम्प: ",
+  "partnerLabelUpper": "भागीदार: ",
+  "revealed": "(खुला हुआ)",
+  "hidden": "(छिपा हुआ)",
+
+  "passed": "पास किया",
+  "bidLabel": "बोली: {bid}",
+  "@bidLabel": {
+    "placeholders": {
+      "bid": {
+        "type": "int"
+      }
+    }
+  },
+  "bidderLabelShort": "बोली लगाने वाला ({bid})",
+  "@bidderLabelShort": {
+    "placeholders": {
+      "bid": {
+        "type": "int"
+      }
+    }
+  },
+  "partnerLabelShort": "भागीदार",
+  "pointsLabel": "अंक: {points}",
+  "@pointsLabel": {
+    "placeholders": {
+      "points": {
+        "type": "int"
+      }
+    }
+  },
+  "thinking": "सोच रहा है ",
+  "noCards": "कोई कार्ड नहीं",
+  "playCard": "कार्ड खेलें",
+  "ptsUnit": "अंक",
+  "rank": "रैंक",
+  "suit": "सूट",
+  "holdWarning": "चेतावनी: आपके पास यह कार्ड है! वह कार्ड चुनें जो आपके पास नहीं है।",
+  "declareTitle": "ट्रम्प और भागीदार घोषित करें",
+  "selectTrump": "1. ट्रम्प सूट चुनें",
+  "nominatePartner": "2. भागीदार कार्ड नामांकित करें",
+  "jack": "गुलाम",
+  "queen": "बेगम",
+  "king": "बादशाह",
+  "ace": "इक्का",
+  "spade": "हुकुम",
+  "heart": "पान",
+  "club": "चिड़ी",
+  "diamond": "ईंट",
+  "spades": "हुकुम",
+  "hearts": "पान",
+  "clubs": "चिड़ी",
+  "diamonds": "ईंट",
+  "selectModePlay": "खेलने के लिए एक मोड चुनें",
+  "dealingCards": "कार्ड बांटे जा रहे हैं...",
+  "allPassedRedealing": "सभी खिलाड़ियों ने पास किया। पुन: वितरण किया जा रहा है...",
+  "allPassedMustBid": "आपके पहले सभी खिलाड़ियों ने पास किया। आपको कम से कम 175 की बोली लगानी होगी या पास करना होगा।",
+  "welcomeMessage": "थ्री ऑफ स्पेड्स में आपका स्वागत है!",
+  "forcedBid175": "{name} को 175 की बोली लगाने के लिए मजबूर किया गया है।",
+  "@forcedBid175": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "playerBidMessage": "{name} ने {amount} अंकों की बोली लगाई।",
+  "@playerBidMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "playerPassedMessage": "{name} ने पास किया।",
+  "@playerPassedMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "wonBidDeclaring": "{name} ने {bid} के साथ बोली जीती! ट्रम्प और भागीदार घोषित कर रहे हैं...",
+  "@wonBidDeclaring": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "bid": {
+        "type": "int"
+      }
+    }
+  },
+  "turnToLead": "{name} की चलने की बारी है।",
+  "@turnToLead": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "invalidFollowSuit": "अमान्य खेल! आपको सूट ({suit}) का पालन करना चाहिए।",
+  "@invalidFollowSuit": {
+    "placeholders": {
+      "suit": {
+        "type": "String"
+      }
+    }
+  },
+  "winsTrick": "{name} ने {card} (+{points} अंक) के साथ चाल जीती!",
+  "@winsTrick": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "card": {
+        "type": "String"
+      },
+      "points": {
+        "type": "int"
+      }
+    }
+  },
+  "trumpPartnerDeclaration": "ट्रम्प {trump} है। भागीदार कार्ड {card} है। {name} शुरुआत करता है।",
+  "@trumpPartnerDeclaration": {
+    "placeholders": {
+      "trump": {
+        "type": "String"
+      },
+      "card": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "gameOverSummary": "खेल समाप्त! बोली लगाने वाला {bidder} था, भागीदार {partner} था। {result}",
+  "@gameOverSummary": {
+    "placeholders": {
+      "bidder": {
+        "type": "String"
+      },
+      "partner": {
+        "type": "String"
+      },
+      "result": {
+        "type": "String"
+      }
+    }
+  },
+  "bidderPartnerWon": "बोली लगाने वाला और भागीदार जीते! {got} / {bid} अंक प्राप्त किए।",
+  "@bidderPartnerWon": {
+    "placeholders": {
+      "got": {
+        "type": "int"
+      },
+      "bid": {
+        "type": "int"
+      }
+    }
+  },
+  "defendersWon": "रक्षा करने वाले जीते! बोली लगाने वाला और भागीदार केवल {got} / {bid} अंक प्राप्त कर सके।",
+  "@defendersWon": {
+    "placeholders": {
+      "got": {
+        "type": "int"
+      },
+      "bid": {
+        "type": "int"
+      }
+    }
+  }
+}

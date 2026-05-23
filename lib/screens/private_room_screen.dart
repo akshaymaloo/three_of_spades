@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/theme.dart';
 import '../models/multiplayer_state.dart';
 import '../providers/multiplayer_notifier.dart';
+import '../l10n/app_localizations.dart';
 
 class PrivateRoomScreen extends ConsumerStatefulWidget {
   const PrivateRoomScreen({super.key});
@@ -35,7 +36,7 @@ class _PrivateRoomScreenState extends ConsumerState<PrivateRoomScreen> {
     final code = _codeController.text.trim().toUpperCase();
     if (code.length < 5) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid room code.')),
+        SnackBar(content: Text(AppLocalizations.of(context)?.invalidRoomCode ?? 'Please enter a valid room code.')),
       );
       return;
     }
@@ -85,7 +86,9 @@ class _PrivateRoomScreenState extends ConsumerState<PrivateRoomScreen> {
                     ),
                     const SizedBox(width: 16),
                     Text(
-                      _joined ? 'PRIVATE LOBBY' : 'PRIVATE ROOM',
+                      _joined 
+                          ? (AppLocalizations.of(context)?.privateLobby ?? 'PRIVATE LOBBY') 
+                          : (AppLocalizations.of(context)?.privateRoom ?? 'PRIVATE ROOM'),
                       style: const TextStyle(
                         color: GameTheme.textWhite,
                         fontSize: 22,
@@ -142,7 +145,7 @@ class _PrivateRoomScreenState extends ConsumerState<PrivateRoomScreen> {
                   ),
                   child: Center(
                     child: Text(
-                      'CREATE ROOM',
+                      AppLocalizations.of(context)?.createRoom ?? 'CREATE ROOM',
                       style: TextStyle(
                         color: _isCreating ? GameTheme.neonCyan : GameTheme.textGrey,
                         fontWeight: FontWeight.bold,
@@ -170,7 +173,7 @@ class _PrivateRoomScreenState extends ConsumerState<PrivateRoomScreen> {
                   ),
                   child: Center(
                     child: Text(
-                      'JOIN ROOM',
+                      AppLocalizations.of(context)?.joinRoom ?? 'JOIN ROOM',
                       style: TextStyle(
                         color: !_isCreating ? GameTheme.neonCyan : GameTheme.textGrey,
                         fontWeight: FontWeight.bold,
@@ -185,10 +188,10 @@ class _PrivateRoomScreenState extends ConsumerState<PrivateRoomScreen> {
         ),
         const SizedBox(height: 32),
         if (_isCreating) ...[
-          const Text(
-            'Create a private lobby code. You can invite your friends to join this lobby or fill up seats with bots.',
+          Text(
+            AppLocalizations.of(context)?.createLobbyDesc ?? 'Create a private lobby code. You can invite your friends to join this lobby or fill up seats with bots.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: GameTheme.textGrey, fontSize: 13, height: 1.4),
+            style: const TextStyle(color: GameTheme.textGrey, fontSize: 13, height: 1.4),
           ),
           const SizedBox(height: 32),
           InkWell(
@@ -201,19 +204,19 @@ class _PrivateRoomScreenState extends ConsumerState<PrivateRoomScreen> {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: GameTheme.neonGlow(GameTheme.neonCyan),
               ),
-              child: const Center(
+              child: Center(
                 child: Text(
-                  'GENERATE ROOM',
-                  style: TextStyle(color: GameTheme.darkBackground, fontWeight: FontWeight.bold, fontSize: 15, letterSpacing: 1.5),
+                  AppLocalizations.of(context)?.generateRoom ?? 'GENERATE ROOM',
+                  style: const TextStyle(color: GameTheme.darkBackground, fontWeight: FontWeight.bold, fontSize: 15, letterSpacing: 1.5),
                 ),
               ),
             ),
           ),
         ] else ...[
-          const Text(
-            'Enter the 6-character room code to join an active private lobby.',
+          Text(
+            AppLocalizations.of(context)?.enterRoomCodeDesc ?? 'Enter the 6-character room code to join an active private lobby.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: GameTheme.textGrey, fontSize: 13, height: 1.4),
+            style: const TextStyle(color: GameTheme.textGrey, fontSize: 13, height: 1.4),
           ),
           const SizedBox(height: 24),
           TextField(
@@ -261,10 +264,10 @@ class _PrivateRoomScreenState extends ConsumerState<PrivateRoomScreen> {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: GameTheme.neonGlow(GameTheme.neonCyan),
               ),
-              child: const Center(
+              child: Center(
                 child: Text(
-                  'JOIN LOBBY',
-                  style: TextStyle(color: GameTheme.darkBackground, fontWeight: FontWeight.bold, fontSize: 15, letterSpacing: 1.5),
+                  AppLocalizations.of(context)?.joinLobby ?? 'JOIN LOBBY',
+                  style: const TextStyle(color: GameTheme.darkBackground, fontWeight: FontWeight.bold, fontSize: 15, letterSpacing: 1.5),
                 ),
               ),
             ),
@@ -295,9 +298,9 @@ class _PrivateRoomScreenState extends ConsumerState<PrivateRoomScreen> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
-                  'ROOM CODE: ',
-                  style: TextStyle(color: GameTheme.textGrey, fontSize: 12, fontWeight: FontWeight.bold),
+                Text(
+                  AppLocalizations.of(context)?.roomCodeLabel ?? 'ROOM CODE: ',
+                  style: const TextStyle(color: GameTheme.textGrey, fontSize: 12, fontWeight: FontWeight.bold),
                 ),
                 Text(
                   codeDisplay,
@@ -310,16 +313,16 @@ class _PrivateRoomScreenState extends ConsumerState<PrivateRoomScreen> {
         const SizedBox(height: 32),
 
         // List of players currently seated
-        const Text(
-          'SEATED PLAYERS (Max 4)',
-          style: TextStyle(color: GameTheme.textGrey, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.0),
+        Text(
+          AppLocalizations.of(context)?.seatedPlayers ?? 'SEATED PLAYERS (Max 4)',
+          style: const TextStyle(color: GameTheme.textGrey, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.0),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 16),
         Column(
           children: List.generate(4, (index) {
             final hasPlayer = mState.lobbyPlayers.length > index;
-            final name = hasPlayer ? mState.lobbyPlayers[index] : 'Empty Seat';
+            final name = hasPlayer ? mState.lobbyPlayers[index] : (AppLocalizations.of(context)?.emptySeat ?? 'Empty Seat');
             final isUser = index == 0;
 
             return Container(
@@ -355,7 +358,9 @@ class _PrivateRoomScreenState extends ConsumerState<PrivateRoomScreen> {
                   const Spacer(),
                   if (hasPlayer) ...[
                     Text(
-                      isUser ? 'HOST' : 'READY',
+                      isUser 
+                          ? (AppLocalizations.of(context)?.host ?? 'HOST') 
+                          : (AppLocalizations.of(context)?.ready ?? 'READY'),
                       style: TextStyle(
                         color: isUser ? GameTheme.neonCyan : GameTheme.neonGreen,
                         fontSize: 11,
@@ -365,7 +370,7 @@ class _PrivateRoomScreenState extends ConsumerState<PrivateRoomScreen> {
                     ),
                   ] else ...[
                     Text(
-                      'WAITING...',
+                      AppLocalizations.of(context)?.waiting ?? 'WAITING...',
                       style: TextStyle(
                         color: GameTheme.textGrey.withValues(alpha: 0.2),
                         fontSize: 11,
@@ -392,9 +397,9 @@ class _PrivateRoomScreenState extends ConsumerState<PrivateRoomScreen> {
                     side: const BorderSide(color: GameTheme.neonCyan, width: 1.0),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
-                  child: const Text(
-                    'ADD BOTS',
-                    style: TextStyle(color: GameTheme.neonCyan, fontWeight: FontWeight.bold),
+                  child: Text(
+                    AppLocalizations.of(context)?.addBots ?? 'ADD BOTS',
+                    style: const TextStyle(color: GameTheme.neonCyan, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -416,10 +421,10 @@ class _PrivateRoomScreenState extends ConsumerState<PrivateRoomScreen> {
                       borderRadius: BorderRadius.circular(8),
                       boxShadow: isFull ? GameTheme.neonGlow(GameTheme.neonCyan) : null,
                     ),
-                    child: const Center(
+                    child: Center(
                       child: Text(
-                        'START MATCH',
-                        style: TextStyle(
+                        AppLocalizations.of(context)?.startMatch ?? 'START MATCH',
+                        style: const TextStyle(
                           color: GameTheme.darkBackground,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1.0,

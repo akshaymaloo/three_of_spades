@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/theme.dart';
 import '../models/game_state.dart';
@@ -12,6 +13,8 @@ import '../widgets/game_table.dart';
 import '../widgets/game_top_bar.dart';
 import '../widgets/player_hand_panel.dart';
 import '../widgets/scoreboard_overlay.dart';
+import '../l10n/app_localizations.dart';
+import '../core/localization_helper.dart';
 
 class GameScreen extends ConsumerStatefulWidget {
   const GameScreen({super.key});
@@ -29,6 +32,17 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     final game = ref.watch(gameProvider);
     final multiplayerState = ref.watch(multiplayerProvider);
 
+    // Listen to changes in game status message and announce them
+    ref.listen<String>(
+      gameProvider.select((s) => s.message),
+      (previous, next) {
+        if (next.isNotEmpty) {
+          final localizedMsg = getLocalizedGameMessage(context, next);
+          SemanticsService.announce(localizedMsg, TextDirection.ltr);
+        }
+      },
+    );
+
     // Auto-update message count when chat is open
     if (_isChatOpen && multiplayerState.chatMessages.length > _lastSeenMessageCount) {
       _lastSeenMessageCount = multiplayerState.chatMessages.length;
@@ -41,23 +55,23 @@ class _GameScreenState extends ConsumerState<GameScreen> {
       return Scaffold(
         body: Container(
           decoration: const BoxDecoration(gradient: GameTheme.backgroundGradient),
-          child: const Center(
+          child: Center(
             child: Padding(
-              padding: EdgeInsets.all(24.0),
+              padding: const EdgeInsets.all(24.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.screen_rotation_rounded, color: GameTheme.neonPink, size: 48),
-                  SizedBox(height: 16),
+                  const Icon(Icons.screen_rotation_rounded, color: GameTheme.neonPink, size: 48),
+                  const SizedBox(height: 16),
                   Text(
-                    'Landscape Mode Required',
-                    style: TextStyle(color: GameTheme.textWhite, fontSize: 18, fontWeight: FontWeight.bold),
+                    AppLocalizations.of(context)?.landscapeRequired ?? 'Landscape Mode Required',
+                    style: const TextStyle(color: GameTheme.textWhite, fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Text(
-                    'Please rotate your device or widen your browser window to play.',
+                    AppLocalizations.of(context)?.rotateDeviceDesc ?? 'Please rotate your device or widen your browser window to play.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: GameTheme.textGrey, fontSize: 13),
+                    style: const TextStyle(color: GameTheme.textGrey, fontSize: 13),
                   ),
                 ],
               ),
@@ -203,7 +217,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                   const SizedBox(width: 8),
                   Flexible(
                     child: Text(
-                      game.message,
+                      getLocalizedGameMessage(context, game.message),
                       style: const TextStyle(
                         color: GameTheme.textWhite,
                         fontSize: 12,

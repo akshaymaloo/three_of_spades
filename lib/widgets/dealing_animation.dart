@@ -3,6 +3,7 @@ import 'dart:ui' show lerpDouble;
 import 'package:flutter/material.dart';
 import '../core/theme.dart';
 import '../core/sound_manager.dart';
+import '../l10n/app_localizations.dart';
 
 class DealingAnimation extends StatefulWidget {
   final VoidCallback onComplete;
@@ -193,10 +194,10 @@ class _DealingAnimationState extends State<DealingAnimation> with SingleTickerPr
                     radius: 20,
                     borderColor: GameTheme.neonCyan,
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      SizedBox(
+                      const SizedBox(
                         width: 14,
                         height: 14,
                         child: CircularProgressIndicator(
@@ -204,10 +205,10 @@ class _DealingAnimationState extends State<DealingAnimation> with SingleTickerPr
                           valueColor: AlwaysStoppedAnimation<Color>(GameTheme.neonCyan),
                         ),
                       ),
-                      SizedBox(width: 12),
+                      const SizedBox(width: 12),
                       Text(
-                        'DEALING CARDS...',
-                        style: TextStyle(
+                        AppLocalizations.of(context)?.dealingCards.toUpperCase() ?? 'DEALING CARDS...',
+                        style: const TextStyle(
                           color: GameTheme.neonCyan,
                           fontSize: 12,
                           fontWeight: FontWeight.bold,

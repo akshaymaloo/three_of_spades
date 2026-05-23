@@ -5,6 +5,7 @@ import '../providers/game_notifier.dart';
 import '../providers/config_provider.dart';
 import '../providers/service_providers.dart';
 import '../providers/stats_provider.dart';
+import '../l10n/app_localizations.dart';
 
 class StartScreen extends ConsumerStatefulWidget {
   const StartScreen({super.key});
@@ -74,7 +75,9 @@ class _StartScreenState extends ConsumerState<StartScreen> {
   @override
   Widget build(BuildContext context) {
     final config = ref.watch(configProvider);
-    final modeText = config.onlineMode ? 'Online Mode' : 'Simulation Mode';
+    final modeText = config.onlineMode 
+        ? (AppLocalizations.of(context)?.onlineMode ?? 'Online Mode') 
+        : (AppLocalizations.of(context)?.simulationMode ?? 'Simulation Mode');
 
     return Scaffold(
       body: Container(
@@ -101,18 +104,18 @@ class _StartScreenState extends ConsumerState<StartScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Three of Spades',
-                    style: TextStyle(
+                    AppLocalizations.of(context)?.threeOfSpades ?? 'Three of Spades',
+                    style: const TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
                       color: GameTheme.textWhite,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    'Classic 4-Player Card Game',
+                  Text(
+                    AppLocalizations.of(context)?.classicFourPlayerGame ?? 'Classic 4-Player Card Game',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14,
                       color: GameTheme.textGrey,
                     ),
@@ -145,7 +148,9 @@ class _StartScreenState extends ConsumerState<StartScreen> {
                         ),
                         child: Center(
                           child: Text(
-                            config.onlineMode ? 'SIGN IN AS GUEST' : 'PLAY OFFLINE',
+                            config.onlineMode 
+                                ? (AppLocalizations.of(context)?.signInAsGuest ?? 'SIGN IN AS GUEST') 
+                                : (AppLocalizations.of(context)?.playOffline ?? 'PLAY OFFLINE'),
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -173,14 +178,14 @@ class _StartScreenState extends ConsumerState<StartScreen> {
                             borderRadius: BorderRadius.circular(12),
                             boxShadow: GameTheme.neonGlow(const Color(0xFF1877F2)),
                           ),
-                          child: const Row(
+                          child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.facebook, color: Colors.white, size: 20),
-                              SizedBox(width: 8),
+                              const Icon(Icons.facebook, color: Colors.white, size: 20),
+                              const SizedBox(width: 8),
                               Text(
-                                'SIGN IN WITH FACEBOOK',
-                                style: TextStyle(
+                                AppLocalizations.of(context)?.signInWithFacebook ?? 'SIGN IN WITH FACEBOOK',
+                                style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
@@ -196,8 +201,8 @@ class _StartScreenState extends ConsumerState<StartScreen> {
 
                     Text(
                       config.onlineMode
-                          ? 'Sign in to access global matchmaking'
-                          : 'Enter as Guest and get 5,000 free coins',
+                          ? (AppLocalizations.of(context)?.signInGlobalMatchmaking ?? 'Sign in to access global matchmaking')
+                          : (AppLocalizations.of(context)?.enterAsGuestCoins ?? 'Enter as Guest and get 5,000 free coins'),
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         fontSize: 12,

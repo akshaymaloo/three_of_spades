@@ -1,3 +1,6 @@
+import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
+
 class CardModel {
   final int id;
   final String suit; // 'S', 'H', 'C', 'D'
@@ -52,6 +55,76 @@ class CardModel {
     final suitName = getSuitName(suit);
     final rankText = rankName;
     return '$rankText of ${suitName}s';
+  }
+
+  String getLocalizedName(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+    if (localizations == null) return name;
+
+    final String rankText;
+    if (rank <= 10) {
+      rankText = rank.toString();
+    } else {
+      switch (rank) {
+        case 11:
+          rankText = localizations.jack;
+          break;
+        case 12:
+          rankText = localizations.queen;
+          break;
+        case 13:
+          rankText = localizations.king;
+          break;
+        case 14:
+          rankText = localizations.ace;
+          break;
+        default:
+          rankText = '';
+      }
+    }
+
+    final isHi = Localizations.localeOf(context).languageCode == 'hi';
+    if (isHi) {
+      final suitName = getLocalizedSuitName(context, suit);
+      return '$suitName का $rankText';
+    } else {
+      final suitNamePlural = getLocalizedSuitNamePlural(context, suit);
+      return '$rankText of $suitNamePlural';
+    }
+  }
+
+  static String getLocalizedSuitName(BuildContext context, String suitChar) {
+    final localizations = AppLocalizations.of(context);
+    if (localizations == null) return getSuitName(suitChar);
+    switch (suitChar) {
+      case 'S':
+        return localizations.spade;
+      case 'H':
+        return localizations.heart;
+      case 'C':
+        return localizations.club;
+      case 'D':
+        return localizations.diamond;
+      default:
+        return 'Unknown';
+    }
+  }
+
+  static String getLocalizedSuitNamePlural(BuildContext context, String suitChar) {
+    final localizations = AppLocalizations.of(context);
+    if (localizations == null) return '${getSuitName(suitChar)}s';
+    switch (suitChar) {
+      case 'S':
+        return localizations.spades;
+      case 'H':
+        return localizations.hearts;
+      case 'C':
+        return localizations.clubs;
+      case 'D':
+        return localizations.diamonds;
+      default:
+        return 'Unknown';
+    }
   }
 
   @override

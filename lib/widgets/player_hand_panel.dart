@@ -5,6 +5,7 @@ import '../models/player_model.dart';
 import '../core/theme.dart';
 import 'playing_card_widget.dart';
 import '../providers/game_notifier.dart';
+import '../l10n/app_localizations.dart';
 
 class PlayerHandPanel extends ConsumerStatefulWidget {
   final GameState game;
@@ -48,7 +49,7 @@ class _PlayerHandPanelState extends ConsumerState<PlayerHandPanel> {
             child: SizedBox(
               height: 96,
               child: hand.isEmpty
-                  ? const Center(child: Text('No Cards', style: TextStyle(color: GameTheme.textGrey)))
+                  ? Center(child: Text(AppLocalizations.of(context)?.noCards ?? 'No Cards', style: const TextStyle(color: GameTheme.textGrey)))
                   : ListView.builder(
                       scrollDirection: Axis.horizontal,
                       itemCount: hand.length,
@@ -115,7 +116,7 @@ class _PlayerHandPanelState extends ConsumerState<PlayerHandPanel> {
                     });
                   }
                 },
-                child: const Text('PLAY CARD', style: TextStyle(fontWeight: FontWeight.bold)),
+                child: Text(AppLocalizations.of(context)?.playCard ?? 'PLAY CARD', style: const TextStyle(fontWeight: FontWeight.bold)),
               ),
             ),
         ],

@@ -6,6 +6,7 @@ import '../core/theme.dart';
 import '../core/suit_utils.dart';
 import '../providers/game_notifier.dart';
 import '../providers/multiplayer_notifier.dart';
+import '../l10n/app_localizations.dart';
 
 class GameTopBar extends ConsumerWidget implements PreferredSizeWidget {
   final GameState game;
@@ -58,14 +59,14 @@ class GameTopBar extends ConsumerWidget implements PreferredSizeWidget {
                     decoration: GameTheme.glassDecoration(opacity: 0.05, borderOpacity: 0.1, radius: 8),
                     child: Row(
                       children: [
-                        const Text('TRUMP: ', style: TextStyle(color: GameTheme.textGrey, fontSize: 11, fontWeight: FontWeight.bold)),
+                        Text(AppLocalizations.of(context)?.trumpLabel ?? 'TRUMP: ', style: const TextStyle(color: GameTheme.textGrey, fontSize: 11, fontWeight: FontWeight.bold)),
                         Text(
                           trumpIcon,
                           style: TextStyle(color: trumpColor, fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          CardModel.getSuitName(game.trump),
+                          CardModel.getLocalizedSuitName(context, game.trump),
                           style: TextStyle(color: trumpColor, fontSize: 12, fontWeight: FontWeight.bold),
                         ),
                       ],
@@ -79,7 +80,7 @@ class GameTopBar extends ConsumerWidget implements PreferredSizeWidget {
                     decoration: GameTheme.glassDecoration(opacity: 0.05, borderOpacity: 0.1, radius: 8),
                     child: Row(
                       children: [
-                        const Text('PARTNER: ', style: TextStyle(color: GameTheme.textGrey, fontSize: 11, fontWeight: FontWeight.bold)),
+                        Text(AppLocalizations.of(context)?.partnerLabelUpper ?? 'PARTNER: ', style: const TextStyle(color: GameTheme.textGrey, fontSize: 11, fontWeight: FontWeight.bold)),
                         Text(
                           game.partnerCard!.rankLabel,
                           style: const TextStyle(color: GameTheme.textWhite, fontSize: 12, fontWeight: FontWeight.bold),
@@ -93,7 +94,9 @@ class GameTopBar extends ConsumerWidget implements PreferredSizeWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          _isPartnerRevealed(game) ? '(REVEALED)' : '(HIDDEN)',
+                          _isPartnerRevealed(game) 
+                              ? (AppLocalizations.of(context)?.revealed ?? '(REVEALED)') 
+                              : (AppLocalizations.of(context)?.hidden ?? '(HIDDEN)'),
                           style: TextStyle(
                             color: _isPartnerRevealed(game) ? GameTheme.neonGreen : GameTheme.neonPink,
                             fontSize: 11,

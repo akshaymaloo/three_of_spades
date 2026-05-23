@@ -6,6 +6,7 @@ import '../models/card_model.dart';
 import '../core/theme.dart';
 import '../core/suit_utils.dart';
 import '../providers/game_notifier.dart';
+import '../l10n/app_localizations.dart';
 
 class DeclaringOverlay extends ConsumerStatefulWidget {
   final PlayerModel humanPlayer;
@@ -64,23 +65,23 @@ class _DeclaringOverlayState extends ConsumerState<DeclaringOverlay> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text(
-                    'DECLARE TRUMP & PARTNER',
-                    style: TextStyle(color: GameTheme.neonCyan, fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1.5),
+                  Text(
+                    AppLocalizations.of(context)?.declareTitle ?? 'DECLARE TRUMP & PARTNER',
+                    style: const TextStyle(color: GameTheme.neonCyan, fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1.5),
                   ),
                   const SizedBox(height: 16),
 
                   // Trump selection row
-                  const Align(
+                  Align(
                     alignment: Alignment.centerLeft,
-                    child: Text('1. SELECT TRUMP SUIT', style: TextStyle(color: GameTheme.textGrey, fontSize: 11, fontWeight: FontWeight.bold)),
+                    child: Text(AppLocalizations.of(context)?.selectTrump ?? '1. SELECT TRUMP SUIT', style: const TextStyle(color: GameTheme.textGrey, fontSize: 11, fontWeight: FontWeight.bold)),
                   ),
                   const SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: ['S', 'H', 'C', 'D'].map((suit) {
                       final isSelected = _selectedTrumpSuit == suit;
-                      final suitName = CardModel.getSuitName(suit);
+                      final suitName = CardModel.getLocalizedSuitName(context, suit);
                       final isRed = suit == 'H' || suit == 'D';
 
                       return Expanded(
@@ -124,9 +125,9 @@ class _DeclaringOverlayState extends ConsumerState<DeclaringOverlay> {
                   const SizedBox(height: 16),
 
                   // Partner card selection
-                  const Align(
+                  Align(
                     alignment: Alignment.centerLeft,
-                    child: Text('2. NOMINATE PARTNER CARD', style: TextStyle(color: GameTheme.textGrey, fontSize: 11, fontWeight: FontWeight.bold)),
+                    child: Text(AppLocalizations.of(context)?.nominatePartner ?? '2. NOMINATE PARTNER CARD', style: const TextStyle(color: GameTheme.textGrey, fontSize: 11, fontWeight: FontWeight.bold)),
                   ),
                   const SizedBox(height: 8),
                   Row(
@@ -137,7 +138,7 @@ class _DeclaringOverlayState extends ConsumerState<DeclaringOverlay> {
                         child: DropdownButtonFormField<int>(
                           dropdownColor: GameTheme.darkBackground,
                           decoration: InputDecoration(
-                            labelText: 'Rank',
+                            labelText: AppLocalizations.of(context)?.rank ?? 'Rank',
                             labelStyle: const TextStyle(color: GameTheme.textGrey, fontSize: 12),
                             enabledBorder: OutlineInputBorder(borderSide: const BorderSide(color: Colors.white24), borderRadius: BorderRadius.circular(8)),
                             focusedBorder: OutlineInputBorder(borderSide: const BorderSide(color: GameTheme.neonCyan), borderRadius: BorderRadius.circular(8)),
@@ -145,10 +146,10 @@ class _DeclaringOverlayState extends ConsumerState<DeclaringOverlay> {
                           initialValue: _selectedPartnerRank,
                           items: List.generate(13, (i) => i + 2).map((rank) {
                             String label = rank.toString();
-                            if (rank == 11) label = 'Jack';
-                            if (rank == 12) label = 'Queen';
-                            if (rank == 13) label = 'King';
-                            if (rank == 14) label = 'Ace';
+                            if (rank == 11) label = AppLocalizations.of(context)?.jack ?? 'Jack';
+                            if (rank == 12) label = AppLocalizations.of(context)?.queen ?? 'Queen';
+                            if (rank == 13) label = AppLocalizations.of(context)?.king ?? 'King';
+                            if (rank == 14) label = AppLocalizations.of(context)?.ace ?? 'Ace';
                             return DropdownMenuItem<int>(
                               value: rank,
                               child: Text(label, style: const TextStyle(color: Colors.white, fontSize: 13)),
@@ -170,7 +171,7 @@ class _DeclaringOverlayState extends ConsumerState<DeclaringOverlay> {
                         child: DropdownButtonFormField<String>(
                           dropdownColor: GameTheme.darkBackground,
                           decoration: InputDecoration(
-                            labelText: 'Suit',
+                            labelText: AppLocalizations.of(context)?.suit ?? 'Suit',
                             labelStyle: const TextStyle(color: GameTheme.textGrey, fontSize: 12),
                             enabledBorder: OutlineInputBorder(borderSide: const BorderSide(color: Colors.white24), borderRadius: BorderRadius.circular(8)),
                             focusedBorder: OutlineInputBorder(borderSide: const BorderSide(color: GameTheme.neonCyan), borderRadius: BorderRadius.circular(8)),
@@ -180,7 +181,7 @@ class _DeclaringOverlayState extends ConsumerState<DeclaringOverlay> {
                             return DropdownMenuItem<String>(
                               value: suit,
                               child: Text(
-                                '${getSuitSymbol(suit)} ${CardModel.getSuitName(suit)}s',
+                                '${getSuitSymbol(suit)} ${CardModel.getLocalizedSuitNamePlural(context, suit)}',
                                 style: TextStyle(
                                   color: (suit == 'H' || suit == 'D') ? Colors.red : Colors.white,
                                   fontSize: 13,
@@ -209,7 +210,7 @@ class _DeclaringOverlayState extends ConsumerState<DeclaringOverlay> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'Warning: You hold this card! Select a card you do NOT hold.',
+                              AppLocalizations.of(context)?.holdWarning ?? 'Warning: You hold this card! Select a card you do NOT hold.',
                               style: TextStyle(color: GameTheme.neonPink.withValues(alpha: 0.9), fontSize: 11, fontWeight: FontWeight.bold),
                             ),
                           ),
@@ -239,7 +240,7 @@ class _DeclaringOverlayState extends ConsumerState<DeclaringOverlay> {
                             );
                             ref.read(gameProvider.notifier).declareTrumpAndPartner(_selectedTrumpSuit, partnerCard);
                           },
-                    child: const Text('DECLARE & START PLAYING', style: TextStyle(fontWeight: FontWeight.bold)),
+                    child: Text(AppLocalizations.of(context)?.declareSubmit ?? 'DECLARE & START PLAYING', style: const TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ],
               ),

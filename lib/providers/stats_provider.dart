@@ -15,6 +15,7 @@ class UserStats {
   final bool soundEnabled;
   final bool musicEnabled;
   final bool hasSeenTutorial;
+  final String languageCode;
 
   const UserStats({
     required this.name,
@@ -25,6 +26,7 @@ class UserStats {
     this.soundEnabled = true,
     this.musicEnabled = true,
     this.hasSeenTutorial = false,
+    this.languageCode = 'en',
   });
 
   UserStats copyWith({
@@ -36,6 +38,7 @@ class UserStats {
     bool? soundEnabled,
     bool? musicEnabled,
     bool? hasSeenTutorial,
+    String? languageCode,
   }) {
     return UserStats(
       name: name ?? this.name,
@@ -46,6 +49,7 @@ class UserStats {
       soundEnabled: soundEnabled ?? this.soundEnabled,
       musicEnabled: musicEnabled ?? this.musicEnabled,
       hasSeenTutorial: hasSeenTutorial ?? this.hasSeenTutorial,
+      languageCode: languageCode ?? this.languageCode,
     );
   }
 }
@@ -67,6 +71,7 @@ class StatsNotifier extends AsyncNotifier<UserStats> {
       final soundEnabled = prefs.getBool('sound_enabled') ?? true;
       final musicEnabled = prefs.getBool('music_enabled') ?? true;
       final hasSeenTutorial = prefs.getBool('has_seen_tutorial') ?? false;
+      final languageCode = prefs.getString('language_code') ?? 'en';
 
       // Initialize SoundManager state
       SoundManager().setEnabled(soundEnabled);
@@ -81,6 +86,7 @@ class StatsNotifier extends AsyncNotifier<UserStats> {
         soundEnabled: soundEnabled,
         musicEnabled: musicEnabled,
         hasSeenTutorial: hasSeenTutorial,
+        languageCode: languageCode,
       );
     } catch (e, stack) {
       debugPrint('Failed to load stats: $e\n$stack');
@@ -243,6 +249,24 @@ class StatsNotifier extends AsyncNotifier<UserStats> {
       await prefs.setBool('has_seen_tutorial', true);
     } catch (e, stack) {
       debugPrint('Failed to save tutorial status: $e\n$stack');
+    }
+  }
+
+  Future<void> updateLanguage(String code) async {
+    final current = state.value ?? const UserStats(
+      name: 'Guest Player',
+      coins: 5000,
+      gamesPlayed: 0,
+      gamesWon: 0,
+      highestBidWon: 0,
+    );
+    final updated = current.copyWith(languageCode: code);
+    state = AsyncValue.data(updated);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('language_code', code);
+    } catch (e, stack) {
+      debugPrint('Failed to save language setting: $e\n$stack');
     }
   }
 

@@ -9,6 +9,9 @@ import 'core/router.dart';
 import 'firebase_options.dart';
 import 'providers/config_provider.dart';
 import 'providers/notification_provider.dart';
+import 'providers/notification_provider.dart';
+import 'providers/stats_provider.dart';
+import 'l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -64,6 +67,13 @@ class ThreeOfSpadesApp extends ConsumerWidget {
     return MaterialApp.router(
       title: 'Kaali Ki Teeggi (Three of Spades)',
       debugShowCheckedModeBanner: false,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: ref.watch(statsProvider).when(
+        data: (stats) => Locale(stats.languageCode),
+        loading: () => const Locale('en'),
+        error: (_, __) => const Locale('en'),
+      ),
       theme: ThemeData(
         brightness: Brightness.dark,
         scaffoldBackgroundColor: GameTheme.darkBackground,

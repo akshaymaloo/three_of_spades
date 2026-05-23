@@ -17,19 +17,7 @@ class GameNotifier extends Notifier<GameState> {
 
   @override
   set state(GameState value) {
-    final oldMsg = state.message;
     super.state = value;
-    if (value.message != oldMsg && value.message.isNotEmpty) {
-      _announce(value.message);
-    }
-  }
-
-  void _announce(String message) {
-    try {
-      SemanticsService.announce(message, TextDirection.ltr);
-    } catch (_) {
-      // Fallback for tests/non-UI environments
-    }
   }
 
   @override

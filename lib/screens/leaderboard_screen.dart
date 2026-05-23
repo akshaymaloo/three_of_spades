@@ -4,6 +4,7 @@ import '../core/theme.dart';
 import '../providers/stats_provider.dart';
 import '../providers/service_providers.dart';
 import '../services/leaderboard_service.dart';
+import '../l10n/app_localizations.dart';
 
 final leaderboardFetchProvider = FutureProvider.family<List<LeaderboardEntry>, LeaderboardPeriod>((ref, period) async {
   final service = ref.watch(leaderboardServiceProvider);
@@ -70,9 +71,9 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> with Sing
                           ),
                         ),
                         const SizedBox(width: 16),
-                        const Text(
-                          'LEADERBOARDS',
-                          style: TextStyle(
+                        Text(
+                          AppLocalizations.of(context)?.leaderboards.toUpperCase() ?? 'LEADERBOARDS',
+                          style: const TextStyle(
                             color: GameTheme.textWhite,
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
@@ -92,7 +93,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> with Sing
                               const Icon(Icons.stars, color: GameTheme.goldAccent, size: 16),
                               const SizedBox(width: 6),
                               Text(
-                                '${stats.coins} COINS',
+                                '${stats.coins} ${AppLocalizations.of(context)?.coins ?? 'COINS'}',
                                 style: const TextStyle(
                                   color: GameTheme.goldAccent,
                                   fontSize: 13,
@@ -124,9 +125,9 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> with Sing
                         labelColor: GameTheme.darkBackground,
                         unselectedLabelColor: GameTheme.textGrey,
                         labelStyle: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.2),
-                        tabs: const [
-                          Tab(text: 'DAILY'),
-                          Tab(text: 'ALL-TIME'),
+                        tabs: [
+                          Tab(text: AppLocalizations.of(context)?.daily.toUpperCase() ?? 'DAILY'),
+                          Tab(text: AppLocalizations.of(context)?.allTime.toUpperCase() ?? 'ALL-TIME'),
                         ],
                       ),
                     ),
@@ -140,12 +141,12 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> with Sing
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(color: Colors.white.withValues(alpha: 0.04)),
                       ),
-                      child: const Row(
+                      child: Row(
                         children: [
-                          SizedBox(width: 40, child: Text('RANK', style: TextStyle(color: GameTheme.textGrey, fontSize: 11, fontWeight: FontWeight.bold))),
-                          Expanded(child: Text('PLAYER', style: TextStyle(color: GameTheme.textGrey, fontSize: 11, fontWeight: FontWeight.bold))),
-                          SizedBox(width: 100, child: Text('COINS', textAlign: TextAlign.right, style: TextStyle(color: GameTheme.textGrey, fontSize: 11, fontWeight: FontWeight.bold))),
-                          SizedBox(width: 80, child: Text('GAMES WON', textAlign: TextAlign.right, style: TextStyle(color: GameTheme.textGrey, fontSize: 11, fontWeight: FontWeight.bold))),
+                          SizedBox(width: 40, child: Text(AppLocalizations.of(context)?.rank.toUpperCase() ?? 'RANK', style: const TextStyle(color: GameTheme.textGrey, fontSize: 11, fontWeight: FontWeight.bold))),
+                          Expanded(child: Text(AppLocalizations.of(context)?.player.toUpperCase() ?? 'PLAYER', style: const TextStyle(color: GameTheme.textGrey, fontSize: 11, fontWeight: FontWeight.bold))),
+                          SizedBox(width: 100, child: Text(AppLocalizations.of(context)?.coins.toUpperCase() ?? 'COINS', textAlign: TextAlign.right, style: const TextStyle(color: GameTheme.textGrey, fontSize: 11, fontWeight: FontWeight.bold))),
+                          SizedBox(width: 80, child: Text(AppLocalizations.of(context)?.gamesWon.toUpperCase() ?? 'GAMES WON', textAlign: TextAlign.right, style: const TextStyle(color: GameTheme.textGrey, fontSize: 11, fontWeight: FontWeight.bold))),
                         ],
                       ),
                     ),
@@ -179,7 +180,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> with Sing
         child: CircularProgressIndicator(color: GameTheme.neonCyan),
       ),
       error: (err, stack) => Center(
-        child: Text('Failed to load leaderboard: $err', style: const TextStyle(color: GameTheme.neonPink)),
+        child: Text(AppLocalizations.of(context)?.failedToLoadLeaderboard(err.toString()) ?? 'Failed to load leaderboard: $err', style: const TextStyle(color: GameTheme.neonPink)),
       ),
       data: (entries) {
         // Build a sorted mutable list
@@ -192,7 +193,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> with Sing
           // Add user at the correct position or bottom
           displayEntries.add(LeaderboardEntry(
             rank: displayEntries.length + 1,
-            name: '${stats.name} (You)',
+            name: '${stats.name} (${AppLocalizations.of(context)?.you ?? 'You'})',
             coins: stats.coins,
             gamesWon: stats.gamesWon,
           ));
@@ -201,8 +202,8 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> with Sing
         }
 
         if (displayEntries.isEmpty) {
-          return const Center(
-            child: Text('No leaderboard entries yet.', style: TextStyle(color: GameTheme.textGrey)),
+          return Center(
+            child: Text(AppLocalizations.of(context)?.noEntries ?? 'No leaderboard entries yet.', style: const TextStyle(color: GameTheme.textGrey)),
           );
         }
 
@@ -272,9 +273,9 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> with Sing
                               borderRadius: BorderRadius.circular(4),
                               border: Border.all(color: GameTheme.neonCyan.withValues(alpha: 0.4)),
                             ),
-                            child: const Text(
-                              'YOU',
-                              style: TextStyle(color: GameTheme.neonCyan, fontSize: 11, fontWeight: FontWeight.bold),
+                            child: Text(
+                              AppLocalizations.of(context)?.you.toUpperCase() ?? 'YOU',
+                              style: const TextStyle(color: GameTheme.neonCyan, fontSize: 11, fontWeight: FontWeight.bold),
                             ),
                           ),
                         ],

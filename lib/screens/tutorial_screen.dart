@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../core/theme.dart';
 import '../providers/stats_provider.dart';
+import '../l10n/app_localizations.dart';
 
 class TutorialScreen extends ConsumerStatefulWidget {
   const TutorialScreen({super.key});
@@ -61,16 +62,16 @@ class _TutorialScreenState extends ConsumerState<TutorialScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Row(
+                        Row(
                           children: [
-                            Text(
+                            const Text(
                               '♠',
                               style: TextStyle(color: GameTheme.neonPink, fontSize: 20),
                             ),
-                            SizedBox(width: 8),
+                            const SizedBox(width: 8),
                             Text(
-                              'HOW TO PLAY',
-                              style: TextStyle(
+                              AppLocalizations.of(context)?.howToPlay ?? 'HOW TO PLAY',
+                              style: const TextStyle(
                                 color: GameTheme.textWhite,
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
@@ -123,9 +124,9 @@ class _TutorialScreenState extends ConsumerState<TutorialScreen> {
                         // Skip Button
                         TextButton(
                           onPressed: _finishTutorial,
-                          child: const Text(
-                            'SKIP',
-                            style: TextStyle(
+                          child: Text(
+                            AppLocalizations.of(context)?.skip ?? 'SKIP',
+                            style: const TextStyle(
                               color: GameTheme.textGrey,
                               fontWeight: FontWeight.bold,
                               fontSize: 12,
@@ -160,7 +161,9 @@ class _TutorialScreenState extends ConsumerState<TutorialScreen> {
                               ),
                             ),
                             child: Text(
-                              _currentPage == _totalPages - 1 ? 'LET\'S PLAY!' : 'NEXT',
+                              _currentPage == _totalPages - 1 
+                                  ? (AppLocalizations.of(context)?.letsPlay ?? 'LET\'S PLAY!') 
+                                  : (AppLocalizations.of(context)?.next ?? 'NEXT'),
                               style: const TextStyle(
                                 color: GameTheme.darkBackground,
                                 fontWeight: FontWeight.bold,
@@ -183,7 +186,7 @@ class _TutorialScreenState extends ConsumerState<TutorialScreen> {
   }
 
   Widget _buildWelcomePage() {
-    return const Row(
+    return Row(
       children: [
         Expanded(
           flex: 2,
@@ -192,23 +195,23 @@ class _TutorialScreenState extends ConsumerState<TutorialScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Welcome to Three of Spades',
-                style: TextStyle(
+                AppLocalizations.of(context)?.welcomeTitle ?? 'Welcome to Three of Spades',
+                style: const TextStyle(
                   color: GameTheme.neonCyan,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               Text(
-                'Also known as Kaali Ki Teeggi, this is a strategic trick-taking card game popular in South Asia. In this modernized cyberpunk version, you play against smart bots or online players in a battle of bidding, declarations, and tactical play.',
-                style: TextStyle(color: GameTheme.textGrey, fontSize: 13, height: 1.4),
+                AppLocalizations.of(context)?.welcomeDesc ?? 'Also known as Kaali Ki Teeggi, this is a strategic trick-taking card game popular in South Asia. In this modernized cyberpunk version, you play against smart bots or online players in a battle of bidding, declarations, and tactical play.',
+                style: const TextStyle(color: GameTheme.textGrey, fontSize: 13, height: 1.4),
               ),
             ],
           ),
         ),
-        SizedBox(width: 24),
-        Expanded(
+        const SizedBox(width: 24),
+        const Expanded(
           child: Center(
             child: Icon(
               Icons.style_rounded,
@@ -224,24 +227,24 @@ class _TutorialScreenState extends ConsumerState<TutorialScreen> {
   Widget _buildObjectivePage() {
     return Row(
       children: [
-        const Expanded(
+        Expanded(
           flex: 2,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'The Objective & Bidding',
-                style: TextStyle(
+                AppLocalizations.of(context)?.objectiveTitle ?? 'The Objective & Bidding',
+                style: const TextStyle(
                   color: GameTheme.neonCyan,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               Text(
-                'Players bid points (from 175 to 350) based on their hand strength. The highest bidder wins the bid and tries to make that many points. Bids can only be placed or passed, and bidding progresses in increments of 5.',
-                style: TextStyle(color: GameTheme.textGrey, fontSize: 13, height: 1.4),
+                AppLocalizations.of(context)?.objectiveDesc ?? 'Players bid points (from 175 to 350) based on their hand strength. The highest bidder wins the bid and tries to make that many points. Bids can only be placed or passed, and bidding progresses in increments of 5.',
+                style: const TextStyle(color: GameTheme.textGrey, fontSize: 13, height: 1.4),
               ),
             ],
           ),
@@ -251,18 +254,18 @@ class _TutorialScreenState extends ConsumerState<TutorialScreen> {
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: GameTheme.glassDecoration(opacity: 0.05, borderOpacity: 0.1),
-            child: const Column(
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.gavel_rounded, color: GameTheme.neonPink, size: 36),
-                SizedBox(height: 8),
+                const Icon(Icons.gavel_rounded, color: GameTheme.neonPink, size: 36),
+                const SizedBox(height: 8),
                 Text(
-                  'Min Bid: 175',
-                  style: TextStyle(color: GameTheme.neonPink, fontWeight: FontWeight.bold, fontSize: 13),
+                  AppLocalizations.of(context)?.minBidLabel ?? 'Min Bid: 175',
+                  style: const TextStyle(color: GameTheme.neonPink, fontWeight: FontWeight.bold, fontSize: 13),
                 ),
                 Text(
-                  'Max Bid: 350',
-                  style: TextStyle(color: GameTheme.textGrey, fontSize: 11),
+                  AppLocalizations.of(context)?.maxBidLabel ?? 'Max Bid: 350',
+                  style: const TextStyle(color: GameTheme.textGrey, fontSize: 11),
                 ),
               ],
             ),
@@ -281,18 +284,18 @@ class _TutorialScreenState extends ConsumerState<TutorialScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Scoring & Point Cards',
-                style: TextStyle(
+              Text(
+                AppLocalizations.of(context)?.scoringTitle ?? 'Scoring & Point Cards',
+                style: const TextStyle(
                   color: GameTheme.neonCyan,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 10),
-              const Text(
-                'Unlike standard card games, only specific cards carry points. Winning tricks containing these cards earns points:',
-                style: TextStyle(color: GameTheme.textGrey, fontSize: 12, height: 1.3),
+              Text(
+                AppLocalizations.of(context)?.scoringDesc ?? 'Unlike standard card games, only specific cards carry points. Winning tricks containing these cards earns points:',
+                style: const TextStyle(color: GameTheme.textGrey, fontSize: 12, height: 1.3),
               ),
               const SizedBox(height: 10),
               Row(
@@ -313,18 +316,18 @@ class _TutorialScreenState extends ConsumerState<TutorialScreen> {
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: GameTheme.glassDecoration(opacity: 0.05, borderOpacity: 0.1),
-            child: const Column(
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'Total Points: 350',
-                  style: TextStyle(color: GameTheme.textWhite, fontWeight: FontWeight.bold, fontSize: 13),
+                  AppLocalizations.of(context)?.totalPointsLabel ?? 'Total Points: 350',
+                  style: const TextStyle(color: GameTheme.textWhite, fontWeight: FontWeight.bold, fontSize: 13),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
-                  'The bidder + partner team must win tricks containing point cards equal to or greater than their bid to win!',
+                  AppLocalizations.of(context)?.scoringTeamDesc ?? 'The bidder + partner team must win tricks containing point cards equal to or greater than their bid to win!',
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: GameTheme.textGrey, fontSize: 11, height: 1.3),
+                  style: const TextStyle(color: GameTheme.textGrey, fontSize: 11, height: 1.3),
                 ),
               ],
             ),
@@ -357,9 +360,9 @@ class _TutorialScreenState extends ConsumerState<TutorialScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Gameplay Flow',
-          style: TextStyle(
+        Text(
+          AppLocalizations.of(context)?.gameplayFlowTitle ?? 'Gameplay Flow',
+          style: const TextStyle(
             color: GameTheme.neonCyan,
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -369,10 +372,10 @@ class _TutorialScreenState extends ConsumerState<TutorialScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildFlowStep('1', 'Bidding', 'Players bid points'),
-            _buildFlowStep('2', 'Declaration', 'Bidder picks Trump & Partner card'),
-            _buildFlowStep('3', 'Trick Play', 'Follow suits to win tricks'),
-            _buildFlowStep('4', 'Scoring', 'Sum points from tricks won'),
+            _buildFlowStep('1', AppLocalizations.of(context)?.flowStep1Title ?? 'Bidding', AppLocalizations.of(context)?.flowStep1Desc ?? 'Players bid points'),
+            _buildFlowStep('2', AppLocalizations.of(context)?.flowStep2Title ?? 'Declaration', AppLocalizations.of(context)?.flowStep2Desc ?? 'Bidder picks Trump & Partner card'),
+            _buildFlowStep('3', AppLocalizations.of(context)?.flowStep3Title ?? 'Trick Play', AppLocalizations.of(context)?.flowStep3Desc ?? 'Follow suits to win tricks'),
+            _buildFlowStep('4', AppLocalizations.of(context)?.flowStep4Title ?? 'Scoring', AppLocalizations.of(context)?.flowStep4Desc ?? 'Sum points from tricks won'),
           ],
         ),
       ],
@@ -420,7 +423,7 @@ class _TutorialScreenState extends ConsumerState<TutorialScreen> {
   }
 
   Widget _buildTipsPage() {
-    return const Row(
+    return Row(
       children: [
         Expanded(
           flex: 2,
@@ -429,24 +432,24 @@ class _TutorialScreenState extends ConsumerState<TutorialScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Tips & Rules',
-                style: TextStyle(
+                AppLocalizations.of(context)?.tipsTitle ?? 'Tips & Rules',
+                style: const TextStyle(
                   color: GameTheme.neonCyan,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 10),
-              BulletPoint('You MUST follow the suit led if you have it in your hand.'),
-              SizedBox(height: 4),
-              BulletPoint('If you don\'t have the led suit, you can play any card, including a Trump to win the trick.'),
-              SizedBox(height: 4),
-              BulletPoint('The partner is secret! Only when the declared Partner card is played is the partner\'s identity revealed.'),
+              const SizedBox(height: 10),
+              BulletPoint(AppLocalizations.of(context)?.tip1 ?? 'You MUST follow the suit led if you have it in your hand.'),
+              const SizedBox(height: 4),
+              BulletPoint(AppLocalizations.of(context)?.tip2 ?? 'If you don\'t have the led suit, you can play any card, including a Trump to win the trick.'),
+              const SizedBox(height: 4),
+              BulletPoint(AppLocalizations.of(context)?.tip3 ?? 'The partner is secret! Only when the declared Partner card is played is the partner\'s identity revealed.'),
             ],
           ),
         ),
-        SizedBox(width: 24),
-        Expanded(
+        const SizedBox(width: 24),
+        const Expanded(
           child: Center(
             child: Icon(
               Icons.lightbulb_outline_rounded,

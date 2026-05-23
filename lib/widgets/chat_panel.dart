@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/theme.dart';
 import '../providers/multiplayer_notifier.dart';
 import '../providers/stats_provider.dart';
+import '../l10n/app_localizations.dart';
 
 class ChatPanel extends ConsumerStatefulWidget {
   final VoidCallback onClose;
@@ -96,7 +97,7 @@ class _ChatPanelState extends ConsumerState<ChatPanel> {
                     const Icon(Icons.chat_bubble_outline, color: GameTheme.neonCyan, size: 20),
                     const SizedBox(width: 8),
                     Text(
-                      'GAME CHAT',
+                      AppLocalizations.of(context)?.gameChat.toUpperCase() ?? 'GAME CHAT',
                       style: const TextStyle(
                         color: GameTheme.textWhite,
                         fontSize: 14,
@@ -228,7 +229,7 @@ class _ChatPanelState extends ConsumerState<ChatPanel> {
                     controller: _chatTextController,
                     style: const TextStyle(color: Colors.white, fontSize: 13),
                     decoration: InputDecoration(
-                      hintText: 'Type message...',
+                      hintText: AppLocalizations.of(context)?.typeMessage ?? 'Type message...',
                       hintStyle: const TextStyle(color: GameTheme.textGrey, fontSize: 13),
                       isDense: true,
                       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

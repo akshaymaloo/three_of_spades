@@ -1,0 +1,408 @@
+{
+  "settings": "Settings",
+  "soundEffects": "Sound Effects",
+  "backgroundMusic": "Background Music",
+  "onlineModeFirebase": "Online Mode (Firebase)",
+  "onlineModeActive": "Active (Needs Firebase setup)",
+  "onlineModeOffline": "Simulation / Offline Only",
+  "switchedOnlineMode": "Switched to Online Mode! Needs Firebase config.",
+  "switchedOfflineMode": "Switched to Simulation Mode (Offline/Mock).",
+  "pushNotifications": "Push Notifications",
+  "pushNotificationsSubtitle": "Get room invites and updates",
+  "resetStatsTitle": "Reset Stats?",
+  "resetStatsBody": "This will reset your coins back to 5,000 and wipe out your win history. This action is irreversible.",
+  "cancel": "CANCEL",
+  "reset": "RESET",
+  "resetGuestStats": "RESET GUEST STATS",
+  "editNameTitle": "Edit Name",
+  "editNameSubtitle": "Enter your alias:",
+  "alias": "Alias",
+  "save": "SAVE",
+  "coins": "COINS",
+  "earnedCoins": "Earned {amount} coins!",
+  "@earnedCoins": {
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "adFailed": "Ad failed or skipped",
+  "statistics": "STATISTICS",
+  "played": "Played",
+  "won": "Won",
+  "winRate": "Win Rate",
+  "bestBid": "Best Bid",
+  "offlinePlay": "OFFLINE PLAY",
+  "playVsIntelligentBots": "Play vs Intelligent Bots",
+  "practiceBiddingDesc": "Practice your bidding strategies and trick estimation with zero network wait times.",
+  "onlinePlay": "ONLINE PLAY",
+  "privateRoom": "PRIVATE ROOM",
+  "leaderboard": "LEADERBOARD",
+  "live": "LIVE",
+  "offline": "OFFLINE",
+  "stats": "STATS",
+  "enableOnlineToPlay": "Enable Online Mode in Settings to play online.",
+  "language": "Language",
+  "english": "English",
+  "hindi": "Hindi",
+
+  "threeOfSpades": "Three of Spades",
+  "classicFourPlayerGame": "Classic 4-Player Card Game",
+  "playOffline": "PLAY OFFLINE",
+  "signInAsGuest": "SIGN IN AS GUEST",
+  "signInWithFacebook": "SIGN IN WITH FACEBOOK",
+  "signInGlobalMatchmaking": "Sign in to access global matchmaking",
+  "enterAsGuestCoins": "Enter as Guest and get 5,000 free coins",
+  "onlineMode": "Online Mode",
+  "simulationMode": "Simulation Mode",
+
+  "howToPlay": "HOW TO PLAY",
+  "skip": "SKIP",
+  "next": "NEXT",
+  "letsPlay": "LET'S PLAY!",
+  "welcomeTitle": "Welcome to Three of Spades",
+  "welcomeDesc": "Also known as Kaali Ki Teeggi, this is a strategic trick-taking card game popular in South Asia. In this modernized cyberpunk version, you play against smart bots or online players in a battle of bidding, declarations, and tactical play.",
+  "objectiveTitle": "The Objective & Bidding",
+  "objectiveDesc": "Players bid points (from 175 to 350) based on their hand strength. The highest bidder wins the bid and tries to make that many points. Bids can only be placed or passed, and bidding progresses in increments of 5.",
+  "minBidLabel": "Min Bid: 175",
+  "maxBidLabel": "Max Bid: 350",
+  "scoringTitle": "Scoring & Point Cards",
+  "scoringDesc": "Unlike standard card games, only specific cards carry points. Winning tricks containing these cards earns points:",
+  "totalPointsLabel": "Total Points: 350",
+  "scoringTeamDesc": "The bidder + partner team must win tricks containing point cards equal to or greater than their bid to win!",
+  "gameplayFlowTitle": "Gameplay Flow",
+  "flowStep1Title": "Bidding",
+  "flowStep1Desc": "Players bid points",
+  "flowStep2Title": "Declaration",
+  "flowStep2Desc": "Bidder picks Trump & Partner card",
+  "flowStep3Title": "Trick Play",
+  "flowStep3Desc": "Follow suits to win tricks",
+  "flowStep4Title": "Scoring",
+  "flowStep4Desc": "Sum points from tricks won",
+  "tipsTitle": "Tips & Rules",
+  "tip1": "You MUST follow the suit led if you have it in your hand.",
+  "tip2": "If you don't have the led suit, you can play any card, including a Trump to win the trick.",
+  "tip3": "The partner is secret! Only when the declared Partner card is played is the partner's identity revealed.",
+
+  "matchmaking": "MATCHMAKING",
+  "matchFound": "MATCH FOUND!",
+  "cancelMatch": "CANCEL MATCH",
+  "searchingPlayers": "Searching for players... (Timer: {seconds}s)",
+  "@searchingPlayers": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "startingGameIn": "Starting game in {seconds} seconds...",
+  "@startingGameIn": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "searching": "Searching...",
+
+  "privateLobby": "PRIVATE LOBBY",
+  "createRoom": "CREATE ROOM",
+  "joinRoom": "JOIN ROOM",
+  "createLobbyDesc": "Create a private lobby code. You can invite your friends to join this lobby or fill up seats with bots.",
+  "generateRoom": "GENERATE ROOM",
+  "enterRoomCodeDesc": "Enter the 6-character room code to join an active private lobby.",
+  "roomCodeLabel": "ROOM CODE: ",
+  "joinLobby": "JOIN LOBBY",
+  "seatedPlayers": "SEATED PLAYERS (Max 4)",
+  "emptySeat": "Empty Seat",
+  "host": "HOST",
+  "ready": "READY",
+  "waiting": "WAITING...",
+  "addBots": "ADD BOTS",
+  "startMatch": "START MATCH",
+  "invalidRoomCode": "Please enter a valid room code.",
+
+  "leaderboards": "LEADERBOARDS",
+  "daily": "DAILY",
+  "allTime": "ALL-TIME",
+  "rank": "RANK",
+  "player": "PLAYER",
+  "gamesWon": "GAMES WON",
+  "you": "YOU",
+  "noEntries": "No leaderboard entries yet.",
+  "failedToLoadLeaderboard": "Failed to load leaderboard: {error}",
+  "@failedToLoadLeaderboard": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+
+  "dailyReward": "DAILY REWARD",
+  "dayNumber": "Day {day}",
+  "@dayNumber": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "alreadyClaimed": "Already Claimed ✓",
+  "claimCoins": "Claim {amount} Coins!",
+  "@claimCoins": {
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "claimedDailyReward": "🎁 Claimed {amount} daily reward coins!",
+  "@claimedDailyReward": {
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+
+  "landscapeRequired": "Landscape Mode Required",
+  "rotateDeviceDesc": "Please rotate your device or widen your browser window to play.",
+
+  "biddingTitle": "PLACE YOUR BID",
+  "biddingSubtitle": "Current Bid: {bid}",
+  "@biddingSubtitle": {
+    "placeholders": {
+      "bid": {
+        "type": "int"
+      }
+    }
+  },
+  "pass": "PASS",
+  "bidButton": "BID {bid}",
+  "@bidButton": {
+    "placeholders": {
+      "bid": {
+        "type": "int"
+      }
+    }
+  },
+
+  "declareTrumpTitle": "DECLARE TRUMP SUIT",
+  "declarePartnerTitle": "CHOOSE PARTNER CARD",
+  "declareSubmit": "DECLARE & START PLAYING",
+
+  "victory": "VICTORY",
+  "defeat": "DEFEAT",
+  "bidderLabel": "Bidder: {name} ({identity})",
+  "@bidderLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "identity": {
+        "type": "String"
+      }
+    }
+  },
+  "partnerLabel": "Partner: {name} ({identity})",
+  "@partnerLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "identity": {
+        "type": "String"
+      }
+    }
+  },
+  "youIdentity": "You",
+  "botIdentity": "Bot",
+  "themselves": "Themselves",
+  "bidValue": "BID VALUE",
+  "collected": "COLLECTED",
+  "coinRewardsPenalties": "COIN REWARDS / PENALTIES:",
+  "quit": "QUIT",
+  "playAgain": "PLAY AGAIN",
+
+  "gameChat": "GAME CHAT",
+  "typeMessage": "Type message...",
+
+  "trumpLabel": "TRUMP: ",
+  "partnerLabelUpper": "PARTNER: ",
+  "revealed": "(REVEALED)",
+  "hidden": "(HIDDEN)",
+
+  "passed": "PASSED",
+  "bidLabel": "BID: {bid}",
+  "@bidLabel": {
+    "placeholders": {
+      "bid": {
+        "type": "int"
+      }
+    }
+  },
+  "bidderLabelShort": "BIDDER ({bid})",
+  "@bidderLabelShort": {
+    "placeholders": {
+      "bid": {
+        "type": "int"
+      }
+    }
+  },
+  "partnerLabelShort": "PARTNER",
+  "pointsLabel": "Pts: {points}",
+  "@pointsLabel": {
+    "placeholders": {
+      "points": {
+        "type": "int"
+      }
+    }
+  },
+  "thinking": "Thinking ",
+  "noCards": "No Cards",
+  "playCard": "PLAY CARD",
+  "ptsUnit": "pts",
+  "rank": "Rank",
+  "suit": "Suit",
+  "holdWarning": "Warning: You hold this card! Select a card you do NOT hold.",
+  "declareTitle": "DECLARE TRUMP & PARTNER",
+  "selectTrump": "1. SELECT TRUMP SUIT",
+  "nominatePartner": "2. NOMINATE PARTNER CARD",
+  "jack": "Jack",
+  "queen": "Queen",
+  "king": "King",
+  "ace": "Ace",
+  "spade": "Spade",
+  "heart": "Heart",
+  "club": "Club",
+  "diamond": "Diamond",
+  "spades": "Spades",
+  "hearts": "Hearts",
+  "clubs": "Clubs",
+  "diamonds": "Diamonds",
+  "selectModePlay": "Select a mode to play",
+  "dealingCards": "Dealing cards...",
+  "allPassedRedealing": "All players passed. Redealing...",
+  "allPassedMustBid": "All players passed before you. You must bid at least 175 or Pass.",
+  "welcomeMessage": "Welcome to Three of Spades!",
+  "forcedBid175": "{name} is forced to bid 175.",
+  "@forcedBid175": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "playerBidMessage": "{name} bid {amount} points.",
+  "@playerBidMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "playerPassedMessage": "{name} passed.",
+  "@playerPassedMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "wonBidDeclaring": "{name} won the bid with {bid}! Declaring Trump & Partner...",
+  "@wonBidDeclaring": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "bid": {
+        "type": "int"
+      }
+    }
+  },
+  "turnToLead": "{name}'s turn to lead.",
+  "@turnToLead": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "invalidFollowSuit": "Invalid play! You must follow suit ({suit}).",
+  "@invalidFollowSuit": {
+    "placeholders": {
+      "suit": {
+        "type": "String"
+      }
+    }
+  },
+  "winsTrick": "{name} wins the trick with {card} (+{points} pts)!",
+  "@winsTrick": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "card": {
+        "type": "String"
+      },
+      "points": {
+        "type": "int"
+      }
+    }
+  },
+  "trumpPartnerDeclaration": "Trump is {trump}. Partner Card is {card}. {name} leads.",
+  "@trumpPartnerDeclaration": {
+    "placeholders": {
+      "trump": {
+        "type": "String"
+      },
+      "card": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "gameOverSummary": "Game Over! Bidder was {bidder}, Partner was {partner}. {result}",
+  "@gameOverSummary": {
+    "placeholders": {
+      "bidder": {
+        "type": "String"
+      },
+      "partner": {
+        "type": "String"
+      },
+      "result": {
+        "type": "String"
+      }
+    }
+  },
+  "bidderPartnerWon": "Bidder & Partner won! Got {got} / {bid} points.",
+  "@bidderPartnerWon": {
+    "placeholders": {
+      "got": {
+        "type": "int"
+      },
+      "bid": {
+        "type": "int"
+      }
+    }
+  },
+  "defendersWon": "Defenders won! Bidder & Partner only got {got} / {bid} points.",
+  "@defendersWon": {
+    "placeholders": {
+      "got": {
+        "type": "int"
+      },
+      "bid": {
+        "type": "int"
+      }
+    }
+  }
+}

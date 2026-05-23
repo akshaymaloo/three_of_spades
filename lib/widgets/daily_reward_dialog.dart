@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/theme.dart';
 import '../providers/daily_reward_provider.dart';
+import '../l10n/app_localizations.dart';
 
 class DailyRewardDialog extends ConsumerWidget {
   final Function(int amount) onClaim;
@@ -73,6 +74,7 @@ class DailyRewardDialog extends ConsumerWidget {
                   children: List.generate(7, (index) {
                     final dayNumber = index + 1; // 1-indexed
                     return _buildDayCard(
+                      context: context,
                       dayNumber: dayNumber,
                       amount: notifier.rewardForDay(dayNumber),
                       isCurrent: dayNumber == displayDay,
@@ -110,9 +112,9 @@ class DailyRewardDialog extends ConsumerWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text(
-            '🎁 DAILY REWARD',
-            style: TextStyle(
+          Text(
+            '🎁 ${AppLocalizations.of(context)?.dailyReward.toUpperCase() ?? 'DAILY REWARD'}',
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
               color: GameTheme.goldAccent,
@@ -133,6 +135,7 @@ class DailyRewardDialog extends ConsumerWidget {
   // ── Day Card ────────────────────────────────────────────────────────────
 
   Widget _buildDayCard({
+    required BuildContext context,
     required int dayNumber,
     required int amount,
     required bool isCurrent,
@@ -183,7 +186,7 @@ class DailyRewardDialog extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Day $dayNumber',
+                  AppLocalizations.of(context)?.dayNumber(dayNumber) ?? 'Day $dayNumber',
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
@@ -264,7 +267,9 @@ class DailyRewardDialog extends ConsumerWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
-              todayClaimed ? 'Already Claimed ✓' : 'Claim $rewardAmount Coins!',
+              todayClaimed
+                  ? (AppLocalizations.of(context)?.alreadyClaimed ?? 'Already Claimed ✓')
+                  : (AppLocalizations.of(context)?.claimCoins(rewardAmount) ?? 'Claim $rewardAmount Coins!'),
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,

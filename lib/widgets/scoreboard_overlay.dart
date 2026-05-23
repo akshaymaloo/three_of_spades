@@ -6,6 +6,7 @@ import '../core/theme.dart';
 import '../core/scoring_utils.dart';
 import '../providers/game_notifier.dart';
 import '../providers/ad_provider.dart';
+import '../l10n/app_localizations.dart';
 
 class ScoreboardOverlay extends ConsumerWidget {
   final GameState game;
@@ -83,7 +84,9 @@ class ScoreboardOverlay extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    humanWon ? 'VICTORY' : 'DEFEAT',
+                    humanWon
+                        ? (AppLocalizations.of(context)?.victory ?? 'VICTORY')
+                        : (AppLocalizations.of(context)?.defeat ?? 'DEFEAT'),
                     style: TextStyle(
                       color: glowColor,
                       fontSize: 28,
@@ -94,11 +97,23 @@ class ScoreboardOverlay extends ConsumerWidget {
                   const SizedBox(height: 16),
 
                   Text(
-                    'Bidder: ${game.players[bidderIndex].name} (${game.players[bidderIndex].isHuman ? "You" : "Bot"})',
+                    AppLocalizations.of(context)?.bidderLabel(
+                      game.players[bidderIndex].name,
+                      game.players[bidderIndex].isHuman
+                          ? (AppLocalizations.of(context)?.youIdentity ?? 'You')
+                          : (AppLocalizations.of(context)?.botIdentity ?? 'Bot'),
+                    ) ?? 'Bidder: ${game.players[bidderIndex].name} (${game.players[bidderIndex].isHuman ? "You" : "Bot"})',
                     style: const TextStyle(color: GameTheme.textWhite, fontSize: 13),
                   ),
                   Text(
-                    'Partner: ${bidderIndex == partnerIndex ? "Themselves" : game.players[partnerIndex].name} (${game.players[partnerIndex].isHuman ? "You" : "Bot"})',
+                    AppLocalizations.of(context)?.partnerLabel(
+                      bidderIndex == partnerIndex
+                          ? (AppLocalizations.of(context)?.themselves ?? 'Themselves')
+                          : game.players[partnerIndex].name,
+                      game.players[partnerIndex].isHuman
+                          ? (AppLocalizations.of(context)?.youIdentity ?? 'You')
+                          : (AppLocalizations.of(context)?.botIdentity ?? 'Bot'),
+                    ) ?? 'Partner: ${bidderIndex == partnerIndex ? "Themselves" : game.players[partnerIndex].name} (${game.players[partnerIndex].isHuman ? "You" : "Bot"})',
                     style: const TextStyle(color: GameTheme.textWhite, fontSize: 13),
                   ),
                   const SizedBox(height: 12),
@@ -112,15 +127,15 @@ class ScoreboardOverlay extends ConsumerWidget {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('BID VALUE', style: TextStyle(color: GameTheme.textGrey, fontSize: 11)),
-                            Text('${game.winningBid} pts', style: const TextStyle(color: GameTheme.textWhite, fontSize: 16, fontWeight: FontWeight.bold)),
+                            Text(AppLocalizations.of(context)?.bidValue ?? 'BID VALUE', style: const TextStyle(color: GameTheme.textGrey, fontSize: 11)),
+                            Text('${game.winningBid} ${AppLocalizations.of(context)?.ptsUnit ?? "pts"}', style: const TextStyle(color: GameTheme.textWhite, fontSize: 16, fontWeight: FontWeight.bold)),
                           ],
                         ),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            const Text('COLLECTED', style: TextStyle(color: GameTheme.textGrey, fontSize: 11)),
-                            Text('$totalBidderPoints pts', style: TextStyle(color: glowColor, fontSize: 16, fontWeight: FontWeight.bold)),
+                            Text(AppLocalizations.of(context)?.collected ?? 'COLLECTED', style: const TextStyle(color: GameTheme.textGrey, fontSize: 11)),
+                            Text('$totalBidderPoints ${AppLocalizations.of(context)?.ptsUnit ?? "pts"}', style: TextStyle(color: glowColor, fontSize: 16, fontWeight: FontWeight.bold)),
                           ],
                         ),
                       ],
@@ -128,9 +143,9 @@ class ScoreboardOverlay extends ConsumerWidget {
                   ),
                   const SizedBox(height: 16),
 
-                  const Align(
+                  Align(
                     alignment: Alignment.centerLeft,
-                    child: Text('COIN REWARDS / PENALTIES:', style: TextStyle(color: GameTheme.textGrey, fontSize: 11, fontWeight: FontWeight.bold)),
+                    child: Text(AppLocalizations.of(context)?.coinRewardsPenalties ?? 'COIN REWARDS / PENALTIES:', style: const TextStyle(color: GameTheme.textGrey, fontSize: 11, fontWeight: FontWeight.bold)),
                   ),
                   const SizedBox(height: 8),
 
@@ -171,7 +186,7 @@ class ScoreboardOverlay extends ConsumerWidget {
                               ref.read(gameProvider.notifier).goToHome();
                             }
                           },
-                          child: const Text('QUIT', style: TextStyle(color: GameTheme.textWhite, fontWeight: FontWeight.bold)),
+                          child: Text(AppLocalizations.of(context)?.quit ?? 'QUIT', style: const TextStyle(color: GameTheme.textWhite, fontWeight: FontWeight.bold)),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -190,7 +205,7 @@ class ScoreboardOverlay extends ConsumerWidget {
                               ref.read(gameProvider.notifier).startNewGame();
                             }
                           },
-                          child: const Text('PLAY AGAIN', style: TextStyle(fontWeight: FontWeight.bold)),
+                          child: Text(AppLocalizations.of(context)?.playAgain ?? 'PLAY AGAIN', style: const TextStyle(fontWeight: FontWeight.bold)),
                         ),
                       ),
                     ],

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../core/theme.dart';
 import '../models/multiplayer_state.dart';
 import '../providers/multiplayer_notifier.dart';
+import '../l10n/app_localizations.dart';
 
 class MatchmakingScreen extends ConsumerStatefulWidget {
   const MatchmakingScreen({super.key});
@@ -63,8 +64,8 @@ class _MatchmakingScreenState extends ConsumerState<MatchmakingScreen> {
                         children: [
                           Text(
                             mState.status == MultiplayerStatus.searching
-                                ? 'MATCHMAKING'
-                                : 'MATCH FOUND!',
+                                ? (AppLocalizations.of(context)?.matchmaking ?? 'MATCHMAKING')
+                                : (AppLocalizations.of(context)?.matchFound ?? 'MATCH FOUND!'),
                             style: const TextStyle(
                               color: GameTheme.textWhite,
                               fontSize: 18,
@@ -103,9 +104,9 @@ class _MatchmakingScreenState extends ConsumerState<MatchmakingScreen> {
                                   border: Border.all(color: GameTheme.neonPink.withValues(alpha: 0.5)),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: const Text(
-                                  'CANCEL MATCH',
-                                  style: TextStyle(
+                                child: Text(
+                                  AppLocalizations.of(context)?.cancelMatch ?? 'CANCEL MATCH',
+                                  style: const TextStyle(
                                     color: GameTheme.neonPink,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 11,
@@ -129,8 +130,8 @@ class _MatchmakingScreenState extends ConsumerState<MatchmakingScreen> {
                         children: [
                           Text(
                             mState.status == MultiplayerStatus.searching
-                                ? 'Searching for players... (Timer: ${mState.searchTimer}s)'
-                                : 'Starting game in ${mState.countdownTimer} seconds...',
+                                ? (AppLocalizations.of(context)?.searchingPlayers(mState.searchTimer) ?? 'Searching for players... (Timer: ${mState.searchTimer}s)')
+                                : (AppLocalizations.of(context)?.startingGameIn(mState.countdownTimer) ?? 'Starting game in ${mState.countdownTimer} seconds...'),
                             style: const TextStyle(
                               color: GameTheme.textGrey,
                               fontSize: 13,
@@ -153,7 +154,9 @@ class _MatchmakingScreenState extends ConsumerState<MatchmakingScreen> {
                               itemCount: 4,
                               itemBuilder: (context, index) {
                                 final hasPlayer = mState.lobbyPlayers.length > index;
-                                final name = hasPlayer ? mState.lobbyPlayers[index] : 'Searching...';
+                                final name = hasPlayer 
+                                    ? mState.lobbyPlayers[index] 
+                                    : (AppLocalizations.of(context)?.searching ?? 'Searching...');
                                 final isUser = index == 0;
  
                                 return Row(

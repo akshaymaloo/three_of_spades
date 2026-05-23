@@ -8,6 +8,7 @@ import '../core/theme.dart';
 import '../core/suit_utils.dart';
 import '../providers/multiplayer_notifier.dart';
 import 'playing_card_widget.dart';
+import '../l10n/app_localizations.dart';
 
 class GameTable extends ConsumerWidget {
   final GameState game;
@@ -64,18 +65,18 @@ class GameTable extends ConsumerWidget {
 
     if (game.phase == GamePhase.bidding) {
       if (player.hasPassed) {
-        status = 'PASSED';
+        status = AppLocalizations.of(context)?.passed ?? 'PASSED';
         statusColor = GameTheme.neonPink;
       } else if (player.currentBid != null) {
-        status = 'BID: ${player.currentBid}';
+        status = AppLocalizations.of(context)?.bidLabel(player.currentBid!) ?? 'BID: ${player.currentBid}';
         statusColor = GameTheme.neonGreen;
       }
     } else if (game.phase == GamePhase.playing || game.phase == GamePhase.declaring || game.phase == GamePhase.roundOver) {
       if (player.isBidder) {
-        status = 'BIDDER (${game.winningBid})';
+        status = AppLocalizations.of(context)?.bidderLabelShort(game.winningBid) ?? 'BIDDER (${game.winningBid})';
         statusColor = GameTheme.neonCyan;
       } else if (player.isPartner && player.isPartnerRevealed) {
-        status = 'PARTNER';
+        status = AppLocalizations.of(context)?.partnerLabelShort ?? 'PARTNER';
         statusColor = GameTheme.neonGreen;
       }
     }
@@ -116,12 +117,12 @@ class GameTable extends ConsumerWidget {
                       style: const TextStyle(color: GameTheme.textWhite, fontSize: 11, fontWeight: FontWeight.bold),
                     ),
                     if (isTyping) ...[
-                      const Row(
+                      Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'Thinking ',
-                            style: TextStyle(color: GameTheme.neonCyan, fontSize: 11, fontWeight: FontWeight.bold),
+                            AppLocalizations.of(context)?.thinking ?? 'Thinking ',
+                            style: const TextStyle(color: GameTheme.neonCyan, fontSize: 11, fontWeight: FontWeight.bold),
                           ),
                           TypingIndicator(),
                         ],
@@ -139,7 +140,7 @@ class GameTable extends ConsumerWidget {
                             const SizedBox(width: 6),
                           if ((game.phase == GamePhase.playing || game.phase == GamePhase.roundOver))
                             Text(
-                              'Pts: ${player.roundPoints}',
+                              AppLocalizations.of(context)?.pointsLabel(player.roundPoints) ?? 'Pts: ${player.roundPoints}',
                               style: const TextStyle(color: GameTheme.goldAccent, fontSize: 11, fontWeight: FontWeight.bold),
                             ),
                         ],
@@ -172,12 +173,12 @@ class GameTable extends ConsumerWidget {
                 ),
                 if (isTyping) ...[
                   const SizedBox(height: 4),
-                  const Row(
+                  Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        'Thinking ',
-                        style: TextStyle(color: GameTheme.neonCyan, fontSize: 11, fontWeight: FontWeight.bold),
+                        AppLocalizations.of(context)?.thinking ?? 'Thinking ',
+                        style: const TextStyle(color: GameTheme.neonCyan, fontSize: 11, fontWeight: FontWeight.bold),
                       ),
                       TypingIndicator(),
                     ],
@@ -192,7 +193,7 @@ class GameTable extends ConsumerWidget {
                 if ((game.phase == GamePhase.playing || game.phase == GamePhase.roundOver) && !isTyping) ...[
                   const SizedBox(height: 2),
                   Text(
-                    'Pts: ${player.roundPoints}',
+                    AppLocalizations.of(context)?.pointsLabel(player.roundPoints) ?? 'Pts: ${player.roundPoints}',
                     style: const TextStyle(color: GameTheme.goldAccent, fontSize: 11, fontWeight: FontWeight.bold),
                   ),
                 ],
