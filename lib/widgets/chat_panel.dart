@@ -97,12 +97,11 @@ class _ChatPanelState extends ConsumerState<ChatPanel> {
                     const SizedBox(width: 8),
                     Text(
                       'GAME CHAT',
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: GameTheme.textWhite,
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 1.2,
-                        shadows: GameTheme.neonGlow(GameTheme.neonCyan, blurRadius: 4),
                       ),
                     ),
                   ],

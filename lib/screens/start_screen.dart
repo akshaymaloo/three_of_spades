@@ -38,12 +38,6 @@ class StartScreen extends ConsumerWidget {
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
                       color: GameTheme.textWhite,
-                      shadows: [
-                        Shadow(
-                          color: GameTheme.neonPink.withValues(alpha: 0.5),
-                          blurRadius: 10,
-                        ),
-                      ],
                     ),
                   ),
                   const SizedBox(height: 8),

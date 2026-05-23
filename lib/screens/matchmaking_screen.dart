@@ -65,19 +65,11 @@ class _MatchmakingScreenState extends ConsumerState<MatchmakingScreen> {
                             mState.status == MultiplayerStatus.searching
                                 ? 'MATCHMAKING'
                                 : 'MATCH FOUND!',
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: GameTheme.textWhite,
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 2,
-                              shadows: [
-                                Shadow(
-                                  color: (mState.status == MultiplayerStatus.searching 
-                                      ? GameTheme.neonCyan 
-                                      : GameTheme.neonGreen).withValues(alpha: 0.5),
-                                  blurRadius: 10,
-                                ),
-                              ],
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -89,16 +81,10 @@ class _MatchmakingScreenState extends ConsumerState<MatchmakingScreen> {
                                 : Center(
                                     child: Text(
                                       mState.countdownTimer.toString(),
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: 48,
                                         fontWeight: FontWeight.bold,
                                         color: GameTheme.neonGreen,
-                                        shadows: [
-                                          Shadow(
-                                            color: GameTheme.neonGreen.withValues(alpha: 0.6),
-                                            blurRadius: 20,
-                                          ),
-                                        ],
                                       ),
                                     ),
                                   ),

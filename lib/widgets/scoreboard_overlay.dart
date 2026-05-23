@@ -88,7 +88,6 @@ class ScoreboardOverlay extends ConsumerWidget {
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 3,
-                      shadows: GameTheme.neonGlow(glowColor),
                     ),
                   ),
                   const SizedBox(height: 16),

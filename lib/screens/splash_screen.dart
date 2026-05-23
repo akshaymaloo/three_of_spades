@@ -79,12 +79,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
                   fontWeight: FontWeight.bold,
                   letterSpacing: 4,
                   color: GameTheme.textWhite,
-                  shadows: [
-                    Shadow(
-                      color: GameTheme.neonCyan.withValues(alpha: 0.8),
-                      blurRadius: 10,
-                    ),
-                  ],
                 ),
               ),
               const SizedBox(height: 8),

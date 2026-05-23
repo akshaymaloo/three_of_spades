@@ -89,17 +89,11 @@ class LeaderboardScreen extends ConsumerWidget {
                     const SizedBox(width: 16),
                     Text(
                       'GLOBAL LEADERBOARD',
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: GameTheme.textWhite,
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 1.5,
-                        shadows: [
-                          Shadow(
-                            color: GameTheme.neonCyan.withValues(alpha: 0.5),
-                            blurRadius: 10,
-                          ),
-                        ],
                       ),
                     ),
                     const Spacer(),

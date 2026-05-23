@@ -66,17 +66,11 @@ class GlassDialog extends StatelessWidget {
                     children: [
                       Text(
                         title.toUpperCase(),
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: GameTheme.textWhite,
                           letterSpacing: 1.5,
-                          shadows: [
-                            Shadow(
-                              color: glowColor.withValues(alpha: 0.8),
-                              blurRadius: 8,
-                            ),
-                          ],
                         ),
                       ),
                       IconButton(

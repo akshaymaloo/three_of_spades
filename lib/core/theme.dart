@@ -2,60 +2,55 @@ import 'package:flutter/material.dart';
 
 class GameTheme {
   // Theme Palette
-  static const Color darkBackground = Color(0xFF0F0F16);
-  static const Color cardTableColor = Color(0xFF0A2B1D); // Deep green felt look
+  static const Color darkBackground = Color(0xFF121212); // Clean dark charcoal
+  static const Color cardTableColor = Color(0xFF0F3E2B); // Classic forest green felt look
   
-  // Neon accents
-  static const Color neonCyan = Color(0xFF00E5FF);
-  static const Color neonGreen = Color(0xFF39FF14);
-  static const Color neonPink = Color(0xFFE040FB);
-  static const Color goldAccent = Color(0xFFffd700);
+  // Classic solid accents (replacing neon colors)
+  static const Color neonCyan = Color(0xFF2196F3);  // Standard Blue
+  static const Color neonGreen = Color(0xFF2E7D32); // Standard Green
+  static const Color neonPink = Color(0xFFD32F2F);  // Standard Red
+  static const Color goldAccent = Color(0xFFFFC107); // Standard Gold
   
   // Text Colors
   static const Color textWhite = Color(0xFFFFFFFF);
-  static const Color textGrey = Color(0xFF8F8F9E);
+  static const Color textGrey = Color(0xFFB0B0B0); // Lighter, clearer gray
 
   // Gradients
   static const LinearGradient neonCyanGradient = LinearGradient(
-    colors: [Color(0xFF00B0FF), Color(0xFF00E5FF)],
+    colors: [Color(0xFF1E88E5), Color(0xFF1565C0)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const LinearGradient neonPinkGradient = LinearGradient(
-    colors: [Color(0xFFD500F9), Color(0xFFF500FF)],
+    colors: [Color(0xFFE53935), Color(0xFFC62828)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const Gradient tableGradient = RadialGradient(
-    colors: [Color(0xFF1B5E20), Color(0xFF0A2510)],
+    colors: [Color(0xFF1B5E20), Color(0xFF0D3E1A)],
     radius: 1.2,
   );
 
   static const LinearGradient backgroundGradient = LinearGradient(
-    colors: [Color(0xFF101018), Color(0xFF07070A)],
+    colors: [Color(0xFF1E1E1E), Color(0xFF121212)],
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
   );
 
-  // Neon Shadow Effects
+  // Soft Standard Shadows (replacing neon glows)
   static List<BoxShadow> neonGlow(Color color, {double blurRadius = 8}) {
     return [
       BoxShadow(
-        color: color.withValues(alpha: 0.4),
-        blurRadius: blurRadius,
-        spreadRadius: 1,
-      ),
-      BoxShadow(
-        color: color.withValues(alpha: 0.2),
-        blurRadius: blurRadius * 2,
-        spreadRadius: 2,
+        color: Colors.black.withValues(alpha: 0.25),
+        blurRadius: 6,
+        offset: const Offset(0, 3),
       ),
     ];
   }
 
-  // Glassmorphism Box Decoration helper
+  // Modern Flat Card Decoration (replacing glassmorphism)
   static BoxDecoration glassDecoration({
     double opacity = 0.08,
     double borderOpacity = 0.15,
@@ -63,17 +58,17 @@ class GameTheme {
     Color borderColor = Colors.white,
   }) {
     return BoxDecoration(
-      color: Colors.white.withValues(alpha: opacity),
+      color: const Color(0xFF1E1E1E), // Solid dark grey card background
       borderRadius: BorderRadius.circular(radius),
       border: Border.all(
-        color: borderColor.withValues(alpha: borderOpacity),
-        width: 1.5,
+        color: Colors.white.withValues(alpha: 0.08),
+        width: 1.0,
       ),
       boxShadow: [
         BoxShadow(
-          color: Colors.black.withValues(alpha: 0.2),
-          blurRadius: 10,
-          spreadRadius: -2,
+          color: Colors.black.withValues(alpha: 0.3),
+          blurRadius: 8,
+          offset: const Offset(0, 4),
         ),
       ],
     );

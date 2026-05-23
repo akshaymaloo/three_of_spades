@@ -86,17 +86,11 @@ class _PrivateRoomScreenState extends ConsumerState<PrivateRoomScreen> {
                     const SizedBox(width: 16),
                     Text(
                       _joined ? 'PRIVATE LOBBY' : 'PRIVATE ROOM',
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: GameTheme.textWhite,
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 1.5,
-                        shadows: [
-                          Shadow(
-                            color: GameTheme.neonCyan.withValues(alpha: 0.5),
-                            blurRadius: 10,
-                          ),
-                        ],
                       ),
                     ),
                   ],
