@@ -180,13 +180,11 @@ class ScoreboardOverlay extends ConsumerWidget {
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           ),
                           onPressed: () async {
-                            ref.read(adProvider.notifier).incrementGameCount();
-                            await ref.read(adProvider.notifier).showInterstitialIfReady();
                             if (context.mounted) {
-                              ref.read(gameProvider.notifier).goToHome();
+                              ref.read(gameProvider.notifier).finishMatch();
                             }
                           },
-                          child: Text(AppLocalizations.of(context)?.quit ?? 'QUIT', style: const TextStyle(color: GameTheme.textWhite, fontWeight: FontWeight.bold)),
+                          child: Text(AppLocalizations.of(context)?.finishMatch ?? 'FINISH MATCH', style: const TextStyle(color: GameTheme.textWhite, fontWeight: FontWeight.bold)),
                         ),
                       ),
                       const SizedBox(width: 16),

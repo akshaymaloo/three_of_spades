@@ -9,10 +9,13 @@ import '../widgets/bidding_overlay.dart';
 import '../widgets/chat_panel.dart';
 import '../widgets/dealing_animation.dart';
 import '../widgets/declaring_overlay.dart';
+import '../widgets/emoji_picker_panel.dart';
 import '../widgets/game_table.dart';
 import '../widgets/game_top_bar.dart';
 import '../widgets/player_hand_panel.dart';
+import '../widgets/training_overlay.dart';
 import '../widgets/scoreboard_overlay.dart';
+import '../widgets/winner_podium_screen.dart';
 import '../l10n/app_localizations.dart';
 import '../core/localization_helper.dart';
 
@@ -25,6 +28,7 @@ class GameScreen extends ConsumerStatefulWidget {
 
 class _GameScreenState extends ConsumerState<GameScreen> {
   bool _isChatOpen = false;
+  bool _isEmojiPickerOpen = false;
   int _lastSeenMessageCount = 0;
 
   @override
@@ -101,8 +105,14 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                     lastSeenMessageCount: _lastSeenMessageCount,
                     onChatPressed: () {
                       setState(() {
-                        _isChatOpen = true;
-                        _lastSeenMessageCount = ref.read(multiplayerProvider).chatMessages.length;
+                        _isChatOpen = !_isChatOpen;
+                        if (_isChatOpen) _isEmojiPickerOpen = false;
+                      });
+                    },
+                    onEmojiPressed: () {
+                      setState(() {
+                        _isEmojiPickerOpen = !_isEmojiPickerOpen;
+                        if (_isEmojiPickerOpen) _isChatOpen = false;
                       });
                     },
                   ),
@@ -126,6 +136,10 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                 ],
               ),
 
+              // Training Overlay
+              if (game.isTrainingMode)
+                TrainingOverlay(game: game),
+
               // Dealing Animation Overlay
               if (game.phase == GamePhase.dealing)
                 DealingAnimation(
@@ -146,23 +160,40 @@ class _GameScreenState extends ConsumerState<GameScreen> {
               if (game.phase == GamePhase.roundOver)
                 ScoreboardOverlay(game: game),
 
-              // Chat Slide Drawer Overlay
-              if (game.isMultiplayer)
-                AnimatedPositioned(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                  right: _isChatOpen ? 0 : -300,
-                  top: 0,
-                  bottom: 0,
-                  child: ChatPanel(
-                    onClose: () {
+              // Match Over Winner Podium
+              if (game.phase == GamePhase.matchOver)
+                WinnerPodiumScreen(players: game.players),
+
+              // Emoji Picker Overlay
+              if (_isEmojiPickerOpen)
+                Positioned(
+                  top: 60, // just below top bar
+                  right: 100, // align roughly under the emoji button
+                  child: EmojiPickerPanel(
+                    onEmojiSent: () {
                       setState(() {
-                        _isChatOpen = false;
-                        _lastSeenMessageCount = ref.read(multiplayerProvider).chatMessages.length;
+                        _isEmojiPickerOpen = false;
                       });
                     },
                   ),
                 ),
+
+              // Chat Slide Drawer Overlay
+              AnimatedPositioned(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                right: _isChatOpen ? 0 : -300,
+                top: 0,
+                bottom: 0,
+                child: ChatPanel(
+                  onClose: () {
+                    setState(() {
+                      _isChatOpen = false;
+                      _lastSeenMessageCount = ref.read(multiplayerProvider).chatMessages.length;
+                    });
+                  },
+                ),
+              ),
             ],
           ),
         ),

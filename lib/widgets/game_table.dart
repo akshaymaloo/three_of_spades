@@ -6,7 +6,9 @@ import '../models/player_model.dart';
 import '../models/multiplayer_state.dart';
 import '../core/theme.dart';
 import '../core/suit_utils.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../providers/multiplayer_notifier.dart';
+import '../providers/stats_provider.dart';
 import 'playing_card_widget.dart';
 import '../l10n/app_localizations.dart';
 
@@ -21,6 +23,8 @@ class GameTable extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final size = MediaQuery.of(context).size;
+    final stats = ref.watch(statsProvider).value;
+    final tableTheme = stats?.tableTheme ?? 'green';
 
     return Stack(
       alignment: Alignment.center,
@@ -30,7 +34,7 @@ class GameTable extends ConsumerWidget {
           width: size.width * 0.75,
           height: size.height * 0.52,
           decoration: BoxDecoration(
-            gradient: GameTheme.tableGradient,
+            gradient: GameTheme.tableGradientForTheme(tableTheme),
             borderRadius: BorderRadius.circular(100),
             border: Border.all(color: Colors.white.withValues(alpha: 0.08), width: 4),
             boxShadow: [
@@ -160,8 +164,10 @@ class GameTable extends ConsumerWidget {
                     shape: BoxShape.circle,
                     border: Border.all(color: showGlow ? GameTheme.neonCyan : Colors.white24, width: 1.5),
                     boxShadow: GameTheme.neonGlow(shadowColor, blurRadius: 8),
-                    image: const DecorationImage(
-                      image: AssetImage('assets/images/guest_avatar.png'),
+                    image: DecorationImage(
+                      image: player.avatarPath.startsWith('http')
+                          ? CachedNetworkImageProvider(player.avatarPath) as ImageProvider
+                          : AssetImage(player.avatarPath.isNotEmpty ? player.avatarPath : 'assets/images/guest_avatar.png'),
                       fit: BoxFit.cover,
                     ),
                   ),

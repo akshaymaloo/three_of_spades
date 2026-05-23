@@ -14,6 +14,10 @@ import 'matchmaking_screen.dart';
 import 'private_room_screen.dart';
 import 'leaderboard_screen.dart';
 import '../l10n/app_localizations.dart';
+import '../widgets/credits_dialog.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import '../models/celebrity_model.dart';
+import 'avatar_selection_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -138,6 +142,56 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           activeThumbColor: GameTheme.neonCyan,
                           onChanged: (val) {
                             ref.read(statsProvider.notifier).toggleMusic(val);
+                          },
+                        ),
+                      ),
+                      const Divider(color: Colors.white10),
+                      // Vibration toggle
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text('Vibration', style: const TextStyle(color: GameTheme.textWhite)),
+                        trailing: Switch(
+                          value: stats.vibrationEnabled,
+                          activeThumbColor: GameTheme.neonCyan,
+                          onChanged: (val) {
+                            ref.read(statsProvider.notifier).toggleVibration(val);
+                          },
+                        ),
+                      ),
+                      const Divider(color: Colors.white10),
+                      // TTS toggle
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text('Read Events Aloud', style: const TextStyle(color: GameTheme.textWhite)),
+                        trailing: Switch(
+                          value: stats.ttsEnabled,
+                          activeThumbColor: GameTheme.neonCyan,
+                          onChanged: (val) {
+                            ref.read(statsProvider.notifier).toggleTts(val);
+                          },
+                        ),
+                      ),
+                      const Divider(color: Colors.white10),
+                      // Table Theme toggle
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text('Table Theme', style: const TextStyle(color: GameTheme.textWhite)),
+                        trailing: DropdownButton<String>(
+                          value: stats.tableTheme,
+                          dropdownColor: GameTheme.darkBackground,
+                          style: const TextStyle(color: GameTheme.neonCyan),
+                          underline: const SizedBox(),
+                          items: const [
+                            DropdownMenuItem(value: 'green', child: Text('Classic Green')),
+                            DropdownMenuItem(value: 'blue', child: Text('Royal Blue')),
+                            DropdownMenuItem(value: 'red', child: Text('Casino Red')),
+                            DropdownMenuItem(value: 'purple', child: Text('Majestic Purple')),
+                            DropdownMenuItem(value: 'brown', child: Text('Wood Brown')),
+                          ],
+                          onChanged: (val) {
+                            if (val != null) {
+                              ref.read(statsProvider.notifier).setTableTheme(val);
+                            }
                           },
                         ),
                       ),
@@ -313,6 +367,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final statsAsync = ref.watch(statsProvider);
     final config = ref.watch(configProvider);
+    final avatar = ref.watch(avatarProvider);
     return statsAsync.when(
       loading: () => const Scaffold(
         body: Center(
@@ -347,7 +402,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         // Header row
                         Row(
@@ -355,17 +410,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           children: [
                             Row(
                               children: [
-                                Container(
-                                  width: 48,
-                                  height: 48,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(color: GameTheme.neonCyan, width: 1.5),
-                                    image: const DecorationImage(
-                                      image: AssetImage('assets/images/guest_avatar.png'),
-                                      fit: BoxFit.cover,
+                                GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (_) => const AvatarSelectionScreen()),
+                                    );
+                                  },
+                                  child: Container(
+                                    width: 48,
+                                    height: 48,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(color: GameTheme.neonCyan, width: 1.5),
+                                      image: DecorationImage(
+                                        image: avatar != null 
+                                          ? CachedNetworkImageProvider(avatar.imageUrl) as ImageProvider
+                                          : const AssetImage('assets/images/guest_avatar.png'),
+                                        fit: BoxFit.cover,
+                                      ),
+                                      boxShadow: GameTheme.neonGlow(GameTheme.neonCyan, blurRadius: 6),
                                     ),
-                                    boxShadow: GameTheme.neonGlow(GameTheme.neonCyan, blurRadius: 6),
                                   ),
                                 ),
                                 const SizedBox(width: 12),
@@ -464,6 +529,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             ),
                             Row(
                               children: [
+                                IconButton(
+                                  icon: const Icon(Icons.info_outline, color: GameTheme.textWhite, size: 24),
+                                  onPressed: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) => const CreditsDialog(),
+                                    );
+                                  },
+                                  style: IconButton.styleFrom(
+                                    backgroundColor: Colors.white.withValues(alpha: 0.05),
+                                    padding: const EdgeInsets.all(12),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
                                 IconButton(
                                   icon: const Icon(Icons.settings, color: GameTheme.textWhite, size: 24),
                                   onPressed: () => _showSettings(context),
@@ -569,6 +648,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                                         context,
                                                         MaterialPageRoute(builder: (context) => const PrivateRoomScreen()),
                                                       );
+                                                    },
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 12),
+                                                Expanded(
+                                                  child: _buildModeCard(
+                                                    context, 
+                                                    AppLocalizations.of(context)?.trainingMode?.toUpperCase() ?? 'TRAINING', 
+                                                    Icons.school_rounded,
+                                                    GameTheme.neonPink,
+                                                    true,
+                                                    () {
+                                                      ref.read(gameProvider.notifier).startTrainingGame();
                                                     },
                                                   ),
                                                 ),

@@ -16,6 +16,9 @@ class UserStats {
   final bool musicEnabled;
   final bool hasSeenTutorial;
   final String languageCode;
+  final bool vibrationEnabled;
+  final bool ttsEnabled;
+  final String tableTheme;
 
   const UserStats({
     required this.name,
@@ -27,6 +30,9 @@ class UserStats {
     this.musicEnabled = true,
     this.hasSeenTutorial = false,
     this.languageCode = 'en',
+    this.vibrationEnabled = true,
+    this.ttsEnabled = false,
+    this.tableTheme = 'green',
   });
 
   UserStats copyWith({
@@ -39,6 +45,9 @@ class UserStats {
     bool? musicEnabled,
     bool? hasSeenTutorial,
     String? languageCode,
+    bool? vibrationEnabled,
+    bool? ttsEnabled,
+    String? tableTheme,
   }) {
     return UserStats(
       name: name ?? this.name,
@@ -50,6 +59,9 @@ class UserStats {
       musicEnabled: musicEnabled ?? this.musicEnabled,
       hasSeenTutorial: hasSeenTutorial ?? this.hasSeenTutorial,
       languageCode: languageCode ?? this.languageCode,
+      vibrationEnabled: vibrationEnabled ?? this.vibrationEnabled,
+      ttsEnabled: ttsEnabled ?? this.ttsEnabled,
+      tableTheme: tableTheme ?? this.tableTheme,
     );
   }
 }
@@ -72,6 +84,9 @@ class StatsNotifier extends AsyncNotifier<UserStats> {
       final musicEnabled = prefs.getBool('music_enabled') ?? true;
       final hasSeenTutorial = prefs.getBool('has_seen_tutorial') ?? false;
       final languageCode = prefs.getString('language_code') ?? 'en';
+      final vibrationEnabled = prefs.getBool('vibration_enabled') ?? true;
+      final ttsEnabled = prefs.getBool('tts_enabled') ?? false;
+      final tableTheme = prefs.getString('table_theme') ?? 'green';
 
       // Initialize SoundManager state
       SoundManager().setEnabled(soundEnabled);
@@ -87,6 +102,9 @@ class StatsNotifier extends AsyncNotifier<UserStats> {
         musicEnabled: musicEnabled,
         hasSeenTutorial: hasSeenTutorial,
         languageCode: languageCode,
+        vibrationEnabled: vibrationEnabled,
+        ttsEnabled: ttsEnabled,
+        tableTheme: tableTheme,
       );
     } catch (e, stack) {
       debugPrint('Failed to load stats: $e\n$stack');
@@ -99,6 +117,9 @@ class StatsNotifier extends AsyncNotifier<UserStats> {
         soundEnabled: true,
         musicEnabled: true,
         hasSeenTutorial: false,
+        vibrationEnabled: true,
+        ttsEnabled: false,
+        tableTheme: 'green',
       );
     }
   }
@@ -270,6 +291,60 @@ class StatsNotifier extends AsyncNotifier<UserStats> {
     }
   }
 
+  Future<void> toggleVibration(bool enabled) async {
+    final current = state.value ?? const UserStats(
+      name: 'Guest Player',
+      coins: 5000,
+      gamesPlayed: 0,
+      gamesWon: 0,
+      highestBidWon: 0,
+    );
+    final updated = current.copyWith(vibrationEnabled: enabled);
+    state = AsyncValue.data(updated);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('vibration_enabled', enabled);
+    } catch (e, stack) {
+      debugPrint('Failed to save vibration setting: $e\n$stack');
+    }
+  }
+
+  Future<void> toggleTts(bool enabled) async {
+    final current = state.value ?? const UserStats(
+      name: 'Guest Player',
+      coins: 5000,
+      gamesPlayed: 0,
+      gamesWon: 0,
+      highestBidWon: 0,
+    );
+    final updated = current.copyWith(ttsEnabled: enabled);
+    state = AsyncValue.data(updated);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('tts_enabled', enabled);
+    } catch (e, stack) {
+      debugPrint('Failed to save TTS setting: $e\n$stack');
+    }
+  }
+
+  Future<void> setTableTheme(String theme) async {
+    final current = state.value ?? const UserStats(
+      name: 'Guest Player',
+      coins: 5000,
+      gamesPlayed: 0,
+      gamesWon: 0,
+      highestBidWon: 0,
+    );
+    final updated = current.copyWith(tableTheme: theme);
+    state = AsyncValue.data(updated);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('table_theme', theme);
+    } catch (e, stack) {
+      debugPrint('Failed to save table theme: $e\n$stack');
+    }
+  }
+
   Future<void> resetStats() async {
     const reset = UserStats(
       name: 'Guest Player',
@@ -280,6 +355,9 @@ class StatsNotifier extends AsyncNotifier<UserStats> {
       soundEnabled: true,
       musicEnabled: true,
       hasSeenTutorial: false,
+      vibrationEnabled: true,
+      ttsEnabled: false,
+      tableTheme: 'green',
     );
     state = const AsyncValue.data(reset);
     try {
@@ -292,6 +370,9 @@ class StatsNotifier extends AsyncNotifier<UserStats> {
       await prefs.setBool('sound_enabled', true);
       await prefs.setBool('music_enabled', true);
       await prefs.setBool('has_seen_tutorial', false);
+      await prefs.setBool('vibration_enabled', true);
+      await prefs.setBool('tts_enabled', false);
+      await prefs.setString('table_theme', 'green');
     } catch (e, stack) {
       debugPrint('Failed to reset stats: $e\n$stack');
     }

@@ -10,6 +10,7 @@ enum GamePhase {
   declaring,
   playing,
   roundOver,
+  matchOver,
 }
 
 class Nullable<T> {
@@ -33,6 +34,7 @@ class GameState {
   final String message;
   final bool soundEnabled;
   final bool isMultiplayer;
+  final bool isTrainingMode;
 
   const GameState({
     required this.phase,
@@ -50,6 +52,7 @@ class GameState {
     required this.message,
     this.soundEnabled = true,
     this.isMultiplayer = false,
+    this.isTrainingMode = false,
   });
 
   GameState copyWith({
@@ -68,6 +71,7 @@ class GameState {
     String? message,
     bool? soundEnabled,
     bool? isMultiplayer,
+    bool? isTrainingMode,
   }) {
     return GameState(
       phase: phase ?? this.phase,
@@ -85,6 +89,7 @@ class GameState {
       message: message ?? this.message,
       soundEnabled: soundEnabled ?? this.soundEnabled,
       isMultiplayer: isMultiplayer ?? this.isMultiplayer,
+      isTrainingMode: isTrainingMode ?? this.isTrainingMode,
     );
   }
 

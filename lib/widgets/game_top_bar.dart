@@ -13,6 +13,7 @@ class GameTopBar extends ConsumerWidget implements PreferredSizeWidget {
   final bool isChatOpen;
   final int lastSeenMessageCount;
   final VoidCallback onChatPressed;
+  final VoidCallback onEmojiPressed;
 
   const GameTopBar({
     super.key,
@@ -20,6 +21,7 @@ class GameTopBar extends ConsumerWidget implements PreferredSizeWidget {
     required this.isChatOpen,
     required this.lastSeenMessageCount,
     required this.onChatPressed,
+    required this.onEmojiPressed,
   });
 
   bool _isPartnerRevealed(GameState game) {
@@ -31,7 +33,7 @@ class GameTopBar extends ConsumerWidget implements PreferredSizeWidget {
     final trumpIcon = game.trump != 'x' ? getSuitSymbol(game.trump) : '?';
     final trumpColor = getSuitColor(game.trump);
     final multiplayerState = ref.watch(multiplayerProvider);
-    final int unreadCount = game.isMultiplayer && !isChatOpen
+    final int unreadCount = !isChatOpen
         ? (multiplayerState.chatMessages.length - lastSeenMessageCount).clamp(0, 99)
         : 0;
 
@@ -110,14 +112,18 @@ class GameTopBar extends ConsumerWidget implements PreferredSizeWidget {
           ),
           Row(
             children: [
-              if (game.isMultiplayer) ...[
-                Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.chat_bubble_outline, color: GameTheme.textWhite),
-                      onPressed: onChatPressed,
-                    ),
+              IconButton(
+                icon: const Icon(Icons.mood, color: GameTheme.goldAccent),
+                onPressed: onEmojiPressed,
+              ),
+              const SizedBox(width: 4),
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.chat_bubble_outline, color: GameTheme.textWhite),
+                    onPressed: onChatPressed,
+                  ),
                     if (unreadCount > 0)
                       Positioned(
                         right: 4,
@@ -144,10 +150,9 @@ class GameTopBar extends ConsumerWidget implements PreferredSizeWidget {
                           ),
                         ),
                       ),
-                  ],
-                ),
-                const SizedBox(width: 8),
-              ],
+                ],
+              ),
+              const SizedBox(width: 8),
               IconButton(
                 icon: Icon(game.soundEnabled ? Icons.volume_up : Icons.volume_off, color: GameTheme.textWhite),
                 onPressed: () {

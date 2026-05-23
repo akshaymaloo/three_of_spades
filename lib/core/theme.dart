@@ -33,6 +33,28 @@ class GameTheme {
     radius: 1.2,
   );
 
+  static Gradient tableGradientForTheme(String theme) {
+    switch (theme) {
+      case 'blue':
+        return const RadialGradient(colors: [Color(0xFF1565C0), Color(0xFF0D47A1)], radius: 1.2);
+      case 'red':
+        return const RadialGradient(colors: [Color(0xFFC62828), Color(0xFF8E0000)], radius: 1.2);
+      case 'purple':
+        return const RadialGradient(colors: [Color(0xFF6A1B9A), Color(0xFF4A148C)], radius: 1.2);
+      case 'orange':
+        return const RadialGradient(colors: [Color(0xFFEF6C00), Color(0xFFE65100)], radius: 1.2);
+      case 'brown':
+        return const RadialGradient(colors: [Color(0xFF4E342E), Color(0xFF3E2723)], radius: 1.2);
+      case 'pink':
+        return const RadialGradient(colors: [Color(0xFFAD1457), Color(0xFF880E4F)], radius: 1.2);
+      case 'yellow':
+        return const RadialGradient(colors: [Color(0xFFF9A825), Color(0xFFF57F17)], radius: 1.2);
+      case 'green':
+      default:
+        return tableGradient;
+    }
+  }
+
   static const LinearGradient backgroundGradient = LinearGradient(
     colors: [Color(0xFF1E1E1E), Color(0xFF121212)],
     begin: Alignment.topCenter,

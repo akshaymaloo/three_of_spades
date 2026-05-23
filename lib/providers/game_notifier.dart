@@ -3,9 +3,11 @@ import 'dart:math';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/foundation.dart';
 import '../models/card_model.dart';
 import '../models/player_model.dart';
 import '../models/game_state.dart';
+import '../models/celebrity_model.dart';
 import '../core/sound_manager.dart';
 import 'stats_provider.dart';
 import 'multiplayer_notifier.dart';
@@ -80,7 +82,7 @@ class GameNotifier extends Notifier<GameState> {
     state = state.copyWith(phase: GamePhase.start);
   }
 
-  void _initializeGame({bool isMultiplayer = false, List<String>? multiplayerNames}) {
+  void _initializeGame({bool isMultiplayer = false, List<String>? multiplayerNames, bool isTrainingMode = false}) {
     final userCoins = ref.read(statsProvider).value?.coins ?? 5000;
     
     // Generate fresh deck and shuffle
@@ -124,10 +126,21 @@ class GameNotifier extends Notifier<GameState> {
         coins = i == 0 ? userCoins : p.coins;
       }
 
+      String avatarPath = 'assets/images/guest_avatar.png';
+      if (isHuman) {
+        final avatar = ref.read(avatarProvider);
+        if (avatar != null) {
+          avatarPath = avatar.imageUrl;
+        }
+      } else {
+        // Bots get celebrity avatars
+        avatarPath = availableAvatars[(i % availableAvatars.length)].imageUrl;
+      }
+
       updatedPlayers.add(PlayerModel(
         id: i,
         name: name,
-        avatarPath: 'assets/images/guest_avatar.png',
+        avatarPath: avatarPath,
         coins: coins,
         isHuman: isHuman,
         hand: hands[i],
@@ -160,10 +173,16 @@ class GameNotifier extends Notifier<GameState> {
       winningBid: 0,
       bidderIndex: const Nullable(null),
       trickWinnerIndex: const Nullable(null),
-      isMultiplayer: isMultiplayer,
-      soundEnabled: soundEnabled,
       message: 'Dealing cards...',
+      soundEnabled: soundEnabled,
+      isMultiplayer: isMultiplayer,
+      isTrainingMode: isTrainingMode,
     );
+
+    // Bot bidding starts immediately if it's their turn
+    if (state.activePlayerIndex != 0) {
+      _planBotBidding();
+    }
   }
 
   void completeDealing() {
@@ -180,7 +199,15 @@ class GameNotifier extends Notifier<GameState> {
   }
 
   void startNewGame() {
-    _initializeGame(isMultiplayer: state.isMultiplayer);
+    _initializeGame(isMultiplayer: state.isMultiplayer, isTrainingMode: state.isTrainingMode);
+  }
+
+  void finishMatch() {
+    state = state.copyWith(phase: GamePhase.matchOver);
+  }
+
+  void startTrainingGame() {
+    _initializeGame(isMultiplayer: false, isTrainingMode: true);
   }
 
   void startNewMultiplayerGame(List<String> names) {
