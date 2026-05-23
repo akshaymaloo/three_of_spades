@@ -19,3 +19,5 @@ This is a major production-ready release bringing the Flutter codebase to featur
 ### Fixed
 - Resolved overlapping banner text on the game table.
 - Corrected imports alignment to satisfy Dart compiling constraints.
+- Fixed Daily Reward dialog layout overflow under small screen heights and landscape orientations.
+- Resolved Kotlin / Java JVM target compilation incompatibilities in subproject Gradle setups.

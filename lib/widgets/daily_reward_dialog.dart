@@ -43,7 +43,10 @@ class DailyRewardDialog extends ConsumerWidget {
         insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         content: Container(
           width: double.maxFinite,
-          constraints: const BoxConstraints(maxWidth: 420),
+          constraints: BoxConstraints(
+            maxWidth: 420,
+            maxHeight: MediaQuery.sizeOf(context).height - 48,
+          ),
           decoration: BoxDecoration(
             color: GameTheme.darkBackground.withValues(alpha: 0.92),
             borderRadius: BorderRadius.circular(20),
@@ -53,9 +56,10 @@ class DailyRewardDialog extends ConsumerWidget {
             ),
             boxShadow: GameTheme.neonGlow(GameTheme.goldAccent, blurRadius: 15),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
               // ── Header ──
               _buildHeader(context),
 
@@ -86,7 +90,8 @@ class DailyRewardDialog extends ConsumerWidget {
           ),
         ),
       ),
-    );
+    ),
+  );
   }
 
   // ── Header ──────────────────────────────────────────────────────────────

@@ -19,6 +19,23 @@ subprojects {
     project.evaluationDependsOn(":app")
 }
 
+subprojects {
+    plugins.withId("com.android.library") {
+        if (!plugins.hasPlugin("org.jetbrains.kotlin.android") && !plugins.hasPlugin("kotlin-android")) {
+            apply(plugin = "org.jetbrains.kotlin.android")
+        }
+    }
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+        val javaTarget = project.extensions.findByType<com.android.build.gradle.BaseExtension>()
+            ?.compileOptions
+            ?.targetCompatibility
+            ?.toString()
+        if (javaTarget != null) {
+            compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(javaTarget))
+        }
+    }
+}
+
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
