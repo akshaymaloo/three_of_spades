@@ -896,6 +896,36 @@ abstract class AppLocalizations {
   /// **'PLAY AGAIN'**
   String get playAgain;
 
+  /// No description provided for @creditsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Credits'**
+  String get creditsTitle;
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// No description provided for @finishMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish Match'**
+  String get finishMatch;
+
+  /// No description provided for @continueButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get continueButton;
+
+  /// No description provided for @trainingMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Training'**
+  String get trainingMode;
+
   /// No description provided for @gameChat.
   ///
   /// In en, this message translates to:

@@ -448,6 +448,21 @@ class AppLocalizationsHi extends AppLocalizations {
   String get playAgain => 'फिर से खेलें';
 
   @override
+  String get creditsTitle => 'क्रेडिट्स';
+
+  @override
+  String get close => 'बंद करें';
+
+  @override
+  String get finishMatch => 'मैच समाप्त करें';
+
+  @override
+  String get continueButton => 'जारी रखें';
+
+  @override
+  String get trainingMode => 'प्रशिक्षण';
+
+  @override
   String get gameChat => 'गेम चैट';
 
   @override

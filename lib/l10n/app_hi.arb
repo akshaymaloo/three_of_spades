@@ -225,6 +225,11 @@
   "coinRewardsPenalties": "सिक्का पुरस्कार / दंड:",
   "quit": "बाहर निकलें",
   "playAgain": "फिर से खेलें",
+  "creditsTitle": "क्रेडिट्स",
+  "close": "बंद करें",
+  "finishMatch": "मैच समाप्त करें",
+  "continueButton": "जारी रखें",
+  "trainingMode": "प्रशिक्षण",
 
   "gameChat": "गेम चैट",
   "typeMessage": "संदेश टाइप करें...",

@@ -198,4 +198,34 @@ class CardModel {
     }
     return deck;
   }
+
+  // Generate 2 standard decks (104 cards) for 7-player mode
+  static List<CardModel> generateDoubleDeck() {
+    final List<CardModel> singleDeck = generateDeck();
+    final List<CardModel> doubleDeck = [];
+    
+    // First deck (ids 0..51)
+    for (var card in singleDeck) {
+      doubleDeck.add(CardModel(
+        id: card.id,
+        suit: card.suit,
+        rank: card.rank,
+        points: card.points,
+        assetPath: card.assetPath,
+      ));
+    }
+    
+    // Second deck (ids 52..103)
+    for (var card in singleDeck) {
+      doubleDeck.add(CardModel(
+        id: card.id + 52,
+        suit: card.suit,
+        rank: card.rank,
+        points: card.points,
+        assetPath: card.assetPath,
+      ));
+    }
+    
+    return doubleDeck;
+  }
 }

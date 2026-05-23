@@ -1,12 +1,13 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/game_state.dart';
 import '../models/player_model.dart';
 import '../models/multiplayer_state.dart';
 import '../core/theme.dart';
 import '../core/suit_utils.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../providers/multiplayer_notifier.dart';
 import '../providers/stats_provider.dart';
 import 'playing_card_widget.dart';
@@ -164,12 +165,15 @@ class GameTable extends ConsumerWidget {
                     shape: BoxShape.circle,
                     border: Border.all(color: showGlow ? GameTheme.neonCyan : Colors.white24, width: 1.5),
                     boxShadow: GameTheme.neonGlow(shadowColor, blurRadius: 8),
-                    image: DecorationImage(
-                      image: player.avatarPath.startsWith('http')
-                          ? CachedNetworkImageProvider(player.avatarPath) as ImageProvider
-                          : AssetImage(player.avatarPath.isNotEmpty ? player.avatarPath : 'assets/images/guest_avatar.png'),
-                      fit: BoxFit.cover,
-                    ),
+                  ),
+                  child: ClipOval(
+                    child: player.avatarPath.startsWith('http')
+                        ? CachedNetworkImage(
+                            imageUrl: player.avatarPath,
+                            fit: BoxFit.cover,
+                            errorWidget: (context, url, error) => Image.asset('assets/images/guest_avatar.png', fit: BoxFit.cover),
+                          )
+                        : Image.asset(player.avatarPath.isNotEmpty ? player.avatarPath : 'assets/images/guest_avatar.png', fit: BoxFit.cover),
                   ),
                 ),
                 const SizedBox(height: 4),

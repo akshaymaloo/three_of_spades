@@ -420,17 +420,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   child: Container(
                                     width: 48,
                                     height: 48,
+                                    clipBehavior: Clip.antiAlias,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       border: Border.all(color: GameTheme.neonCyan, width: 1.5),
-                                      image: DecorationImage(
-                                        image: avatar != null 
-                                          ? CachedNetworkImageProvider(avatar.imageUrl) as ImageProvider
-                                          : const AssetImage('assets/images/guest_avatar.png'),
-                                        fit: BoxFit.cover,
-                                      ),
                                       boxShadow: GameTheme.neonGlow(GameTheme.neonCyan, blurRadius: 6),
                                     ),
+                                    child: avatar != null && avatar.imageUrl.startsWith('http')
+                                        ? CachedNetworkImage(
+                                            imageUrl: avatar.imageUrl,
+                                            fit: BoxFit.cover,
+                                            placeholder: (context, url) => const Center(child: CircularProgressIndicator(color: GameTheme.neonCyan, strokeWidth: 2)),
+                                            errorWidget: (context, url, error) => Image.asset('assets/images/guest_avatar.png', fit: BoxFit.cover),
+                                          )
+                                        : Image.asset(avatar != null ? avatar.imageUrl : 'assets/images/guest_avatar.png', fit: BoxFit.cover),
                                   ),
                                 ),
                                 const SizedBox(width: 12),

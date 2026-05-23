@@ -445,6 +445,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get playAgain => 'PLAY AGAIN';
 
   @override
+  String get creditsTitle => 'Credits';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get finishMatch => 'Finish Match';
+
+  @override
+  String get continueButton => 'Continue';
+
+  @override
+  String get trainingMode => 'Training';
+
+  @override
   String get gameChat => 'GAME CHAT';
 
   @override

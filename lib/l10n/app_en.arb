@@ -225,6 +225,11 @@
   "coinRewardsPenalties": "COIN REWARDS / PENALTIES:",
   "quit": "QUIT",
   "playAgain": "PLAY AGAIN",
+  "creditsTitle": "Credits",
+  "close": "Close",
+  "finishMatch": "Finish Match",
+  "continueButton": "Continue",
+  "trainingMode": "Training",
 
   "gameChat": "GAME CHAT",
   "typeMessage": "Type message...",

@@ -21,7 +21,7 @@ class CreditsDialog extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           const Text(
-            'Developed with ❤️ by Akshay Maloo',
+            'Developed with ❤️ by Dushyant and Akshay',
             textAlign: TextAlign.center,
             style: TextStyle(color: GameTheme.textWhite, fontSize: 14),
           ),

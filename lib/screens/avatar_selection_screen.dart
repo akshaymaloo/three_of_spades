@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../models/celebrity_model.dart';
 import '../core/theme.dart';
 
@@ -67,11 +67,17 @@ class AvatarSelectionScreen extends ConsumerWidget {
                               ),
                               boxShadow: isSelected ? GameTheme.neonGlow(GameTheme.neonCyan) : null,
                             ),
-                            child: CircleAvatar(
-                              radius: 40,
-                              backgroundImage: CachedNetworkImageProvider(avatar.imageUrl),
-                              backgroundColor: Colors.grey.shade800,
-                            ),
+                              child: ClipOval(
+                                child: avatar.imageUrl.startsWith('http')
+                                  ? CachedNetworkImage(
+                                      imageUrl: avatar.imageUrl,
+                                      fit: BoxFit.cover,
+                                      width: 80,
+                                      height: 80,
+                                      errorWidget: (context, url, error) => Image.asset('assets/images/guest_avatar.png', fit: BoxFit.cover),
+                                    )
+                                  : Image.asset(avatar.imageUrl, fit: BoxFit.cover, width: 80, height: 80),
+                              ),
                           ),
                           const SizedBox(height: 8),
                           Text(

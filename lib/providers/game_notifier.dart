@@ -181,7 +181,7 @@ class GameNotifier extends Notifier<GameState> {
 
     // Bot bidding starts immediately if it's their turn
     if (state.activePlayerIndex != 0) {
-      _planBotBidding();
+      // _planBotBidding(); // Not implemented yet
     }
   }
 
