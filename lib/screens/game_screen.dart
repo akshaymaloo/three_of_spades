@@ -93,6 +93,9 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                     },
                   ),
                   
+                  // Status message banner (integrated, non-overlapping)
+                  _buildStatusBanner(game),
+                  
                   // Central Card Table Area
                   Expanded(
                     child: Padding(
@@ -107,27 +110,6 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                     humanPlayer: humanPlayer,
                   ),
                 ],
-              ),
-
-              // Game Status overlay messages
-              Positioned(
-                top: 50,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: GameTheme.glassDecoration(opacity: 0.1, borderOpacity: 0.15, radius: 20),
-                    child: Text(
-                      game.message,
-                      style: const TextStyle(
-                        color: GameTheme.textWhite,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ),
               ),
 
               // Dealing Animation Overlay
@@ -171,6 +153,72 @@ class _GameScreenState extends ConsumerState<GameScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  IconData _getStatusIcon(GamePhase phase) {
+    switch (phase) {
+      case GamePhase.dealing:
+        return Icons.style;
+      case GamePhase.bidding:
+        return Icons.gavel;
+      case GamePhase.declaring:
+        return Icons.campaign;
+      case GamePhase.playing:
+        return Icons.play_circle_outline;
+      case GamePhase.roundOver:
+        return Icons.emoji_events;
+      default:
+        return Icons.info_outline;
+    }
+  }
+
+  Widget _buildStatusBanner(GameState game) {
+    final hasMessage = game.message.isNotEmpty;
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeInOut,
+      height: hasMessage ? 34 : 0,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.25),
+        border: Border(
+          bottom: BorderSide(
+            color: Colors.white.withValues(alpha: 0.05),
+            width: 1,
+          ),
+        ),
+      ),
+      child: hasMessage
+          ? Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    _getStatusIcon(game.phase),
+                    size: 14,
+                    color: GameTheme.goldAccent,
+                  ),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      game.message,
+                      style: const TextStyle(
+                        color: GameTheme.textWhite,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: 0.5,
+                      ),
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : const SizedBox.shrink(),
     );
   }
 }
