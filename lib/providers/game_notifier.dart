@@ -16,6 +16,7 @@ class GameNotifier extends Notifier<GameState> {
   Timer? _trickEvaluationTimer;
   Timer? _redealTimer;
   Timer? _botActionTimer;
+  Timer? _playTurnCountdownTimer;
 
   @override
   set state(GameState value) {
@@ -28,6 +29,7 @@ class GameNotifier extends Notifier<GameState> {
       _trickEvaluationTimer?.cancel();
       _redealTimer?.cancel();
       _botActionTimer?.cancel();
+      _playTurnCountdownTimer?.cancel();
     });
     return _createInitialState();
   }
@@ -83,6 +85,7 @@ class GameNotifier extends Notifier<GameState> {
   }
 
   void _initializeGame({bool isMultiplayer = false, List<String>? multiplayerNames, bool isTrainingMode = false, int playerCount = 4}) {
+    _cancelPlayTurnTimer();
     final userCoins = ref.read(statsProvider).value?.coins ?? 5000;
     
     // Generate fresh deck and shuffle
@@ -116,51 +119,56 @@ class GameNotifier extends Notifier<GameState> {
     // Update player models
     final updatedPlayers = <PlayerModel>[];
     for (int i = 0; i < playerCount; i++) {
-      String name;
-      int coins;
-      bool isHuman = i == 0;
-      
-      if (isMultiplayer && multiplayerNames != null && multiplayerNames.length > i) {
-        name = multiplayerNames[i];
-        coins = i == 0 ? userCoins : 5000;
-      } else {
-        if (i < state.players.length) {
-          final p = state.players[i];
-          name = i == 0 ? (ref.read(statsProvider).value?.name ?? 'You') : p.name;
-          coins = i == 0 ? userCoins : p.coins;
+      try {
+        String name;
+        int coins;
+        bool isHuman = i == 0;
+        
+        if (isMultiplayer && multiplayerNames != null && multiplayerNames.length > i) {
+          name = multiplayerNames[i];
+          coins = i == 0 ? userCoins : 5000;
         } else {
-          // New bots for 7-player mode
-          name = 'Bot ${i + 1}';
-          coins = 5000;
+          if (i < state.players.length) {
+            final p = state.players[i];
+            name = i == 0 ? (ref.read(statsProvider).value?.name ?? 'You') : p.name;
+            coins = i == 0 ? userCoins : p.coins;
+          } else {
+            // New bots for 7-player mode
+            name = 'Bot ${i + 1}';
+            coins = 5000;
+          }
         }
-      }
 
-      String avatarPath = 'assets/images/guest_avatar.png';
-      if (isHuman) {
-        final avatar = ref.read(avatarProvider);
-        if (avatar != null) {
-          avatarPath = avatar.imageUrl;
+        String avatarPath = 'assets/images/guest_avatar.png';
+        if (isHuman) {
+          final avatar = ref.read(avatarProvider);
+          if (avatar != null) {
+            avatarPath = avatar.imageUrl;
+          }
+        } else {
+          // Bots get celebrity avatars
+          avatarPath = availableAvatars[(i % availableAvatars.length)].imageUrl;
         }
-      } else {
-        // Bots get celebrity avatars
-        avatarPath = availableAvatars[(i % availableAvatars.length)].imageUrl;
-      }
 
-      updatedPlayers.add(PlayerModel(
-        id: i,
-        name: name,
-        avatarPath: avatarPath,
-        coins: coins,
-        isHuman: isHuman,
-        hand: hands[i],
-        currentBid: null,
-        hasPassed: false,
-        playedCard: null,
-        roundPoints: 0,
-        isBidder: false,
-        isPartner: false,
-        isPartnerRevealed: false,
-      ));
+        updatedPlayers.add(PlayerModel(
+          id: i,
+          name: name,
+          avatarPath: avatarPath,
+          coins: coins,
+          isHuman: isHuman,
+          hand: hands[i],
+          currentBid: null,
+          hasPassed: false,
+          playedCard: null,
+          roundPoints: 0,
+          isBidder: false,
+          isPartner: false,
+          isPartnerRevealed: false,
+        ));
+      } catch (e, st) {
+        print('Error initializing player $i: $e\n$st');
+        rethrow;
+      }
     }
 
     // Bidding starts with the player next to the dealer
@@ -455,8 +463,10 @@ class GameNotifier extends Notifier<GameState> {
       );
       _triggerBotActionIfNeeded();
     } else {
-      // Evaluate trick
-      _evaluateTrick();
+      // Delay evaluating the trick to allow the UI to render the last card being played.
+      Future.delayed(const Duration(milliseconds: 500), () {
+        _evaluateTrick();
+      });
     }
 
     return true;
@@ -534,6 +544,8 @@ class GameNotifier extends Notifier<GameState> {
       trickWinnerIndex: Nullable(winnerIndex),
       message: '${winner.name} wins the trick with ${state.players[winnerIndex].playedCard!.name} (+$trickPoints pts)!',
     );
+
+    _cancelPlayTurnTimer();
 
     // Play collect sound
     SoundManager().playSound('sounds/card_collect.mp3');
@@ -661,6 +673,12 @@ class GameNotifier extends Notifier<GameState> {
 
   void _triggerBotActionIfNeeded() {
     _botActionTimer?.cancel();
+    
+    if (state.phase == GamePhase.playing && state.trickWinnerIndex == null) {
+      _startPlayTurnTimer();
+    } else {
+      _cancelPlayTurnTimer();
+    }
     
     if (state.phase == GamePhase.bidding) {
       final activePlayer = state.players[state.activePlayerIndex];
@@ -1016,6 +1034,61 @@ class GameNotifier extends Notifier<GameState> {
     }
 
     playCard(cardToPlay);
+  }
+
+  void _startPlayTurnTimer() {
+    _playTurnCountdownTimer?.cancel();
+    
+    // Set initial timer state to 20 seconds
+    state = state.copyWith(turnTimer: const Nullable(20));
+    
+    _playTurnCountdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (state.phase != GamePhase.playing || state.trickWinnerIndex != null) {
+        _cancelPlayTurnTimer();
+        return;
+      }
+      
+      final currentTimer = state.turnTimer ?? 20;
+      if (currentTimer > 1) {
+        state = state.copyWith(turnTimer: Nullable(currentTimer - 1));
+      } else {
+        _cancelPlayTurnTimer();
+        _handlePlayTimeout();
+      }
+    });
+  }
+
+  void _cancelPlayTurnTimer() {
+    _playTurnCountdownTimer?.cancel();
+    _playTurnCountdownTimer = null;
+    if (state.turnTimer != null) {
+      state = state.copyWith(turnTimer: const Nullable(null));
+    }
+  }
+
+  void _handlePlayTimeout() {
+    if (state.phase != GamePhase.playing) return;
+    
+    final activePlayer = state.players[state.activePlayerIndex];
+    if (activePlayer.hand.isEmpty) return;
+
+    CardModel? cardToPlay;
+    
+    // Find valid playable cards
+    if (state.gameTurn > 1) {
+      final hasLedSuit = activePlayer.hand.any((c) => c.suit == state.trumpStart);
+      if (hasLedSuit) {
+        cardToPlay = activePlayer.hand.firstWhere((c) => c.suit == state.trumpStart);
+      }
+    }
+    
+    cardToPlay ??= activePlayer.hand.first;
+
+    final suffix = activePlayer.isHuman ? ' (Timeout Auto-play)' : '';
+    playCard(cardToPlay);
+    state = state.copyWith(
+      message: '${activePlayer.name} ran out of time! Auto-playing ${cardToPlay.name}$suffix.',
+    );
   }
 
   void triggerBotAction() {

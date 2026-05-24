@@ -56,6 +56,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void _checkDailyReward() {
     final rewardState = ref.read(dailyRewardProvider);
     if (!rewardState.todayClaimed) {
+      if (rewardState.consecutiveDays >= DailyRewardNotifier.rewardSchedule.length) {
+        return; // All 7 days claimed, hide forever
+      }
       DailyRewardDialog.show(
         context,
         onClaim: (amount) {

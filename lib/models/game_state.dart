@@ -38,6 +38,7 @@ class GameState {
   final bool soundEnabled;
   final bool isMultiplayer;
   final bool isTrainingMode;
+  final int? turnTimer;
 
   const GameState({
     required this.phase,
@@ -59,6 +60,7 @@ class GameState {
     this.soundEnabled = true,
     this.isMultiplayer = false,
     this.isTrainingMode = false,
+    this.turnTimer,
   });
 
   GameState copyWith({
@@ -81,6 +83,7 @@ class GameState {
     bool? soundEnabled,
     bool? isMultiplayer,
     bool? isTrainingMode,
+    Nullable<int?>? turnTimer,
   }) {
     return GameState(
       phase: phase ?? this.phase,
@@ -102,6 +105,7 @@ class GameState {
       soundEnabled: soundEnabled ?? this.soundEnabled,
       isMultiplayer: isMultiplayer ?? this.isMultiplayer,
       isTrainingMode: isTrainingMode ?? this.isTrainingMode,
+      turnTimer: turnTimer != null ? turnTimer.value : this.turnTimer,
     );
   }
 

@@ -57,6 +57,14 @@ class GameTable extends ConsumerWidget {
         
         // Human (bottom)
         _buildSeat(context, ref, game.players[0], Alignment.bottomCenter, game.activePlayerIndex == 0),
+
+        // Turn timer (top-right quadrant of the table stack)
+        if (game.phase == GamePhase.playing && game.turnTimer != null)
+          Positioned(
+            top: 20,
+            right: size.width * 0.16,
+            child: _buildTurnTimer(game.turnTimer!),
+          ),
       ],
     );
   }
@@ -298,9 +306,14 @@ class GameTable extends ConsumerWidget {
   }
 
   Widget _buildTrickCenter(GameState game) {
+    final trickPoints = game.players
+        .where((p) => p.playedCard != null)
+        .fold(0, (sum, p) => sum + p.playedCard!.points);
+    final hasPlayedCards = game.players.any((p) => p.playedCard != null);
+
     return Container(
-      width: 150,
-      height: 100,
+      width: 260,
+      height: 260,
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.01),
         borderRadius: BorderRadius.circular(16),
@@ -311,10 +324,30 @@ class GameTable extends ConsumerWidget {
           if (game.gameTurn > 1 && game.trumpStart != 'x')
             Center(
               child: Opacity(
-                opacity: 0.1,
+                opacity: 0.05,
                 child: Text(
                   getSuitSymbol(game.trumpStart),
-                  style: const TextStyle(fontSize: 54, color: Colors.white),
+                  style: const TextStyle(fontSize: 80, color: Colors.white),
+                ),
+              ),
+            ),
+
+          // Total points in the center (low contrast, behind cards)
+          if (hasPlayedCards)
+            Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  '$trickPoints',
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.5),
+                    fontSize: 48,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
@@ -323,32 +356,85 @@ class GameTable extends ConsumerWidget {
             if (game.players[i].playedCard != null)
               Align(
                 alignment: _getTrickAlignmentForPlayer(i, game.playerCount),
-                child: PlayingCardWidget(card: game.players[i].playedCard!, width: 40, height: 58),
+                child: PlayingCardWidget(card: game.players[i].playedCard!, width: 60, height: 86),
               ),
         ],
       ),
     );
   }
 
+  Widget _buildTurnTimer(int secondsRemaining) {
+    final double progress = secondsRemaining / 20.0;
+    
+    Color ringColor;
+    if (secondsRemaining > 3) {
+      ringColor = GameTheme.neonGreen;
+    } else if (secondsRemaining > 1) {
+      ringColor = Colors.orangeAccent;
+    } else {
+      ringColor = GameTheme.neonPink;
+    }
+
+    return Container(
+      width: 50,
+      height: 50,
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.6),
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white24, width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: ringColor.withValues(alpha: 0.3),
+            blurRadius: 8,
+            spreadRadius: 1,
+          )
+        ],
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          SizedBox(
+            width: 42,
+            height: 42,
+            child: CircularProgressIndicator(
+              value: progress,
+              strokeWidth: 3.5,
+              backgroundColor: Colors.white12,
+              valueColor: AlwaysStoppedAnimation<Color>(ringColor),
+            ),
+          ),
+          Text(
+            '${secondsRemaining}s',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Alignment _getTrickAlignmentForPlayer(int index, int totalPlayers) {
-    if (index == 0) return const Alignment(0, 0.45);
+    if (index == 0) return const Alignment(0, 1.0); // Bottom
     
     if (totalPlayers == 7) {
       switch (index) {
-        case 1: return const Alignment(-0.4, 0.3);
-        case 2: return const Alignment(-0.6, 0);
-        case 3: return const Alignment(-0.3, -0.45);
-        case 4: return const Alignment(0.3, -0.45);
-        case 5: return const Alignment(0.6, 0);
-        case 6: return const Alignment(0.4, 0.3);
+        case 1: return const Alignment(-0.75, 0.75); // Bottom Left
+        case 2: return const Alignment(-1.0, -0.2); // Mid Left
+        case 3: return const Alignment(-0.5, -1.0); // Top Left
+        case 4: return const Alignment(0.5, -1.0); // Top Right
+        case 5: return const Alignment(1.0, -0.2); // Mid Right
+        case 6: return const Alignment(0.75, 0.75); // Bottom Right
       }
     }
     
-    // Default 4 player
+    // Default 4 player (Cross shape)
     switch (index) {
-      case 1: return const Alignment(-0.6, 0);
-      case 2: return const Alignment(0, -0.45);
-      case 3: return const Alignment(0.6, 0);
+      case 1: return const Alignment(-1.0, 0); // Left
+      case 2: return const Alignment(0, -1.0); // Top
+      case 3: return const Alignment(1.0, 0); // Right
     }
     return const Alignment(0, 0);
   }

@@ -47,7 +47,7 @@ class _PlayerHandPanelState extends ConsumerState<PlayerHandPanel> {
         children: [
           Expanded(
             child: SizedBox(
-              height: 96,
+              height: 120,
               child: hand.isEmpty
                   ? Center(child: Text(AppLocalizations.of(context)?.noCards ?? 'No Cards', style: const TextStyle(color: GameTheme.textGrey)))
                   : ListView.builder(
@@ -67,30 +67,71 @@ class _PlayerHandPanelState extends ConsumerState<PlayerHandPanel> {
                         final isSelected = _selectedCardIndex == index;
 
                         return Padding(
-                          padding: const EdgeInsets.only(right: 6.0),
-                          child: PlayingCardWidget(
-                            card: card,
-                            isSelected: isSelected,
-                            isPlayable: isPlayable,
-                            width: 56,
-                            height: 80,
-                            selectionOffset: 14,
-                            onTap: () {
-                              if (widget.game.activePlayerIndex != 0) return;
+                          padding: const EdgeInsets.only(right: 6.0, top: 16.0), // Add top padding to allow badge space
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              PlayingCardWidget(
+                                card: card,
+                                isSelected: isSelected,
+                                isPlayable: isPlayable,
+                                width: 56,
+                                height: 80,
+                                selectionOffset: 14,
+                                onTap: () {
+                                  if (widget.game.activePlayerIndex != 0) return;
 
-                              if (isSelected) {
-                                final played = ref.read(gameProvider.notifier).playCard(card);
-                                if (played) {
-                                  setState(() {
-                                    _selectedCardIndex = null;
-                                  });
-                                }
-                              } else {
-                                setState(() {
-                                  _selectedCardIndex = index;
-                                });
-                              }
-                            },
+                                  if (isSelected) {
+                                    final played = ref.read(gameProvider.notifier).playCard(card);
+                                    if (played) {
+                                      setState(() {
+                                        _selectedCardIndex = null;
+                                      });
+                                    }
+                                  } else {
+                                    setState(() {
+                                      _selectedCardIndex = index;
+                                    });
+                                  }
+                                },
+                              ),
+                              if (card.points > 0)
+                                AnimatedPositioned(
+                                  duration: const Duration(milliseconds: 200),
+                                  curve: Curves.easeOut,
+                                  top: isSelected ? -20 : -6,
+                                  left: 0,
+                                  right: 0,
+                                  child: Center(
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                                      decoration: BoxDecoration(
+                                        gradient: const LinearGradient(
+                                          colors: [Color(0xFF81C784), Color(0xFF4CAF50)],
+                                          begin: Alignment.topCenter,
+                                          end: Alignment.bottomCenter,
+                                        ),
+                                        borderRadius: BorderRadius.circular(6),
+                                        boxShadow: const [
+                                          BoxShadow(
+                                            color: Colors.black26,
+                                            blurRadius: 2,
+                                            offset: Offset(0, 1),
+                                          )
+                                        ],
+                                      ),
+                                      child: Text(
+                                        '${card.points}',
+                                        style: const TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 9,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                         );
                       },

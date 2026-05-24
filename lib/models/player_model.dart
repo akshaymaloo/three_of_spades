@@ -61,7 +61,7 @@ class PlayerModel {
       isHuman: isHuman ?? this.isHuman,
       currentBid: currentBid ?? this.currentBid,
       hasPassed: hasPassed ?? this.hasPassed,
-      playedCard: playedCard, // Allows setting to null explicitly if not passed
+      playedCard: playedCard ?? this.playedCard,
       roundPoints: roundPoints ?? this.roundPoints,
       isBidder: isBidder ?? this.isBidder,
       isPartner: isPartner ?? this.isPartner,

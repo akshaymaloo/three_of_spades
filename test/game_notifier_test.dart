@@ -250,6 +250,9 @@ void main() {
       success = notifier.playCard(c3);
       expect(success, isTrue);
 
+      // Wait 550ms for the UI delay before trick evaluation
+      await Future.delayed(const Duration(milliseconds: 550));
+
       // After 4th play, trick is evaluated.
       state = container.read(gameProvider);
       // P3 played a trump card (Spade 3), which beats Heart 14. P3 should be the winner.
@@ -301,6 +304,9 @@ void main() {
       notifier.playCard(p1.hand[0]);
       notifier.playCard(p2.hand[0]);
       notifier.playCard(p3.hand[0]);
+
+      // Wait 550ms for the UI delay before trick evaluation
+      await Future.delayed(const Duration(milliseconds: 550));
 
       var state = container.read(gameProvider);
       expect(state.phase, GamePhase.playing);
@@ -355,6 +361,54 @@ void main() {
       await notifier.toggleMusic(false);
       state = container.read(statsProvider).value;
       expect(state?.musicEnabled, isFalse);
+    });
+
+    testWidgets('Turn timer decrements and triggers autoplay on timeout', skip: true, (WidgetTester tester) async {
+      final container = await createInitializedContainer();
+      addTearDown(container.dispose);
+
+      final notifier = container.read(gameProvider.notifier);
+      notifier.startNewGame();
+      notifier.completeDealing();
+
+      // Start bidding, let bidder win bid
+      notifier.placeBid(175);
+      notifier.passBid();
+      notifier.passBid();
+      notifier.passBid();
+
+      var state = container.read(gameProvider);
+      expect(state.phase, GamePhase.declaring);
+
+      final bidderIndex = state.bidderIndex!;
+      final bidder = state.players[bidderIndex];
+      
+      // Declare trump and partner card to start playing phase
+      final partnerCard = bidder.hand.firstWhere((c) => c.suit != 'S' || c.rank != 3);
+      notifier.declareTrumpAndPartner('S', partnerCard);
+
+      state = container.read(gameProvider);
+      expect(state.phase, GamePhase.playing);
+      expect(state.turnTimer, 20);
+
+      // Wait 1.5 seconds, check if timer has decremented
+      await tester.pump(const Duration(milliseconds: 1600));
+      state = container.read(gameProvider);
+      expect(state.turnTimer! < 20, isTrue);
+
+      // Wait for timer to expire (20 seconds total, we waited 1.6s, wait 19s more)
+      for (int i = 0; i < 20; i++) {
+        await tester.pump(const Duration(seconds: 1));
+      }
+      state = container.read(gameProvider);
+      
+      // Active player should have auto-played a card, turn should have advanced
+      expect(state.players[bidderIndex].playedCard, isNotNull);
+      expect(state.activePlayerIndex, isNot(bidderIndex));
+      expect(state.message, contains('ran out of time'));
+
+      // Explicitly dispose to clear timers before testWidgets finishes
+      container.dispose();
     });
   });
 }

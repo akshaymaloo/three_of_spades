@@ -73,8 +73,10 @@ class DailyRewardNotifier extends Notifier<DailyRewardState> {
         if (lastDate != null && todayDate != null) {
           final difference = todayDate.difference(lastDate).inDays;
           if (difference != 1) {
-            // Streak broken – reset
-            adjustedConsecutive = 0;
+            // Streak broken – reset, unless they already claimed all 7 days
+            if (adjustedConsecutive < rewardSchedule.length) {
+              adjustedConsecutive = 0;
+            }
           }
         }
       }
