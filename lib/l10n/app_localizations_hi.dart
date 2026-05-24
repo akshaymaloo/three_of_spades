@@ -74,8 +74,18 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String earnedCoins(int amount) {
-    return '$amount सिक्के कमाए!';
+    return '🪙 $amount सिक्के मिले!';
   }
+
+  @override
+  String get sevenPlayerMode => '7 खिलाड़ी\nमहाकाव्य मोड';
+
+  @override
+  String get sevenPlayerModeBadge => '2 डेक · 7 खिलाड़ी';
+
+  @override
+  String get sevenPlayerModeDesc =>
+      '104 कार्ड और 2 भागीदारों के साथ 6 बॉट्स के खिलाफ खेलें!';
 
   @override
   String get adFailed => 'विज्ञापन विफल रहा या छोड़ दिया गया';

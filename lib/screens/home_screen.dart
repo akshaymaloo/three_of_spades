@@ -614,7 +614,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         crossAxisAlignment: CrossAxisAlignment.stretch,
                                         children: [
                                           Expanded(
-                                            child: _buildIntelligentBotsCard(context),
+                                            child: Row(
+                                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                                              children: [
+                                                Expanded(child: _buildIntelligentBotsCard(context)),
+                                                const SizedBox(width: 12),
+                                                Expanded(child: _build7PlayersCard(context)),
+                                              ],
+                                            ),
                                           ),
                                           const SizedBox(height: 16),
 
@@ -740,6 +747,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         child: _buildIntelligentBotsCard(context),
                                       ),
                                       const SizedBox(height: 16),
+                                      SizedBox(
+                                        height: 140,
+                                        child: _build7PlayersCard(context),
+                                      ),
+                                      const SizedBox(height: 16),
                                       // Bottom Game Modes (Bottom)
                                       SizedBox(
                                         height: 90,
@@ -808,6 +820,96 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         );
       },
+    );
+  }
+
+  Widget _build7PlayersCard(BuildContext context) {
+    return Semantics(
+      label: AppLocalizations.of(context)?.sevenPlayerMode ?? '7 Players',
+      button: true,
+      child: InkWell(
+        onTap: () {
+          ref.read(gameProvider.notifier).startNewGame(playerCount: 7);
+        },
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                GameTheme.neonPink.withValues(alpha: 0.3),
+                GameTheme.neonPink.withValues(alpha: 0.1),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: GameTheme.neonPink.withValues(alpha: 0.3), width: 1.5),
+            boxShadow: GameTheme.neonGlow(GameTheme.neonPink, blurRadius: 10),
+          ),
+          child: Stack(
+            children: [
+              Positioned(
+                right: -10,
+                bottom: -10,
+                child: Opacity(
+                  opacity: 0.15,
+                  child: const Text(
+                    '7',
+                    style: TextStyle(
+                      fontSize: 150,
+                      color: GameTheme.neonPink,
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: GameTheme.neonPink.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          AppLocalizations.of(context)?.sevenPlayerModeBadge ?? '2 Decks · 7 Players',
+                          style: const TextStyle(
+                            color: GameTheme.neonPink,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        AppLocalizations.of(context)?.sevenPlayerMode ?? '7 Players\nEpic Mode',
+                        style: const TextStyle(
+                          color: GameTheme.textWhite,
+                          fontSize: 22,
+                          height: 1.1,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        AppLocalizations.of(context)?.sevenPlayerModeDesc ?? 'Play against 6 bots with 104 cards and 2 partners!',
+                        style: const TextStyle(
+                          color: GameTheme.textGrey,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 

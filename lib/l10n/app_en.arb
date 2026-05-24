@@ -19,7 +19,7 @@
   "alias": "Alias",
   "save": "SAVE",
   "coins": "COINS",
-  "earnedCoins": "Earned {amount} coins!",
+  "earnedCoins": "🪙 Earned {amount} coins!",
   "@earnedCoins": {
     "placeholders": {
       "amount": {
@@ -27,6 +27,9 @@
       }
     }
   },
+  "sevenPlayerMode": "7 Players\nEpic Mode",
+  "sevenPlayerModeBadge": "2 Decks · 7 Players",
+  "sevenPlayerModeDesc": "Play against 6 bots with 104 cards and 2 partners!",
   "adFailed": "Ad failed or skipped",
   "statistics": "STATISTICS",
   "played": "Played",

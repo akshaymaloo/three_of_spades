@@ -52,12 +52,36 @@ class GameTable extends ConsumerWidget {
         _buildTrickCenter(game),
 
         // Seat positions
-        _buildSeat(context, ref, game.players[1], Alignment.centerLeft, game.activePlayerIndex == 1), // Left Bot
-        _buildSeat(context, ref, game.players[2], Alignment.topCenter, game.activePlayerIndex == 2),  // Top Bot
-        _buildSeat(context, ref, game.players[3], Alignment.centerRight, game.activePlayerIndex == 3), // Right Bot
-        _buildSeat(context, ref, game.players[0], Alignment.bottomCenter, game.activePlayerIndex == 0), // Human (bottom)
+        for (int i = 1; i < game.playerCount; i++)
+          _buildSeat(context, ref, game.players[i], _getAlignmentForPlayer(i, game.playerCount), game.activePlayerIndex == i),
+        
+        // Human (bottom)
+        _buildSeat(context, ref, game.players[0], Alignment.bottomCenter, game.activePlayerIndex == 0),
       ],
     );
+  }
+
+  Alignment _getAlignmentForPlayer(int index, int totalPlayers) {
+    if (index == 0) return Alignment.bottomCenter;
+    
+    if (totalPlayers == 7) {
+      switch (index) {
+        case 1: return const Alignment(-0.8, 0.7); // Bottom Left
+        case 2: return Alignment.centerLeft;
+        case 3: return const Alignment(-0.5, -0.8); // Top Left
+        case 4: return const Alignment(0.5, -0.8); // Top Right
+        case 5: return Alignment.centerRight;
+        case 6: return const Alignment(0.8, 0.7); // Bottom Right
+      }
+    }
+    
+    // Default 4 player
+    switch (index) {
+      case 1: return Alignment.centerLeft;
+      case 2: return Alignment.topCenter;
+      case 3: return Alignment.centerRight;
+    }
+    return Alignment.bottomCenter;
   }
 
   Widget _buildSeat(BuildContext context, WidgetRef ref, PlayerModel player, Alignment alignment, bool isActive) {
@@ -87,7 +111,7 @@ class GameTable extends ConsumerWidget {
     }
 
     final isTyping = game.isMultiplayer && isActive && !player.isHuman && (game.phase == GamePhase.playing || game.phase == GamePhase.bidding || game.phase == GamePhase.declaring);
-    final isRowLayout = alignment == Alignment.topCenter || alignment == Alignment.bottomCenter;
+    final isRowLayout = alignment.y == 1.0 || alignment.y == -1.0 || alignment.y == 0.7 || alignment.y == -0.8;
 
     final seatContent = Container(
       padding: EdgeInsets.symmetric(
@@ -295,36 +319,38 @@ class GameTable extends ConsumerWidget {
               ),
             ),
 
-          // Player 0 (Bottom) played card
-          if (game.players[0].playedCard != null)
-            Align(
-              alignment: const Alignment(0, 0.45),
-              child: PlayingCardWidget(card: game.players[0].playedCard!, width: 40, height: 58),
-            ),
-
-          // Player 1 (Left) played card
-          if (game.players[1].playedCard != null)
-            Align(
-              alignment: const Alignment(-0.6, 0),
-              child: PlayingCardWidget(card: game.players[1].playedCard!, width: 40, height: 58),
-            ),
-
-          // Player 2 (Top) played card
-          if (game.players[2].playedCard != null)
-            Align(
-              alignment: const Alignment(0, -0.45),
-              child: PlayingCardWidget(card: game.players[2].playedCard!, width: 40, height: 58),
-            ),
-
-          // Player 3 (Right) played card
-          if (game.players[3].playedCard != null)
-            Align(
-              alignment: const Alignment(0.6, 0),
-              child: PlayingCardWidget(card: game.players[3].playedCard!, width: 40, height: 58),
-            ),
+          for (int i = 0; i < game.playerCount; i++)
+            if (game.players[i].playedCard != null)
+              Align(
+                alignment: _getTrickAlignmentForPlayer(i, game.playerCount),
+                child: PlayingCardWidget(card: game.players[i].playedCard!, width: 40, height: 58),
+              ),
         ],
       ),
     );
+  }
+
+  Alignment _getTrickAlignmentForPlayer(int index, int totalPlayers) {
+    if (index == 0) return const Alignment(0, 0.45);
+    
+    if (totalPlayers == 7) {
+      switch (index) {
+        case 1: return const Alignment(-0.4, 0.3);
+        case 2: return const Alignment(-0.6, 0);
+        case 3: return const Alignment(-0.3, -0.45);
+        case 4: return const Alignment(0.3, -0.45);
+        case 5: return const Alignment(0.6, 0);
+        case 6: return const Alignment(0.4, 0.3);
+      }
+    }
+    
+    // Default 4 player
+    switch (index) {
+      case 1: return const Alignment(-0.6, 0);
+      case 2: return const Alignment(0, -0.45);
+      case 3: return const Alignment(0.6, 0);
+    }
+    return const Alignment(0, 0);
   }
 }
 

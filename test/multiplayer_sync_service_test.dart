@@ -30,6 +30,27 @@ void main() {
     success = await service.joinRoom(code, 'Player5');
     expect(success, isFalse); // Max 4 players
 
+    // Broadcast action (does nothing but should not throw)
+    await service.broadcastGameAction(code, {'action': 'bid'});
+
+    // Listen to game state (empty stream)
+    final stream = service.listenToGameState(code);
+    final isStreamEmpty = await stream.isEmpty;
+    expect(isStreamEmpty, isTrue);
+
+    // Send chat (does nothing but should not throw)
+    await service.sendChat(code, 'HostPlayer', 'Hello');
+
+    // Listen to chat (empty stream)
+    final chatStream = service.listenToChat(code);
+    final isChatStreamEmpty = await chatStream.isEmpty;
+    expect(isChatStreamEmpty, isTrue);
+
+    // Listen to lobby players (empty stream)
+    final lobbyStream = service.listenToLobbyPlayers(code);
+    final isLobbyStreamEmpty = await lobbyStream.isEmpty;
+    expect(isLobbyStreamEmpty, isTrue);
+
     // Leave room
     await service.leaveRoom(code);
     players = await service.getLobbyPlayers(code);

@@ -321,5 +321,40 @@ void main() {
       expect(state.players[2].coins, 4900);
       expect(state.players[3].coins, 4900);
     });
+    test('startNewGame initializes 7-player game correctly', () async {
+      final container = await createInitializedContainer();
+      addTearDown(container.dispose);
+
+      final notifier = container.read(gameProvider.notifier);
+      notifier.startNewGame(playerCount: 7);
+
+      var state = container.read(gameProvider);
+      expect(state.playerCount, 7);
+      expect(state.players.length, 7);
+      expect(state.phase, GamePhase.dealing);
+
+      notifier.completeDealing();
+      state = container.read(gameProvider);
+      expect(state.phase, GamePhase.bidding);
+      
+      for (final player in state.players) {
+        expect(player.hand.length, 14); // 104 total cards / 7 players = 14 cards each + 6 in kitty
+      }
+    });
+
+    test('toggleSound and toggleMusic updates state', () async {
+      final container = await createInitializedContainer();
+      addTearDown(container.dispose);
+
+      final notifier = container.read(statsProvider.notifier);
+      
+      await notifier.toggleSound(false);
+      var state = container.read(statsProvider).value;
+      expect(state?.soundEnabled, isFalse);
+
+      await notifier.toggleMusic(false);
+      state = container.read(statsProvider).value;
+      expect(state?.musicEnabled, isFalse);
+    });
   });
 }

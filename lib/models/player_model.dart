@@ -14,6 +14,8 @@ class PlayerModel {
   final bool isBidder;
   final bool isPartner;
   final bool isPartnerRevealed;
+  final bool isPartner2;
+  final bool isPartner2Revealed;
 
   const PlayerModel({
     required this.id,
@@ -29,6 +31,8 @@ class PlayerModel {
     this.isBidder = false,
     this.isPartner = false,
     this.isPartnerRevealed = false,
+    this.isPartner2 = false,
+    this.isPartner2Revealed = false,
   });
 
   PlayerModel copyWith({
@@ -45,6 +49,8 @@ class PlayerModel {
     bool? isBidder,
     bool? isPartner,
     bool? isPartnerRevealed,
+    bool? isPartner2,
+    bool? isPartner2Revealed,
   }) {
     return PlayerModel(
       id: id ?? this.id,
@@ -60,6 +66,8 @@ class PlayerModel {
       isBidder: isBidder ?? this.isBidder,
       isPartner: isPartner ?? this.isPartner,
       isPartnerRevealed: isPartnerRevealed ?? this.isPartnerRevealed,
+      isPartner2: isPartner2 ?? this.isPartner2,
+      isPartner2Revealed: isPartner2Revealed ?? this.isPartner2Revealed,
     );
   }
 
@@ -79,6 +87,8 @@ class PlayerModel {
       isBidder: isBidder,
       isPartner: isPartner,
       isPartnerRevealed: isPartnerRevealed,
+      isPartner2: isPartner2,
+      isPartner2Revealed: isPartner2Revealed,
     );
   }
 }

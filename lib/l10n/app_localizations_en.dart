@@ -73,8 +73,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String earnedCoins(int amount) {
-    return 'Earned $amount coins!';
+    return '🪙 Earned $amount coins!';
   }
+
+  @override
+  String get sevenPlayerMode => '7 Players\nEpic Mode';
+
+  @override
+  String get sevenPlayerModeBadge => '2 Decks · 7 Players';
+
+  @override
+  String get sevenPlayerModeDesc =>
+      'Play against 6 bots with 104 cards and 2 partners!';
 
   @override
   String get adFailed => 'Ad failed or skipped';

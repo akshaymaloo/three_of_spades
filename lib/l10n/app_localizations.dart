@@ -221,8 +221,26 @@ abstract class AppLocalizations {
   /// No description provided for @earnedCoins.
   ///
   /// In en, this message translates to:
-  /// **'Earned {amount} coins!'**
+  /// **'🪙 Earned {amount} coins!'**
   String earnedCoins(int amount);
+
+  /// No description provided for @sevenPlayerMode.
+  ///
+  /// In en, this message translates to:
+  /// **'7 Players\nEpic Mode'**
+  String get sevenPlayerMode;
+
+  /// No description provided for @sevenPlayerModeBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'2 Decks · 7 Players'**
+  String get sevenPlayerModeBadge;
+
+  /// No description provided for @sevenPlayerModeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Play against 6 bots with 104 cards and 2 partners!'**
+  String get sevenPlayerModeDesc;
 
   /// No description provided for @adFailed.
   ///

@@ -19,7 +19,7 @@
   "alias": "उपनाम",
   "save": "सहेजें",
   "coins": "सिक्के",
-  "earnedCoins": "{amount} सिक्के कमाए!",
+  "earnedCoins": "🪙 {amount} सिक्के मिले!",
   "@earnedCoins": {
     "placeholders": {
       "amount": {
@@ -27,6 +27,9 @@
       }
     }
   },
+  "sevenPlayerMode": "7 खिलाड़ी\nमहाकाव्य मोड",
+  "sevenPlayerModeBadge": "2 डेक · 7 खिलाड़ी",
+  "sevenPlayerModeDesc": "104 कार्ड और 2 भागीदारों के साथ 6 बॉट्स के खिलाफ खेलें!",
   "adFailed": "विज्ञापन विफल रहा या छोड़ दिया गया",
   "statistics": "आँकड़े",
   "played": "खेले गए",

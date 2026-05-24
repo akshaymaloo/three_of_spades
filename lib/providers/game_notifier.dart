@@ -82,26 +82,29 @@ class GameNotifier extends Notifier<GameState> {
     state = state.copyWith(phase: GamePhase.start);
   }
 
-  void _initializeGame({bool isMultiplayer = false, List<String>? multiplayerNames, bool isTrainingMode = false}) {
+  void _initializeGame({bool isMultiplayer = false, List<String>? multiplayerNames, bool isTrainingMode = false, int playerCount = 4}) {
     final userCoins = ref.read(statsProvider).value?.coins ?? 5000;
     
     // Generate fresh deck and shuffle
-    final deck = CardModel.generateDeck();
+    final deck = playerCount == 7 ? CardModel.generateDoubleDeck() : CardModel.generateDeck();
     deck.shuffle(Random());
 
     // Play shuffle sound
     SoundManager().playSound('sounds/card_shuffle.mp3');
 
-    // Distribute 13 cards to 4 players
-    final List<List<CardModel>> hands = [[], [], [], []];
-    for (int i = 0; i < 52; i++) {
-      hands[i % 4].add(deck[i]);
+    // Distribute cards to players
+    final List<List<CardModel>> hands = List.generate(playerCount, (_) => []);
+    final int cardsPerPlayer = playerCount == 7 ? 14 : 13;
+    final int cardsToDeal = cardsPerPlayer * playerCount;
+    
+    for (int i = 0; i < cardsToDeal; i++) {
+      hands[i % playerCount].add(deck[i]);
     }
 
     // Sort each hand by suit and rank
     // Suit priority: Spades (S), Hearts (H), Clubs (C), Diamonds (D)
     final suitOrder = {'S': 0, 'H': 1, 'C': 2, 'D': 3};
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < playerCount; i++) {
       hands[i].sort((a, b) {
         if (a.suit != b.suit) {
           return suitOrder[a.suit]!.compareTo(suitOrder[b.suit]!);
@@ -112,7 +115,7 @@ class GameNotifier extends Notifier<GameState> {
 
     // Update player models
     final updatedPlayers = <PlayerModel>[];
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < playerCount; i++) {
       String name;
       int coins;
       bool isHuman = i == 0;
@@ -121,9 +124,15 @@ class GameNotifier extends Notifier<GameState> {
         name = multiplayerNames[i];
         coins = i == 0 ? userCoins : 5000;
       } else {
-        final p = state.players[i];
-        name = i == 0 ? (ref.read(statsProvider).value?.name ?? 'You') : p.name;
-        coins = i == 0 ? userCoins : p.coins;
+        if (i < state.players.length) {
+          final p = state.players[i];
+          name = i == 0 ? (ref.read(statsProvider).value?.name ?? 'You') : p.name;
+          coins = i == 0 ? userCoins : p.coins;
+        } else {
+          // New bots for 7-player mode
+          name = 'Bot ${i + 1}';
+          coins = 5000;
+        }
       }
 
       String avatarPath = 'assets/images/guest_avatar.png';
@@ -155,14 +164,15 @@ class GameNotifier extends Notifier<GameState> {
     }
 
     // Bidding starts with the player next to the dealer
-    final int nextDealer = (state.dealerIndex + 1) % 4;
-    final int firstBidder = (nextDealer + 1) % 4;
+    final int nextDealer = (state.dealerIndex + 1) % playerCount;
+    final int firstBidder = (nextDealer + 1) % playerCount;
 
     final soundEnabled = ref.read(statsProvider).value?.soundEnabled ?? true;
 
     state = state.copyWith(
       phase: GamePhase.dealing,
       players: updatedPlayers,
+      playerCount: playerCount,
       activePlayerIndex: firstBidder,
       dealerIndex: nextDealer,
       roundNumber: 1,
@@ -170,8 +180,10 @@ class GameNotifier extends Notifier<GameState> {
       trumpStart: 'x',
       trump: 'x',
       partnerCard: const Nullable(null),
+      partnerCard2: const Nullable(null),
       winningBid: 0,
       bidderIndex: const Nullable(null),
+      partnerIndex2: const Nullable(null),
       trickWinnerIndex: const Nullable(null),
       message: 'Dealing cards...',
       soundEnabled: soundEnabled,
@@ -198,8 +210,8 @@ class GameNotifier extends Notifier<GameState> {
     _triggerBotActionIfNeeded();
   }
 
-  void startNewGame() {
-    _initializeGame(isMultiplayer: state.isMultiplayer, isTrainingMode: state.isTrainingMode);
+  void startNewGame({int playerCount = 4}) {
+    _initializeGame(isMultiplayer: state.isMultiplayer, isTrainingMode: state.isTrainingMode, playerCount: playerCount);
   }
 
   void finishMatch() {
@@ -314,7 +326,7 @@ class GameNotifier extends Notifier<GameState> {
       return;
     }
 
-    // If all 4 players passed without any bid
+    // If all players passed without any bid
     if (activeBidders.isEmpty) {
       state = state.copyWith(
         message: 'All players passed. Redealing...',
@@ -329,23 +341,25 @@ class GameNotifier extends Notifier<GameState> {
     // Find next player who has not passed
     int nextIndex = state.activePlayerIndex;
     do {
-      nextIndex = (nextIndex + 1) % 4;
+      nextIndex = (nextIndex + 1) % state.playerCount;
     } while (state.players[nextIndex].hasPassed);
 
     state = state.copyWith(activePlayerIndex: nextIndex);
     _triggerBotActionIfNeeded();
   }
 
-  void declareTrumpAndPartner(String trumpSuit, CardModel partnerCard) {
+  void declareTrumpAndPartner(String trumpSuit, CardModel partnerCard, [CardModel? partnerCard2]) {
     if (state.phase != GamePhase.declaring) return;
 
     // Set partner on the player holding this card
     final updatedPlayers = state.players.map((p) {
-      final hasCard = p.hand.any((c) => c.suit == partnerCard.suit && c.rank == partnerCard.rank);
-      if (hasCard) {
-        return p.copyWith(isPartner: true);
-      }
-      return p;
+      final hasCard1 = p.hand.any((c) => c.suit == partnerCard.suit && c.rank == partnerCard.rank);
+      final hasCard2 = partnerCard2 != null && p.hand.any((c) => c.suit == partnerCard2.suit && c.rank == partnerCard2.rank);
+      
+      return p.copyWith(
+        isPartner: hasCard1,
+        isPartner2: hasCard2,
+      );
     }).toList();
 
     state = state.copyWith(
@@ -353,11 +367,14 @@ class GameNotifier extends Notifier<GameState> {
       players: updatedPlayers,
       trump: trumpSuit,
       partnerCard: Nullable(partnerCard),
+      partnerCard2: Nullable(partnerCard2),
       activePlayerIndex: state.bidderIndex!, // Bidder leads first trick
       roundNumber: 1,
       gameTurn: 1,
       trumpStart: 'x',
-      message: 'Trump is ${CardModel.getSuitName(trumpSuit)}s. Partner Card is ${partnerCard.name}. ${state.players[state.bidderIndex!].name} leads.',
+      message: partnerCard2 != null 
+          ? 'Trump is ${CardModel.getSuitName(trumpSuit)}s. Partners are ${partnerCard.name} & ${partnerCard2.name}. ${state.players[state.bidderIndex!].name} leads.'
+          : 'Trump is ${CardModel.getSuitName(trumpSuit)}s. Partner Card is ${partnerCard.name}. ${state.players[state.bidderIndex!].name} leads.',
     );
 
     SoundManager().playSound('sounds/success.mp3');
@@ -430,8 +447,8 @@ class GameNotifier extends Notifier<GameState> {
     }
 
     // Advance turn
-    if (state.gameTurn < 4) {
-      final nextIndex = (state.activePlayerIndex + 1) % 4;
+    if (state.gameTurn < state.playerCount) {
+      final nextIndex = (state.activePlayerIndex + 1) % state.playerCount;
       state = state.copyWith(
         gameTurn: state.gameTurn + 1,
         activePlayerIndex: nextIndex,
@@ -447,13 +464,13 @@ class GameNotifier extends Notifier<GameState> {
 
   int _determineTrickWinnerIndex() {
     int bestIndex = state.activePlayerIndex; // Last active player, but we trace starting leader
-    // Wait, the leader index is (activePlayerIndex - 3) % 4
-    final int leaderIndex = (state.activePlayerIndex - 3 + 4) % 4;
+    // Wait, the leader index is (activePlayerIndex - (playerCount - 1) + playerCount) % playerCount
+    final int leaderIndex = (state.activePlayerIndex - (state.playerCount - 1) + state.playerCount) % state.playerCount;
     
     bestIndex = leaderIndex;
     CardModel bestCard = state.players[leaderIndex].playedCard!;
 
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < state.playerCount; i++) {
       final card = state.players[i].playedCard;
       if (card == null || i == leaderIndex) continue;
 
@@ -551,54 +568,60 @@ class GameNotifier extends Notifier<GameState> {
   void _endGame(List<PlayerModel> finalPlayers) {
     final bidderIndex = state.bidderIndex!;
     
-    // Find partner index
+    // Find partner indices
     int partnerIndex = bidderIndex;
-    for (int i = 0; i < 4; i++) {
-      if (finalPlayers[i].isPartner) {
-        partnerIndex = i;
-        break;
-      }
+    int partnerIndex2 = bidderIndex;
+    for (int i = 0; i < state.playerCount; i++) {
+      if (finalPlayers[i].isPartner) partnerIndex = i;
+      if (finalPlayers[i].isPartner2) partnerIndex2 = i;
     }
 
-    final bidderPoints = finalPlayers[bidderIndex].roundPoints;
-    final partnerPoints = finalPlayers[partnerIndex].roundPoints;
-    final totalBidderPoints = bidderIndex == partnerIndex 
-        ? bidderPoints 
-        : bidderPoints + partnerPoints;
+    int totalBidderPoints = finalPlayers[bidderIndex].roundPoints;
+    if (partnerIndex != bidderIndex) {
+      totalBidderPoints += finalPlayers[partnerIndex].roundPoints;
+    }
+    if (partnerIndex2 != bidderIndex && partnerIndex2 != partnerIndex) {
+      totalBidderPoints += finalPlayers[partnerIndex2].roundPoints;
+    }
 
     final isBidWon = totalBidderPoints >= state.winningBid;
 
     final bid = state.winningBid;
-    final coinDelta = List<int>.filled(4, 0);
+    final coinDelta = List<int>.filled(state.playerCount, 0);
+    
     if (isBidWon) {
       final bidderReward = bid * 2;
-      final partnerReward = bidderIndex == partnerIndex ? bidderReward : bid;
+      final partnerReward = bid;
       final defenderLoss = -(bid ~/ 2);
       
-      coinDelta[bidderIndex] = bidderReward;
-      coinDelta[partnerIndex] = partnerReward;
-      for (int i = 0; i < 4; i++) {
-        if (i != bidderIndex && i != partnerIndex) {
-          coinDelta[i] = defenderLoss;
+      for (int i = 0; i < state.playerCount; i++) {
+        if (i == bidderIndex) {
+          coinDelta[i] += bidderReward;
+        } else if (i == partnerIndex || i == partnerIndex2) {
+          coinDelta[i] += partnerReward;
+        } else {
+          coinDelta[i] += defenderLoss;
         }
       }
     } else {
       final bidderLoss = -(bid * 1.5).floor();
-      final partnerLoss = bidderIndex == partnerIndex ? bidderLoss : -(bid * 0.75).floor();
+      final partnerLoss = -(bid * 0.75).floor();
       final defenderReward = (bid * 0.75).floor();
       
-      coinDelta[bidderIndex] = bidderLoss;
-      coinDelta[partnerIndex] = partnerLoss;
-      for (int i = 0; i < 4; i++) {
-        if (i != bidderIndex && i != partnerIndex) {
-          coinDelta[i] = defenderReward;
+      for (int i = 0; i < state.playerCount; i++) {
+        if (i == bidderIndex) {
+          coinDelta[i] += bidderLoss;
+        } else if (i == partnerIndex || i == partnerIndex2) {
+          coinDelta[i] += partnerLoss;
+        } else {
+          coinDelta[i] += defenderReward;
         }
       }
     }
 
     // Apply coin delta and update stats
     final updatedPlayers = <PlayerModel>[];
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < state.playerCount; i++) {
       final p = finalPlayers[i];
       int newCoins = p.coins + coinDelta[i];
       if (newCoins < 0) newCoins = 0; // Prevent negative coins
@@ -606,7 +629,7 @@ class GameNotifier extends Notifier<GameState> {
     }
 
     final isHumanBidder = bidderIndex == 0;
-    final isHumanPartner = partnerIndex == 0;
+    final isHumanPartner = partnerIndex == 0 || partnerIndex2 == 0;
     final isHumanBidderOrPartner = isHumanBidder || isHumanPartner;
 
     final bool humanWon = isBidWon ? isHumanBidderOrPartner : !isHumanBidderOrPartner;
@@ -774,18 +797,42 @@ class GameNotifier extends Notifier<GameState> {
       }
     }
 
-    declareTrumpAndPartner(selectedTrump, selectedPartnerCard!);
+    CardModel? selectedPartnerCard2;
+    if (state.playerCount == 7) {
+      // Find a second partner card
+      for (var card in trumpCardsInDeck) {
+        if (card.suit != selectedPartnerCard!.suit || card.rank != selectedPartnerCard.rank) {
+          final botHasIt = bot.hand.any((c) => c.suit == card.suit && c.rank == card.rank);
+          if (!botHasIt) {
+            selectedPartnerCard2 = card;
+            break;
+          }
+        }
+      }
+      if (selectedPartnerCard2 == null) {
+         // Fallback logic for second partner card could be more robust, just pick any they don't have
+         final remainingDeck = allCards.where((c) => 
+            !bot.hand.any((bh) => bh.suit == c.suit && bh.rank == c.rank) &&
+            !(c.suit == selectedPartnerCard!.suit && c.rank == selectedPartnerCard.rank)
+         ).toList();
+         if (remainingDeck.isNotEmpty) {
+           selectedPartnerCard2 = remainingDeck.first;
+         }
+      }
+    }
+
+    declareTrumpAndPartner(selectedTrump, selectedPartnerCard!, selectedPartnerCard2);
   }
 
   int _getCurrentlyWinningPlayerIndex() {
     final int ledCount = state.gameTurn - 1;
     if (ledCount == 0) return state.activePlayerIndex;
 
-    final int leaderIndex = (state.activePlayerIndex - ledCount + 4) % 4;
+    final int leaderIndex = (state.activePlayerIndex - ledCount + state.playerCount) % state.playerCount;
     int bestIndex = leaderIndex;
     CardModel bestCard = state.players[leaderIndex].playedCard!;
 
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < state.playerCount; i++) {
       final card = state.players[i].playedCard;
       if (card == null || i == leaderIndex) continue;
 
@@ -825,20 +872,32 @@ class GameNotifier extends Notifier<GameState> {
     
     if (bot.id == state.bidderIndex) {
       final other = state.players[otherId];
-      return other.isPartner && other.isPartnerRevealed;
+      return (other.isPartner && other.isPartnerRevealed) || 
+             (other.isPartner2 && other.isPartner2Revealed);
     }
     
-    if (bot.isPartner) {
-      return otherId == state.bidderIndex;
+    if (bot.isPartner || bot.isPartner2) {
+      if (otherId == state.bidderIndex) return true;
+      final other = state.players[otherId];
+      return (other.isPartner && other.isPartnerRevealed) || 
+             (other.isPartner2 && other.isPartner2Revealed);
     }
     
     if (otherId == state.bidderIndex) return false;
     
-    final partner = state.players.firstWhere((p) => p.isPartner, orElse: () => state.players[0]);
-    if (partner.isPartner && partner.isPartnerRevealed) {
-      return otherId != partner.id;
+    // Check if other is a revealed partner
+    final other = state.players[otherId];
+    if ((other.isPartner && other.isPartnerRevealed) || 
+        (other.isPartner2 && other.isPartner2Revealed)) {
+      return false;
     }
     
+    // If not bidder and not partner, then defender
+    final isBidderOrPartner = bot.id == state.bidderIndex || bot.isPartner || bot.isPartner2;
+    if (!isBidderOrPartner) {
+      return true; // defenders are allied with each other
+    }
+
     return false;
   }
 
@@ -884,7 +943,7 @@ class GameNotifier extends Notifier<GameState> {
 
       if (matchingCards.isNotEmpty) {
         if (alliedWinning) {
-          final isLastTurn = state.gameTurn == 4;
+          final isLastTurn = state.gameTurn == state.playerCount;
           if (isLastTurn) {
             matchingCards.sort((a, b) => b.points.compareTo(a.points));
             cardToPlay = matchingCards.last;
@@ -914,7 +973,7 @@ class GameNotifier extends Notifier<GameState> {
         if (alliedWinning) {
           final nonTrumps = bot.hand.where((c) => c.suit != state.trump).toList();
           if (nonTrumps.isNotEmpty) {
-            final isLastTurn = state.gameTurn == 4;
+            final isLastTurn = state.gameTurn == state.playerCount;
             if (isLastTurn) {
               nonTrumps.sort((a, b) => b.points.compareTo(a.points));
               cardToPlay = nonTrumps.first;
