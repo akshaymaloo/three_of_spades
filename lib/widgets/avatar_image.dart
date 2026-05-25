@@ -17,8 +17,18 @@ class AvatarImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pixelRatio = MediaQuery.of(context).devicePixelRatio;
+    final int cacheSize = (size * pixelRatio).round();
+
     if (avatarPath.isEmpty) {
-      return Image.asset('assets/images/guest_avatar.png', fit: fit, width: size, height: size);
+      return Image.asset(
+        'assets/images/guest_avatar.png',
+        fit: fit,
+        width: size,
+        height: size,
+        cacheWidth: cacheSize,
+        cacheHeight: cacheSize,
+      );
     }
 
     // Check if it is Base64 data (custom avatar)
@@ -30,11 +40,27 @@ class AvatarImage extends StatelessWidget {
           fit: fit,
           width: size,
           height: size,
-          errorBuilder: (context, error, stackTrace) => Image.asset('assets/images/guest_avatar.png', fit: fit, width: size, height: size),
+          cacheWidth: cacheSize,
+          cacheHeight: cacheSize,
+          errorBuilder: (context, error, stackTrace) => Image.asset(
+            'assets/images/guest_avatar.png',
+            fit: fit,
+            width: size,
+            height: size,
+            cacheWidth: cacheSize,
+            cacheHeight: cacheSize,
+          ),
         );
       } catch (e) {
         // Fallback if decoding fails
-        return Image.asset('assets/images/guest_avatar.png', fit: fit, width: size, height: size);
+        return Image.asset(
+          'assets/images/guest_avatar.png',
+          fit: fit,
+          width: size,
+          height: size,
+          cacheWidth: cacheSize,
+          cacheHeight: cacheSize,
+        );
       }
     }
 
@@ -44,6 +70,8 @@ class AvatarImage extends StatelessWidget {
         fit: fit,
         width: size,
         height: size,
+        memCacheWidth: cacheSize,
+        memCacheHeight: cacheSize,
         placeholder: (context, url) => const Center(
           child: SizedBox(
             width: 20,
@@ -51,7 +79,14 @@ class AvatarImage extends StatelessWidget {
             child: CircularProgressIndicator(color: GameTheme.neonCyan, strokeWidth: 2),
           ),
         ),
-        errorWidget: (context, url, error) => Image.asset('assets/images/guest_avatar.png', fit: fit, width: size, height: size),
+        errorWidget: (context, url, error) => Image.asset(
+          'assets/images/guest_avatar.png',
+          fit: fit,
+          width: size,
+          height: size,
+          cacheWidth: cacheSize,
+          cacheHeight: cacheSize,
+        ),
       );
     }
 
@@ -60,7 +95,16 @@ class AvatarImage extends StatelessWidget {
       fit: fit,
       width: size,
       height: size,
-      errorBuilder: (context, error, stackTrace) => Image.asset('assets/images/guest_avatar.png', fit: fit, width: size, height: size),
+      cacheWidth: cacheSize,
+      cacheHeight: cacheSize,
+      errorBuilder: (context, error, stackTrace) => Image.asset(
+        'assets/images/guest_avatar.png',
+        fit: fit,
+        width: size,
+        height: size,
+        cacheWidth: cacheSize,
+        cacheHeight: cacheSize,
+      ),
     );
   }
 }

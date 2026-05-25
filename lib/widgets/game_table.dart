@@ -13,6 +13,7 @@ import '../providers/stats_provider.dart';
 import 'playing_card_widget.dart';
 import '../l10n/app_localizations.dart';
 import 'avatar_image.dart';
+import '../models/celebrity_model.dart';
 
 class GameTable extends ConsumerWidget {
   final GameState game;
@@ -27,14 +28,16 @@ class GameTable extends ConsumerWidget {
     final size = MediaQuery.of(context).size;
     final stats = ref.watch(statsProvider).value;
     final tableTheme = stats?.tableTheme ?? 'green';
+    final double screenHeight = size.height;
+    final bool isSmallHeight = screenHeight < 500;
 
     return Stack(
       alignment: Alignment.center,
       children: [
         // Felt green table
         Container(
-          width: size.width * 0.75,
-          height: size.height * 0.52,
+          width: size.width * (isSmallHeight ? 0.82 : 0.75),
+          height: size.height * (isSmallHeight ? 0.44 : 0.52),
           decoration: BoxDecoration(
             gradient: GameTheme.tableGradientForTheme(tableTheme),
             borderRadius: BorderRadius.circular(100),
@@ -50,14 +53,28 @@ class GameTable extends ConsumerWidget {
         ),
 
         // Dotted center slot representing trick cards
-        _buildTrickCenter(game),
+        _buildTrickCenter(game, isSmallHeight),
 
         // Seat positions
         for (int i = 1; i < game.playerCount; i++)
-          _buildSeat(context, ref, game.players[i], _getAlignmentForPlayer(i, game.playerCount), game.activePlayerIndex == i),
+          _buildSeat(
+            context,
+            ref,
+            game.players[i],
+            _getAlignmentForPlayer(i, game.playerCount, isSmallHeight),
+            game.activePlayerIndex == i,
+            isSmallHeight,
+          ),
         
         // Human (bottom)
-        _buildSeat(context, ref, game.players[0], Alignment.bottomCenter, game.activePlayerIndex == 0),
+        _buildSeat(
+          context,
+          ref,
+          game.players[0],
+          Alignment.bottomCenter,
+          game.activePlayerIndex == 0,
+          isSmallHeight,
+        ),
 
         // Turn timer (top-right quadrant of the table stack)
         if (game.phase == GamePhase.playing && game.turnTimer != null)
@@ -70,30 +87,30 @@ class GameTable extends ConsumerWidget {
     );
   }
 
-  Alignment _getAlignmentForPlayer(int index, int totalPlayers) {
+  Alignment _getAlignmentForPlayer(int index, int totalPlayers, bool isSmallHeight) {
     if (index == 0) return Alignment.bottomCenter;
     
     if (totalPlayers == 7) {
       switch (index) {
-        case 1: return const Alignment(-0.8, 0.7); // Bottom Left
+        case 1: return Alignment(-0.8, isSmallHeight ? 0.95 : 0.7); // Bottom Left
         case 2: return Alignment.centerLeft;
-        case 3: return const Alignment(-0.5, -0.8); // Top Left
-        case 4: return const Alignment(0.5, -0.8); // Top Right
+        case 3: return Alignment(-0.55, isSmallHeight ? -0.95 : -0.8); // Top Left
+        case 4: return Alignment(0.55, isSmallHeight ? -0.95 : -0.8); // Top Right
         case 5: return Alignment.centerRight;
-        case 6: return const Alignment(0.8, 0.7); // Bottom Right
+        case 6: return Alignment(0.8, isSmallHeight ? 0.95 : 0.7); // Bottom Right
       }
     }
     
     // Default 4 player
     switch (index) {
       case 1: return Alignment.centerLeft;
-      case 2: return Alignment.topCenter;
+      case 2: return isSmallHeight ? const Alignment(0, -0.95) : Alignment.topCenter;
       case 3: return Alignment.centerRight;
     }
     return Alignment.bottomCenter;
   }
 
-  Widget _buildSeat(BuildContext context, WidgetRef ref, PlayerModel player, Alignment alignment, bool isActive) {
+  Widget _buildSeat(BuildContext context, WidgetRef ref, PlayerModel player, Alignment alignment, bool isActive, bool isSmallHeight) {
     final showGlow = isActive && (game.phase != GamePhase.roundOver);
     final shadowColor = showGlow ? GameTheme.neonCyan : Colors.transparent;
 
@@ -120,7 +137,14 @@ class GameTable extends ConsumerWidget {
     }
 
     final isTyping = game.isMultiplayer && isActive && !player.isHuman && (game.phase == GamePhase.playing || game.phase == GamePhase.bidding || game.phase == GamePhase.declaring);
-    final isRowLayout = alignment.y == 1.0 || alignment.y == -1.0 || alignment.y == 0.7 || alignment.y == -0.8;
+    final isRowLayout = alignment.y == 1.0 || 
+                        alignment.y == -1.0 || 
+                        alignment.y == 0.7 || 
+                        alignment.y == -0.8 || 
+                        alignment.y == 0.95 || 
+                        alignment.y == -0.95;
+
+    final double baseFontSize = isSmallHeight ? 9 : 11;
 
     final seatContent = Container(
       padding: EdgeInsets.symmetric(
@@ -133,14 +157,18 @@ class GameTable extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  width: 32,
-                  height: 32,
+                  width: isSmallHeight ? 24 : 32,
+                  height: isSmallHeight ? 24 : 32,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(color: showGlow ? GameTheme.neonCyan : Colors.white24, width: 1.5),
                     boxShadow: GameTheme.neonGlow(shadowColor, blurRadius: 8),
-                    image: const DecorationImage(
-                      image: AssetImage('assets/images/guest_avatar.png'),
+                  ),
+                  child: ClipOval(
+                    child: AvatarImage(
+                      avatarPath: player.isHuman
+                          ? (ref.watch(avatarProvider)?.imageUrl ?? player.avatarPath)
+                          : player.avatarPath,
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -152,7 +180,7 @@ class GameTable extends ConsumerWidget {
                   children: [
                     Text(
                       player.name,
-                      style: const TextStyle(color: GameTheme.textWhite, fontSize: 11, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: GameTheme.textWhite, fontSize: baseFontSize, fontWeight: FontWeight.bold),
                     ),
                     if (isTyping) ...[
                       Row(
@@ -160,7 +188,7 @@ class GameTable extends ConsumerWidget {
                         children: [
                           Text(
                             AppLocalizations.of(context)?.thinking ?? 'Thinking ',
-                            style: const TextStyle(color: GameTheme.neonCyan, fontSize: 11, fontWeight: FontWeight.bold),
+                            style: TextStyle(color: GameTheme.neonCyan, fontSize: baseFontSize, fontWeight: FontWeight.bold),
                           ),
                           TypingIndicator(),
                         ],
@@ -172,14 +200,14 @@ class GameTable extends ConsumerWidget {
                           if (status.isNotEmpty)
                             Text(
                               status,
-                              style: TextStyle(color: statusColor, fontSize: 11, fontWeight: FontWeight.bold),
+                              style: TextStyle(color: statusColor, fontSize: baseFontSize, fontWeight: FontWeight.bold),
                             ),
                           if (status.isNotEmpty && (game.phase == GamePhase.playing || game.phase == GamePhase.roundOver))
                             const SizedBox(width: 6),
                           if ((game.phase == GamePhase.playing || game.phase == GamePhase.roundOver))
                             Text(
                               AppLocalizations.of(context)?.pointsLabel(player.roundPoints) ?? 'Pts: ${player.roundPoints}',
-                              style: const TextStyle(color: GameTheme.goldAccent, fontSize: 11, fontWeight: FontWeight.bold),
+                              style: TextStyle(color: GameTheme.goldAccent, fontSize: baseFontSize, fontWeight: FontWeight.bold),
                             ),
                         ],
                       ),
@@ -192,8 +220,8 @@ class GameTable extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  width: 38,
-                  height: 38,
+                  width: isSmallHeight ? 28 : 38,
+                  height: isSmallHeight ? 28 : 38,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(color: showGlow ? GameTheme.neonCyan : Colors.white24, width: 1.5),
@@ -201,7 +229,9 @@ class GameTable extends ConsumerWidget {
                   ),
                   child: ClipOval(
                     child: AvatarImage(
-                      avatarPath: player.avatarPath,
+                      avatarPath: player.isHuman
+                          ? (ref.watch(avatarProvider)?.imageUrl ?? player.avatarPath)
+                          : player.avatarPath,
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -209,7 +239,7 @@ class GameTable extends ConsumerWidget {
                 const SizedBox(height: 4),
                 Text(
                   player.name,
-                  style: const TextStyle(color: GameTheme.textWhite, fontSize: 11, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: GameTheme.textWhite, fontSize: baseFontSize, fontWeight: FontWeight.bold),
                 ),
                 if (isTyping) ...[
                   const SizedBox(height: 4),
@@ -218,7 +248,7 @@ class GameTable extends ConsumerWidget {
                     children: [
                       Text(
                         AppLocalizations.of(context)?.thinking ?? 'Thinking ',
-                        style: const TextStyle(color: GameTheme.neonCyan, fontSize: 11, fontWeight: FontWeight.bold),
+                        style: TextStyle(color: GameTheme.neonCyan, fontSize: baseFontSize, fontWeight: FontWeight.bold),
                       ),
                       TypingIndicator(),
                     ],
@@ -227,14 +257,14 @@ class GameTable extends ConsumerWidget {
                   const SizedBox(height: 2),
                   Text(
                     status,
-                    style: TextStyle(color: statusColor, fontSize: 11, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: statusColor, fontSize: baseFontSize, fontWeight: FontWeight.bold),
                   ),
                 ],
                 if ((game.phase == GamePhase.playing || game.phase == GamePhase.roundOver) && !isTyping) ...[
                   const SizedBox(height: 2),
                   Text(
                     AppLocalizations.of(context)?.pointsLabel(player.roundPoints) ?? 'Pts: ${player.roundPoints}',
-                    style: const TextStyle(color: GameTheme.goldAccent, fontSize: 11, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: GameTheme.goldAccent, fontSize: baseFontSize, fontWeight: FontWeight.bold),
                   ),
                 ],
               ],
@@ -252,7 +282,7 @@ class GameTable extends ConsumerWidget {
       }
     }
 
-    final paddingVal = isRowLayout ? 2.0 : 12.0;
+    final paddingVal = isRowLayout ? 2.0 : (isSmallHeight ? 4.0 : 12.0);
 
     if (activeMessage == null) {
       return Align(
@@ -270,15 +300,15 @@ class GameTable extends ConsumerWidget {
     // Determine bubble placement relative to seat
     double? left, right, top, bottom;
     if (alignment == Alignment.centerLeft) {
-      left = 80;
+      left = isSmallHeight ? 60 : 80;
       top = -10;
     } else if (alignment == Alignment.centerRight) {
-      right = 80;
+      right = isSmallHeight ? 60 : 80;
       top = -10;
     } else if (alignment == Alignment.topCenter) {
-      top = 50;
+      top = isSmallHeight ? 40 : 50;
     } else if (alignment == Alignment.bottomCenter) {
-      bottom = 50;
+      bottom = isSmallHeight ? 40 : 50;
     }
 
     return Align(
@@ -303,15 +333,16 @@ class GameTable extends ConsumerWidget {
     );
   }
 
-  Widget _buildTrickCenter(GameState game) {
+  Widget _buildTrickCenter(GameState game, bool isSmallHeight) {
     final trickPoints = game.players
         .where((p) => p.playedCard != null)
         .fold(0, (sum, p) => sum + p.playedCard!.points);
     final hasPlayedCards = game.players.any((p) => p.playedCard != null);
+    final double trickCenterSize = isSmallHeight ? 160 : 260;
 
     return Container(
-      width: 260,
-      height: 260,
+      width: trickCenterSize,
+      height: trickCenterSize,
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.01),
         borderRadius: BorderRadius.circular(16),
@@ -325,7 +356,7 @@ class GameTable extends ConsumerWidget {
                 opacity: 0.05,
                 child: Text(
                   getSuitSymbol(game.trumpStart),
-                  style: const TextStyle(fontSize: 80, color: Colors.white),
+                  style: TextStyle(fontSize: isSmallHeight ? 50 : 80, color: Colors.white),
                 ),
               ),
             ),
@@ -334,7 +365,10 @@ class GameTable extends ConsumerWidget {
           if (hasPlayedCards)
             Center(
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: EdgeInsets.symmetric(
+                  horizontal: isSmallHeight ? 10 : 16,
+                  vertical: isSmallHeight ? 4 : 8,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.black.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(16),
@@ -343,7 +377,7 @@ class GameTable extends ConsumerWidget {
                   '$trickPoints',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.5),
-                    fontSize: 48,
+                    fontSize: isSmallHeight ? 32 : 48,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -354,7 +388,11 @@ class GameTable extends ConsumerWidget {
             if (game.players[i].playedCard != null)
               Align(
                 alignment: _getTrickAlignmentForPlayer(i, game.playerCount),
-                child: PlayingCardWidget(card: game.players[i].playedCard!, width: 60, height: 86),
+                child: PlayingCardWidget(
+                  card: game.players[i].playedCard!, 
+                  width: isSmallHeight ? 42 : 60, 
+                  height: isSmallHeight ? 60 : 86,
+                ),
               ),
         ],
       ),

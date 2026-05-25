@@ -36,9 +36,14 @@ class _PlayerHandPanelState extends ConsumerState<PlayerHandPanel> {
   @override
   Widget build(BuildContext context) {
     final hand = widget.humanPlayer.hand;
+    final double screenHeight = MediaQuery.of(context).size.height;
+    final bool isSmallHeight = screenHeight < 500;
+    final double panelHeight = isSmallHeight ? 95 : 120;
+    final double cardWidth = isSmallHeight ? 44 : 56;
+    final double cardHeight = isSmallHeight ? 62 : 80;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: isSmallHeight ? 4 : 8),
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: 0.4),
         border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.05))),
@@ -47,7 +52,7 @@ class _PlayerHandPanelState extends ConsumerState<PlayerHandPanel> {
         children: [
           Expanded(
             child: SizedBox(
-              height: 120,
+              height: panelHeight,
               child: hand.isEmpty
                   ? Center(child: Text(AppLocalizations.of(context)?.noCards ?? 'No Cards', style: const TextStyle(color: GameTheme.textGrey)))
                   : ListView.builder(
@@ -67,7 +72,7 @@ class _PlayerHandPanelState extends ConsumerState<PlayerHandPanel> {
                         final isSelected = _selectedCardIndex == index;
 
                         return Padding(
-                          padding: const EdgeInsets.only(right: 6.0, top: 16.0), // Add top padding to allow badge space
+                          padding: EdgeInsets.only(right: 6.0, top: isSmallHeight ? 8.0 : 16.0), // Add top padding to allow badge space
                           child: Stack(
                             clipBehavior: Clip.none,
                             children: [
@@ -75,9 +80,9 @@ class _PlayerHandPanelState extends ConsumerState<PlayerHandPanel> {
                                 card: card,
                                 isSelected: isSelected,
                                 isPlayable: isPlayable,
-                                width: 56,
-                                height: 80,
-                                selectionOffset: 14,
+                                width: cardWidth,
+                                height: cardHeight,
+                                selectionOffset: isSmallHeight ? 10 : 14,
                                 onTap: () {
                                   if (widget.game.activePlayerIndex != 0) return;
 
@@ -99,7 +104,7 @@ class _PlayerHandPanelState extends ConsumerState<PlayerHandPanel> {
                                 AnimatedPositioned(
                                   duration: const Duration(milliseconds: 200),
                                   curve: Curves.easeOut,
-                                  top: isSelected ? -20 : -6,
+                                  top: isSelected ? (isSmallHeight ? -14 : -20) : (isSmallHeight ? -4 : -6),
                                   left: 0,
                                   right: 0,
                                   child: Center(
@@ -145,7 +150,7 @@ class _PlayerHandPanelState extends ConsumerState<PlayerHandPanel> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: GameTheme.neonGreen,
                   foregroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: isSmallHeight ? 8 : 12),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 ),
                 onPressed: () {

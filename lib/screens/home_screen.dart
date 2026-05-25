@@ -594,10 +594,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                                 childAspectRatio: 1.8,
                                                 physics: const NeverScrollableScrollPhysics(),
                                                 children: [
-                                                  _buildStatTile(AppLocalizations.of(context)?.played ?? 'Played', stats.gamesPlayed.toString(), Icons.play_arrow_rounded),
-                                                  _buildStatTile(AppLocalizations.of(context)?.won ?? 'Won', stats.gamesWon.toString(), Icons.emoji_events_rounded),
-                                                  _buildStatTile(AppLocalizations.of(context)?.winRate ?? 'Win Rate', winRate, Icons.percent_rounded),
-                                                  _buildStatTile(AppLocalizations.of(context)?.bestBid ?? 'Best Bid', stats.highestBidWon > 0 ? stats.highestBidWon.toString() : '-', Icons.workspace_premium_rounded),
+                                                  _buildStatTile(context, AppLocalizations.of(context)?.played ?? 'Played', stats.gamesPlayed.toString(), Icons.play_arrow_rounded),
+                                                  _buildStatTile(context, AppLocalizations.of(context)?.won ?? 'Won', stats.gamesWon.toString(), Icons.emoji_events_rounded),
+                                                  _buildStatTile(context, AppLocalizations.of(context)?.winRate ?? 'Win Rate', winRate, Icons.percent_rounded),
+                                                  _buildStatTile(context, AppLocalizations.of(context)?.bestBid ?? 'Best Bid', stats.highestBidWon > 0 ? stats.highestBidWon.toString() : '-', Icons.workspace_premium_rounded),
                                                 ],
                                               ),
                                             ),
@@ -699,118 +699,247 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   ],
                                 ),
                               )
-                            : Expanded(
-                                child: SingleChildScrollView(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                                    children: [
-                                      // Statistics Panel (Top)
-                                      Container(
-                                        height: 190,
-                                        padding: const EdgeInsets.all(16),
-                                        decoration: GameTheme.glassDecoration(opacity: 0.03, borderOpacity: 0.08),
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              AppLocalizations.of(context)?.statistics.toUpperCase() ?? 'STATISTICS',
-                                              style: const TextStyle(
-                                                color: GameTheme.neonCyan,
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.bold,
-                                                letterSpacing: 1.5,
-                                              ),
+                              : () {
+                                final bool isLandscapeMobile = !isWide && size.width > size.height;
+                                if (isLandscapeMobile) {
+                                  return Expanded(
+                                    child: Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        // Left Pane: Stats Panel
+                                        Expanded(
+                                          flex: 4,
+                                          child: Container(
+                                            padding: const EdgeInsets.all(16),
+                                            decoration: GameTheme.glassDecoration(opacity: 0.03, borderOpacity: 0.08),
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  AppLocalizations.of(context)?.statistics.toUpperCase() ?? 'STATISTICS',
+                                                  style: const TextStyle(
+                                                    color: GameTheme.neonCyan,
+                                                    fontSize: 13,
+                                                    fontWeight: FontWeight.bold,
+                                                    letterSpacing: 1.5,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 12),
+                                                Expanded(
+                                                  child: GridView.count(
+                                                    crossAxisCount: 2,
+                                                    crossAxisSpacing: 10,
+                                                    mainAxisSpacing: 10,
+                                                    childAspectRatio: 2.2,
+                                                    physics: const NeverScrollableScrollPhysics(),
+                                                    children: [
+                                                      _buildStatTile(context, AppLocalizations.of(context)?.played ?? 'Played', stats.gamesPlayed.toString(), Icons.play_arrow_rounded),
+                                                      _buildStatTile(context, AppLocalizations.of(context)?.won ?? 'Won', stats.gamesWon.toString(), Icons.emoji_events_rounded),
+                                                      _buildStatTile(context, AppLocalizations.of(context)?.winRate ?? 'Win Rate', winRate, Icons.percent_rounded),
+                                                      _buildStatTile(context, AppLocalizations.of(context)?.bestBid ?? 'Best Bid', stats.highestBidWon > 0 ? stats.highestBidWon.toString() : '-', Icons.workspace_premium_rounded),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
                                             ),
-                                            const SizedBox(height: 12),
-                                            Expanded(
-                                              child: GridView.count(
-                                                crossAxisCount: 2,
-                                                crossAxisSpacing: 10,
-                                                mainAxisSpacing: 10,
-                                                childAspectRatio: 2.2,
-                                                physics: const NeverScrollableScrollPhysics(),
-                                                children: [
-                                                  _buildStatTile(AppLocalizations.of(context)?.played ?? 'Played', stats.gamesPlayed.toString(), Icons.play_arrow_rounded),
-                                                  _buildStatTile(AppLocalizations.of(context)?.won ?? 'Won', stats.gamesWon.toString(), Icons.emoji_events_rounded),
-                                                  _buildStatTile(AppLocalizations.of(context)?.winRate ?? 'Win Rate', winRate, Icons.percent_rounded),
-                                                  _buildStatTile(AppLocalizations.of(context)?.bestBid ?? 'Best Bid', stats.highestBidWon > 0 ? stats.highestBidWon.toString() : '-', Icons.workspace_premium_rounded),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
+                                          ),
                                         ),
-                                      ),
-                                      const SizedBox(height: 16),
-                                      // Intelligent Bots Card (Middle)
-                                      SizedBox(
-                                        height: 150,
-                                        child: _buildIntelligentBotsCard(context),
-                                      ),
-                                      const SizedBox(height: 16),
-                                      SizedBox(
-                                        height: 140,
-                                        child: _build7PlayersCard(context),
-                                      ),
-                                      const SizedBox(height: 16),
-                                      // Bottom Game Modes (Bottom)
-                                      SizedBox(
-                                        height: 90,
-                                        child: Row(
-                                          children: [
-                                            Expanded(
-                                              child: _buildModeCard(
-                                                context, 
-                                                AppLocalizations.of(context)?.onlinePlay.toUpperCase() ?? 'ONLINE PLAY', 
-                                                Icons.wifi_rounded,
-                                                GameTheme.neonCyan,
-                                                config.onlineMode,
-                                                () {
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(builder: (context) => const MatchmakingScreen()),
-                                                  );
-                                                },
-                                              ),
+                                        const SizedBox(width: 16),
+                                        // Right Pane: Scrollable Game Modes
+                                        Expanded(
+                                          flex: 6,
+                                          child: SingleChildScrollView(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                                              children: [
+                                                // Intelligent Bots Card
+                                                SizedBox(
+                                                  height: 120,
+                                                  child: _buildIntelligentBotsCard(context),
+                                                ),
+                                                const SizedBox(height: 12),
+                                                // 7 Players Card
+                                                SizedBox(
+                                                  height: 120,
+                                                  child: _build7PlayersCard(context),
+                                                ),
+                                                const SizedBox(height: 12),
+                                                // Bottom Game Modes
+                                                SizedBox(
+                                                  height: 80,
+                                                  child: Row(
+                                                    children: [
+                                                      Expanded(
+                                                        child: _buildModeCard(
+                                                          context, 
+                                                          AppLocalizations.of(context)?.onlinePlay.toUpperCase() ?? 'ONLINE PLAY', 
+                                                          Icons.wifi_rounded,
+                                                          GameTheme.neonCyan,
+                                                          config.onlineMode,
+                                                          () {
+                                                            Navigator.push(
+                                                              context,
+                                                              MaterialPageRoute(builder: (context) => const MatchmakingScreen()),
+                                                            );
+                                                          },
+                                                        ),
+                                                      ),
+                                                      const SizedBox(width: 8),
+                                                      Expanded(
+                                                        child: _buildModeCard(
+                                                          context, 
+                                                          AppLocalizations.of(context)?.privateRoom.toUpperCase() ?? 'PRIVATE ROOM', 
+                                                          Icons.vpn_key_rounded,
+                                                          Colors.purpleAccent,
+                                                          config.onlineMode,
+                                                          () {
+                                                            Navigator.push(
+                                                              context,
+                                                              MaterialPageRoute(builder: (context) => const PrivateRoomScreen()),
+                                                            );
+                                                          },
+                                                        ),
+                                                      ),
+                                                      const SizedBox(width: 8),
+                                                      Expanded(
+                                                        child: _buildModeCard(
+                                                          context, 
+                                                          AppLocalizations.of(context)?.leaderboard.toUpperCase() ?? 'LEADERBOARD', 
+                                                          Icons.leaderboard_rounded,
+                                                          GameTheme.goldAccent,
+                                                          true,
+                                                          () {
+                                                            Navigator.push(
+                                                              context,
+                                                              MaterialPageRoute(builder: (context) => const LeaderboardScreen()),
+                                                            );
+                                                          },
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
                                             ),
-                                            const SizedBox(width: 10),
-                                            Expanded(
-                                              child: _buildModeCard(
-                                                context, 
-                                                AppLocalizations.of(context)?.privateRoom.toUpperCase() ?? 'PRIVATE ROOM', 
-                                                Icons.vpn_key_rounded,
-                                                Colors.purpleAccent,
-                                                config.onlineMode,
-                                                () {
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(builder: (context) => const PrivateRoomScreen()),
-                                                  );
-                                                },
-                                              ),
-                                            ),
-                                            const SizedBox(width: 10),
-                                            Expanded(
-                                              child: _buildModeCard(
-                                                context, 
-                                                AppLocalizations.of(context)?.leaderboard.toUpperCase() ?? 'LEADERBOARD', 
-                                                Icons.leaderboard_rounded,
-                                                GameTheme.goldAccent,
-                                                true,
-                                                () {
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(builder: (context) => const LeaderboardScreen()),
-                                                  );
-                                                },
-                                              ),
-                                            ),
-                                          ],
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
+                                  );
+                                }
+                                return Expanded(
+                                  child: SingleChildScrollView(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                                      children: [
+                                        // Statistics Panel (Top)
+                                        Container(
+                                          height: 190,
+                                          padding: const EdgeInsets.all(16),
+                                          decoration: GameTheme.glassDecoration(opacity: 0.03, borderOpacity: 0.08),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                AppLocalizations.of(context)?.statistics.toUpperCase() ?? 'STATISTICS',
+                                                style: const TextStyle(
+                                                  color: GameTheme.neonCyan,
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.bold,
+                                                  letterSpacing: 1.5,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 12),
+                                              Expanded(
+                                                child: GridView.count(
+                                                  crossAxisCount: 2,
+                                                  crossAxisSpacing: 10,
+                                                  mainAxisSpacing: 10,
+                                                  childAspectRatio: 2.2,
+                                                  physics: const NeverScrollableScrollPhysics(),
+                                                  children: [
+                                                    _buildStatTile(context, AppLocalizations.of(context)?.played ?? 'Played', stats.gamesPlayed.toString(), Icons.play_arrow_rounded),
+                                                    _buildStatTile(context, AppLocalizations.of(context)?.won ?? 'Won', stats.gamesWon.toString(), Icons.emoji_events_rounded),
+                                                    _buildStatTile(context, AppLocalizations.of(context)?.winRate ?? 'Win Rate', winRate, Icons.percent_rounded),
+                                                    _buildStatTile(context, AppLocalizations.of(context)?.bestBid ?? 'Best Bid', stats.highestBidWon > 0 ? stats.highestBidWon.toString() : '-', Icons.workspace_premium_rounded),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(height: 16),
+                                        // Intelligent Bots Card (Middle)
+                                        SizedBox(
+                                          height: 150,
+                                          child: _buildIntelligentBotsCard(context),
+                                        ),
+                                        const SizedBox(height: 16),
+                                        SizedBox(
+                                          height: 140,
+                                          child: _build7PlayersCard(context),
+                                        ),
+                                        const SizedBox(height: 16),
+                                        // Bottom Game Modes (Bottom)
+                                        SizedBox(
+                                          height: 90,
+                                          child: Row(
+                                            children: [
+                                              Expanded(
+                                                child: _buildModeCard(
+                                                  context, 
+                                                  AppLocalizations.of(context)?.onlinePlay.toUpperCase() ?? 'ONLINE PLAY', 
+                                                  Icons.wifi_rounded,
+                                                  GameTheme.neonCyan,
+                                                  config.onlineMode,
+                                                  () {
+                                                    Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(builder: (context) => const MatchmakingScreen()),
+                                                    );
+                                                  },
+                                                ),
+                                              ),
+                                              const SizedBox(width: 10),
+                                              Expanded(
+                                                child: _buildModeCard(
+                                                  context, 
+                                                  AppLocalizations.of(context)?.privateRoom.toUpperCase() ?? 'PRIVATE ROOM', 
+                                                  Icons.vpn_key_rounded,
+                                                  Colors.purpleAccent,
+                                                  config.onlineMode,
+                                                  () {
+                                                    Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(builder: (context) => const PrivateRoomScreen()),
+                                                    );
+                                                  },
+                                                ),
+                                              ),
+                                              const SizedBox(width: 10),
+                                              Expanded(
+                                                child: _buildModeCard(
+                                                  context, 
+                                                  AppLocalizations.of(context)?.leaderboard.toUpperCase() ?? 'LEADERBOARD', 
+                                                  Icons.leaderboard_rounded,
+                                                  GameTheme.goldAccent,
+                                                  true,
+                                                  () {
+                                                    Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(builder: (context) => const LeaderboardScreen()),
+                                                    );
+                                                  },
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                        ),
+                                );
+                              }(),
                       ],
                     ),
                   ),
@@ -1003,9 +1132,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildStatTile(String label, String value, IconData icon) {
+  Widget _buildStatTile(BuildContext context, String label, String value, IconData icon) {
+    final double screenHeight = MediaQuery.of(context).size.height;
+    final bool isSmallHeight = screenHeight < 500;
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      padding: EdgeInsets.symmetric(
+        horizontal: isSmallHeight ? 10 : 14, 
+        vertical: isSmallHeight ? 4 : 10,
+      ),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.02),
         borderRadius: BorderRadius.circular(12),
@@ -1014,14 +1149,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: EdgeInsets.all(isSmallHeight ? 4 : 8),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: GameTheme.neonCyan.withValues(alpha: 0.08),
             ),
-            child: Icon(icon, color: GameTheme.neonCyan, size: 18),
+            child: Icon(icon, color: GameTheme.neonCyan, size: isSmallHeight ? 14 : 18),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: isSmallHeight ? 8 : 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1029,17 +1164,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               children: [
                 Text(
                   value,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: GameTheme.textWhite,
-                    fontSize: 20,
+                    fontSize: isSmallHeight ? 14 : 20,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
                   label,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: GameTheme.textGrey,
-                    fontSize: 10,
+                    fontSize: isSmallHeight ? 8 : 10,
                     letterSpacing: 1.0,
                   ),
                 ),
@@ -1059,7 +1194,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     bool enabled,
     VoidCallback onTap,
   ) {
+    final double screenHeight = MediaQuery.of(context).size.height;
+    final bool isSmallHeight = screenHeight < 500;
     final finalColor = enabled ? glowColor : GameTheme.textGrey;
+
     return Semantics(
       label: title,
       button: true,
@@ -1067,70 +1205,76 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         onTap: enabled
             ? onTap
             : () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(AppLocalizations.of(context)?.enableOnlineToPlay ?? 'Enable Online Mode in Settings to play online.'),
-                  duration: const Duration(seconds: 2),
-                ),
-              );
-            },
-      borderRadius: BorderRadius.circular(12),
-      child: Opacity(
-        opacity: enabled ? 1.0 : 0.4,
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.02),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: finalColor.withValues(alpha: 0.2)),
-            boxShadow: enabled
-                ? [
-                    BoxShadow(
-                      color: finalColor.withValues(alpha: 0.05),
-                      blurRadius: 6,
-                      spreadRadius: 1,
-                    )
-                  ]
-                : null,
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, color: finalColor, size: 22),
-              const SizedBox(height: 8),
-              Text(
-                title,
-                style: TextStyle(
-                  color: enabled ? GameTheme.textWhite : GameTheme.textGrey,
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.0,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: finalColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  icon == Icons.leaderboard_rounded
-                      ? (AppLocalizations.of(context)?.stats.toUpperCase() ?? 'STATS')
-                      : (enabled 
-                          ? (AppLocalizations.of(context)?.live.toUpperCase() ?? 'LIVE') 
-                          : (AppLocalizations.of(context)?.offline.toUpperCase() ?? 'OFFLINE')),
-                  style: TextStyle(
-                    color: finalColor,
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(AppLocalizations.of(context)?.enableOnlineToPlay ?? 'Enable Online Mode in Settings to play online.'),
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              },
+        borderRadius: BorderRadius.circular(12),
+        child: Opacity(
+          opacity: enabled ? 1.0 : 0.4,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.02),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: finalColor.withValues(alpha: 0.2)),
+              boxShadow: enabled
+                  ? [
+                      BoxShadow(
+                        color: finalColor.withValues(alpha: 0.05),
+                        blurRadius: 6,
+                        spreadRadius: 1,
+                      )
+                    ]
+                  : null,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, color: finalColor, size: isSmallHeight ? 18 : 22),
+                SizedBox(height: isSmallHeight ? 4 : 8),
+                Flexible(
+                  child: Text(
+                    title,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: enabled ? GameTheme.textWhite : GameTheme.textGrey,
+                      fontSize: isSmallHeight ? 9 : 11,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.0,
+                    ),
                   ),
                 ),
-              ),
-            ],
+                SizedBox(height: isSmallHeight ? 2 : 4),
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isSmallHeight ? 4 : 6, 
+                    vertical: isSmallHeight ? 1 : 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: finalColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    icon == Icons.leaderboard_rounded
+                        ? (AppLocalizations.of(context)?.stats.toUpperCase() ?? 'STATS')
+                        : (enabled 
+                            ? (AppLocalizations.of(context)?.live.toUpperCase() ?? 'LIVE') 
+                            : (AppLocalizations.of(context)?.offline.toUpperCase() ?? 'OFFLINE')),
+                    style: TextStyle(
+                      color: finalColor,
+                      fontSize: isSmallHeight ? 8 : 11,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
-     ),
     );
   }
 }
