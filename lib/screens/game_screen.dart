@@ -36,16 +36,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     final game = ref.watch(gameProvider);
     final multiplayerState = ref.watch(multiplayerProvider);
 
-    // Listen to changes in game status message and announce them
-    ref.listen<String>(
-      gameProvider.select((s) => s.message),
-      (previous, next) {
-        if (next.isNotEmpty) {
-          final localizedMsg = getLocalizedGameMessage(context, next);
-          SemanticsService.announce(localizedMsg, TextDirection.ltr);
-        }
-      },
-    );
+    // Note: We use a semantic liveRegion in the status banner to announce messages accessibly.
 
     // Auto-update message count when chat is open
     if (_isChatOpen && multiplayerState.chatMessages.length > _lastSeenMessageCount) {
@@ -247,17 +238,20 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                   ),
                   const SizedBox(width: 8),
                   Flexible(
-                    child: Text(
-                      getLocalizedGameMessage(context, game.message),
-                      style: const TextStyle(
-                        color: GameTheme.textWhite,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: 0.5,
+                    child: Semantics(
+                      liveRegion: true,
+                      child: Text(
+                        getLocalizedGameMessage(context, game.message),
+                        style: const TextStyle(
+                          color: GameTheme.textWhite,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 0.5,
+                        ),
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                       ),
-                      textAlign: TextAlign.center,
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
                     ),
                   ),
                 ],

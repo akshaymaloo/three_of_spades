@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/card_model.dart';
 import '../core/theme.dart';
+import '../providers/stats_provider.dart';
 
-class PlayingCardWidget extends StatelessWidget {
+class PlayingCardWidget extends ConsumerWidget {
   final CardModel card;
   final bool isSelected;
   final bool isPlayable;
@@ -26,13 +28,21 @@ class PlayingCardWidget extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final stats = ref.watch(statsProvider).value;
+    final cardBack = stats?.cardBack ?? 'classic_blue';
+    final cardBackAsset = cardBack == 'classic_red'
+        ? 'assets/cards/back_side_red.svg'
+        : cardBack == 'neon_cross'
+            ? 'assets/cards/back_cross_blue.svg'
+            : 'assets/cards/back_side_blue.svg';
+
     Widget cardBody;
 
     if (showBack) {
       cardBody = ExcludeSemantics(
         child: SvgPicture.asset(
-          'assets/cards/back_side_blue.svg',
+          cardBackAsset,
           fit: BoxFit.fill,
           placeholderBuilder: (context) => _buildCardBackFallback(),
         ),

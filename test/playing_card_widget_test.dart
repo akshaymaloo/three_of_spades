@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:three_of_spades_flutter/widgets/playing_card_widget.dart';
 import 'package:three_of_spades_flutter/models/card_model.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -16,29 +17,31 @@ void main() {
   group('PlayingCardWidget Tests', () {
     testWidgets('renders face up card with correct SvgPicture', (WidgetTester tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: PlayingCardWidget(
-              card: testCard,
-              showBack: false,
+        const ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: PlayingCardWidget(
+                card: testCard,
+                showBack: false,
+              ),
             ),
           ),
         ),
       );
 
-      // We might not be able to easily query the SvgPicture asset path depending on the flutter_svg implementation,
-      // but we can ensure the widget builds without errors.
       expect(find.byType(PlayingCardWidget), findsOneWidget);
       expect(find.byType(SvgPicture), findsOneWidget);
     });
 
     testWidgets('renders back of the card when showBack is true', (WidgetTester tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: PlayingCardWidget(
-              card: testCard,
-              showBack: true,
+        const ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: PlayingCardWidget(
+                card: testCard,
+                showBack: true,
+              ),
             ),
           ),
         ),
@@ -52,14 +55,16 @@ void main() {
       bool tapped = false;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: PlayingCardWidget(
-              card: testCard,
-              isPlayable: true,
-              onTap: () {
-                tapped = true;
-              },
+        ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: PlayingCardWidget(
+                card: testCard,
+                isPlayable: true,
+                onTap: () {
+                  tapped = true;
+                },
+              ),
             ),
           ),
         ),
@@ -73,14 +78,16 @@ void main() {
       bool tapped = false;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: PlayingCardWidget(
-              card: testCard,
-              isPlayable: false,
-              onTap: () {
-                tapped = true;
-              },
+        ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: PlayingCardWidget(
+                card: testCard,
+                isPlayable: false,
+                onTap: () {
+                  tapped = true;
+                },
+              ),
             ),
           ),
         ),
@@ -92,11 +99,13 @@ void main() {
     
     testWidgets('renders ColorFiltered when not playable', (WidgetTester tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: PlayingCardWidget(
-              card: testCard,
-              isPlayable: false,
+        const ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: PlayingCardWidget(
+                card: testCard,
+                isPlayable: false,
+              ),
             ),
           ),
         ),

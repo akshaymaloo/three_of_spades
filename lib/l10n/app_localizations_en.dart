@@ -642,4 +642,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String defendersWon(int got, int bid) {
     return 'Defenders won! Bidder & Partner only got $got / $bid points.';
   }
+
+  @override
+  String get cardBack => 'Card Back';
+
+  @override
+  String get classicBlue => 'Classic Blue';
+
+  @override
+  String get classicRed => 'Classic Red';
+
+  @override
+  String get neonCross => 'Neon Cross';
 }

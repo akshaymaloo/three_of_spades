@@ -412,5 +412,9 @@
         "type": "int"
       }
     }
-  }
+  },
+  "cardBack": "Card Back",
+  "classicBlue": "Classic Blue",
+  "classicRed": "Classic Red",
+  "neonCross": "Neon Cross"
 }

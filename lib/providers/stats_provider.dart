@@ -19,6 +19,7 @@ class UserStats {
   final bool vibrationEnabled;
   final bool ttsEnabled;
   final String tableTheme;
+  final String cardBack;
 
   const UserStats({
     required this.name,
@@ -33,6 +34,7 @@ class UserStats {
     this.vibrationEnabled = true,
     this.ttsEnabled = false,
     this.tableTheme = 'green',
+    this.cardBack = 'classic_blue',
   });
 
   UserStats copyWith({
@@ -48,6 +50,7 @@ class UserStats {
     bool? vibrationEnabled,
     bool? ttsEnabled,
     String? tableTheme,
+    String? cardBack,
   }) {
     return UserStats(
       name: name ?? this.name,
@@ -62,6 +65,7 @@ class UserStats {
       vibrationEnabled: vibrationEnabled ?? this.vibrationEnabled,
       ttsEnabled: ttsEnabled ?? this.ttsEnabled,
       tableTheme: tableTheme ?? this.tableTheme,
+      cardBack: cardBack ?? this.cardBack,
     );
   }
 }
@@ -87,6 +91,7 @@ class StatsNotifier extends AsyncNotifier<UserStats> {
       final vibrationEnabled = prefs.getBool('vibration_enabled') ?? true;
       final ttsEnabled = prefs.getBool('tts_enabled') ?? false;
       final tableTheme = prefs.getString('table_theme') ?? 'green';
+      final cardBack = prefs.getString('card_back') ?? 'classic_blue';
 
       // Initialize SoundManager state
       SoundManager().setEnabled(soundEnabled);
@@ -105,6 +110,7 @@ class StatsNotifier extends AsyncNotifier<UserStats> {
         vibrationEnabled: vibrationEnabled,
         ttsEnabled: ttsEnabled,
         tableTheme: tableTheme,
+        cardBack: cardBack,
       );
     } catch (e, stack) {
       debugPrint('Failed to load stats: $e\n$stack');
@@ -120,6 +126,7 @@ class StatsNotifier extends AsyncNotifier<UserStats> {
         vibrationEnabled: true,
         ttsEnabled: false,
         tableTheme: 'green',
+        cardBack: 'classic_blue',
       );
     }
   }
@@ -345,6 +352,24 @@ class StatsNotifier extends AsyncNotifier<UserStats> {
     }
   }
 
+  Future<void> setCardBack(String design) async {
+    final current = state.value ?? const UserStats(
+      name: 'Guest Player',
+      coins: 5000,
+      gamesPlayed: 0,
+      gamesWon: 0,
+      highestBidWon: 0,
+    );
+    final updated = current.copyWith(cardBack: design);
+    state = AsyncValue.data(updated);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('card_back', design);
+    } catch (e, stack) {
+      debugPrint('Failed to save card back: $e\n$stack');
+    }
+  }
+
   Future<void> resetStats() async {
     const reset = UserStats(
       name: 'Guest Player',
@@ -358,6 +383,7 @@ class StatsNotifier extends AsyncNotifier<UserStats> {
       vibrationEnabled: true,
       ttsEnabled: false,
       tableTheme: 'green',
+      cardBack: 'classic_blue',
     );
     state = const AsyncValue.data(reset);
     try {
@@ -373,6 +399,7 @@ class StatsNotifier extends AsyncNotifier<UserStats> {
       await prefs.setBool('vibration_enabled', true);
       await prefs.setBool('tts_enabled', false);
       await prefs.setString('table_theme', 'green');
+      await prefs.setString('card_back', 'classic_blue');
     } catch (e, stack) {
       debugPrint('Failed to reset stats: $e\n$stack');
     }

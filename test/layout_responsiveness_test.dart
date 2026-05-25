@@ -8,11 +8,13 @@ import 'package:three_of_spades_flutter/screens/home_screen.dart';
 import 'package:three_of_spades_flutter/screens/avatar_selection_screen.dart';
 import 'package:three_of_spades_flutter/widgets/game_table.dart';
 import 'package:three_of_spades_flutter/widgets/player_hand_panel.dart';
+import 'package:three_of_spades_flutter/widgets/playing_card_widget.dart';
 import 'package:three_of_spades_flutter/models/game_state.dart';
 import 'package:three_of_spades_flutter/models/player_model.dart';
 import 'package:three_of_spades_flutter/models/card_model.dart';
 import 'package:three_of_spades_flutter/providers/stats_provider.dart';
 import 'package:three_of_spades_flutter/l10n/app_localizations.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class _MockStatsNotifier extends StatsNotifier {
   final UserStats _initialStats;
@@ -196,6 +198,47 @@ void main() {
       // Verify human hand is visible and cards are rendered
       expect(find.byType(PlayerHandPanel), findsOneWidget);
       expect(find.byType(GameTable), findsOneWidget);
+    });
+
+    testWidgets('PlayingCardWidget renders the correct card back based on UserStats setting', (WidgetTester tester) async {
+      final customStats = UserStats(
+        name: 'Test Player',
+        coins: 5000,
+        gamesPlayed: 10,
+        gamesWon: 5,
+        highestBidWon: 350,
+        cardBack: 'classic_red',
+      );
+
+      const card = CardModel(id: 1, suit: 'S', rank: 14, points: 50, assetPath: 'assets/cards/ace_of_spades.svg');
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            statsProvider.overrideWith(() => _MockStatsNotifier(customStats)),
+          ],
+          child: const MaterialApp(
+            home: Scaffold(
+              body: PlayingCardWidget(
+                card: card,
+                showBack: true,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Find the SvgPicture asset
+      final svgFinder = find.byType(SvgPicture);
+      expect(svgFinder, findsOneWidget);
+
+      final SvgPicture svgWidget = tester.widget(svgFinder);
+      final SvgAssetLoader loader = svgWidget.bytesLoader as SvgAssetLoader;
+      
+      // The asset path should resolve to the 'classic_red' SVG
+      expect(loader.assetName, equals('assets/cards/back_side_red.svg'));
     });
   });
 }

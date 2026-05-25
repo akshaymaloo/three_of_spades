@@ -646,4 +646,16 @@ class AppLocalizationsHi extends AppLocalizations {
   String defendersWon(int got, int bid) {
     return 'रक्षा करने वाले जीते! बोली लगाने वाला और भागीदार केवल $got / $bid अंक प्राप्त कर सके।';
   }
+
+  @override
+  String get cardBack => 'कार्ड बैक';
+
+  @override
+  String get classicBlue => 'क्लासिक नीला';
+
+  @override
+  String get classicRed => 'क्लासिक लाल';
+
+  @override
+  String get neonCross => 'नियोन क्रॉस';
 }

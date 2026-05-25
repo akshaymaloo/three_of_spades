@@ -1231,6 +1231,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Defenders won! Bidder & Partner only got {got} / {bid} points.'**
   String defendersWon(int got, int bid);
+
+  /// No description provided for @cardBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Card Back'**
+  String get cardBack;
+
+  /// No description provided for @classicBlue.
+  ///
+  /// In en, this message translates to:
+  /// **'Classic Blue'**
+  String get classicBlue;
+
+  /// No description provided for @classicRed.
+  ///
+  /// In en, this message translates to:
+  /// **'Classic Red'**
+  String get classicRed;
+
+  /// No description provided for @neonCross.
+  ///
+  /// In en, this message translates to:
+  /// **'Neon Cross'**
+  String get neonCross;
 }
 
 class _AppLocalizationsDelegate

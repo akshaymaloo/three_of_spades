@@ -5,6 +5,7 @@ import '../core/theme.dart';
 import '../models/multiplayer_state.dart';
 import '../providers/multiplayer_notifier.dart';
 import '../l10n/app_localizations.dart';
+import '../widgets/glass_dialog.dart';
 
 class PrivateRoomScreen extends ConsumerStatefulWidget {
   const PrivateRoomScreen({super.key});
@@ -46,6 +47,41 @@ class _PrivateRoomScreenState extends ConsumerState<PrivateRoomScreen> {
     ref.read(multiplayerProvider.notifier).joinPrivateRoom(code);
   }
 
+  void _onBackPress() {
+    if (_joined) {
+      showDialog(
+        context: context,
+        builder: (subContext) => GlassDialog(
+          title: 'Leave Lobby?',
+          glowColor: GameTheme.neonPink,
+          content: const Text(
+            'Are you sure you want to leave the private lobby? This will dissolve the group.',
+            style: TextStyle(color: GameTheme.textWhite, fontSize: 14),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(subContext),
+              child: const Text('CANCEL', style: TextStyle(color: GameTheme.textGrey)),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(subContext); // pop dialog
+                ref.read(multiplayerProvider.notifier).cancelMatchmaking();
+                setState(() {
+                  _joined = false;
+                });
+              },
+              child: const Text('LEAVE', style: TextStyle(color: GameTheme.neonPink, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+      );
+    } else {
+      ref.read(multiplayerProvider.notifier).cancelMatchmaking();
+      Navigator.pop(context);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final mState = ref.watch(multiplayerProvider);
@@ -59,62 +95,67 @@ class _PrivateRoomScreenState extends ConsumerState<PrivateRoomScreen> {
       });
     }
 
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: GameTheme.backgroundGradient,
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Header row
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back_rounded, color: GameTheme.textWhite),
-                      onPressed: () {
-                        ref.read(multiplayerProvider.notifier).cancelMatchmaking();
-                        Navigator.pop(context);
-                      },
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.white.withValues(alpha: 0.05),
-                        padding: const EdgeInsets.all(12),
+    return PopScope(
+      canPop: !_joined,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          _onBackPress();
+        }
+      },
+      child: Scaffold(
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: GameTheme.backgroundGradient,
+          ),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Header row
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back_rounded, color: GameTheme.textWhite),
+                        onPressed: _onBackPress,
+                        style: IconButton.styleFrom(
+                          backgroundColor: Colors.white.withValues(alpha: 0.05),
+                          padding: const EdgeInsets.all(12),
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 16),
-                    Text(
-                      _joined 
-                          ? (AppLocalizations.of(context)?.privateLobby ?? 'PRIVATE LOBBY') 
-                          : (AppLocalizations.of(context)?.privateRoom ?? 'PRIVATE ROOM'),
-                      style: const TextStyle(
-                        color: GameTheme.textWhite,
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.5,
+                      const SizedBox(width: 16),
+                      Text(
+                        _joined 
+                            ? (AppLocalizations.of(context)?.privateLobby ?? 'PRIVATE LOBBY') 
+                            : (AppLocalizations.of(context)?.privateRoom ?? 'PRIVATE ROOM'),
+                        style: const TextStyle(
+                          color: GameTheme.textWhite,
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.5,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
 
-                Expanded(
-                  child: Center(
-                    child: Container(
-                      constraints: const BoxConstraints(maxWidth: 550),
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                      decoration: GameTheme.glassDecoration(opacity: 0.04, borderOpacity: 0.1),
-                      child: SingleChildScrollView(
-                        child: !_joined 
-                            ? _buildSelectionLayout() 
-                            : _buildLobbyLayout(mState),
+                  Expanded(
+                    child: Center(
+                      child: Container(
+                        constraints: const BoxConstraints(maxWidth: 550),
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                        decoration: GameTheme.glassDecoration(opacity: 0.04, borderOpacity: 0.1),
+                        child: SingleChildScrollView(
+                          child: !_joined 
+                              ? _buildSelectionLayout() 
+                              : _buildLobbyLayout(mState),
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

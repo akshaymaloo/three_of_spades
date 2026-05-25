@@ -200,6 +200,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ),
                       ),
                       const Divider(color: Colors.white10),
+                      // Card Back theme toggle
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(AppLocalizations.of(context)?.cardBack ?? 'Card Back', style: const TextStyle(color: GameTheme.textWhite)),
+                        trailing: DropdownButton<String>(
+                          value: stats.cardBack,
+                          dropdownColor: GameTheme.darkBackground,
+                          style: const TextStyle(color: GameTheme.neonCyan),
+                          underline: const SizedBox(),
+                          items: [
+                            DropdownMenuItem(value: 'classic_blue', child: Text(AppLocalizations.of(context)?.classicBlue ?? 'Classic Blue')),
+                            DropdownMenuItem(value: 'classic_red', child: Text(AppLocalizations.of(context)?.classicRed ?? 'Classic Red')),
+                            DropdownMenuItem(value: 'neon_cross', child: Text(AppLocalizations.of(context)?.neonCross ?? 'Neon Cross')),
+                          ],
+                          onChanged: (val) {
+                            if (val != null) {
+                              ref.read(statsProvider.notifier).setCardBack(val);
+                            }
+                          },
+                        ),
+                      ),
+                      const Divider(color: Colors.white10),
                       // Online Mode toggle
                       ListTile(
                         contentPadding: EdgeInsets.zero,
