@@ -18,6 +18,7 @@ import '../widgets/credits_dialog.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../models/celebrity_model.dart';
 import 'avatar_selection_screen.dart';
+import '../widgets/avatar_image.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -429,14 +430,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       border: Border.all(color: GameTheme.neonCyan, width: 1.5),
                                       boxShadow: GameTheme.neonGlow(GameTheme.neonCyan, blurRadius: 6),
                                     ),
-                                    child: avatar != null && avatar.imageUrl.startsWith('http')
-                                        ? CachedNetworkImage(
-                                            imageUrl: avatar.imageUrl,
-                                            fit: BoxFit.cover,
-                                            placeholder: (context, url) => const Center(child: CircularProgressIndicator(color: GameTheme.neonCyan, strokeWidth: 2)),
-                                            errorWidget: (context, url, error) => Image.asset('assets/images/guest_avatar.png', fit: BoxFit.cover),
-                                          )
-                                        : Image.asset(avatar != null ? avatar.imageUrl : 'assets/images/guest_avatar.png', fit: BoxFit.cover),
+                                    child: AvatarImage(
+                                      avatarPath: avatar?.imageUrl ?? 'assets/images/guest_avatar.png',
+                                      fit: BoxFit.cover,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(width: 12),

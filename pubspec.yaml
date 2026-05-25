@@ -53,6 +53,7 @@ dependencies:
   confetti: ^0.7.0
   flutter_localizations:
     sdk: flutter
+  image_picker: ^1.2.2
 
 dev_dependencies:
   flutter_test:

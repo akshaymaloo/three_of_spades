@@ -12,6 +12,7 @@ import '../providers/multiplayer_notifier.dart';
 import '../providers/stats_provider.dart';
 import 'playing_card_widget.dart';
 import '../l10n/app_localizations.dart';
+import 'avatar_image.dart';
 
 class GameTable extends ConsumerWidget {
   final GameState game;
@@ -199,13 +200,10 @@ class GameTable extends ConsumerWidget {
                     boxShadow: GameTheme.neonGlow(shadowColor, blurRadius: 8),
                   ),
                   child: ClipOval(
-                    child: player.avatarPath.startsWith('http')
-                        ? CachedNetworkImage(
-                            imageUrl: player.avatarPath,
-                            fit: BoxFit.cover,
-                            errorWidget: (context, url, error) => Image.asset('assets/images/guest_avatar.png', fit: BoxFit.cover),
-                          )
-                        : Image.asset(player.avatarPath.isNotEmpty ? player.avatarPath : 'assets/images/guest_avatar.png', fit: BoxFit.cover),
+                    child: AvatarImage(
+                      avatarPath: player.avatarPath,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 4),
