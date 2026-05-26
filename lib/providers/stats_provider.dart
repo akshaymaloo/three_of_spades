@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -5,6 +6,46 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../core/sound_manager.dart';
 import 'config_provider.dart';
 import 'service_providers.dart';
+
+/// Represents a single completed match in the game history log.
+class GameRecord {
+  final String dateTime;
+  final bool won;
+  final int coinsChange;
+  final int tricksTaken;
+  final int bid;
+  final List<String> opponentNames;
+
+  const GameRecord({
+    required this.dateTime,
+    required this.won,
+    required this.coinsChange,
+    required this.tricksTaken,
+    required this.bid,
+    required this.opponentNames,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'dateTime': dateTime,
+        'won': won,
+        'coinsChange': coinsChange,
+        'tricksTaken': tricksTaken,
+        'bid': bid,
+        'opponentNames': opponentNames,
+      };
+
+  factory GameRecord.fromJson(Map<String, dynamic> json) => GameRecord(
+        dateTime: json['dateTime'] as String? ?? '',
+        won: json['won'] as bool? ?? false,
+        coinsChange: json['coinsChange'] as int? ?? 0,
+        tricksTaken: json['tricksTaken'] as int? ?? 0,
+        bid: json['bid'] as int? ?? 0,
+        opponentNames: List<String>.from(json['opponentNames'] as List? ?? []),
+      );
+}
+
+/// AI bot difficulty level.
+enum AiDifficulty { easy, medium, hard }
 
 class UserStats {
   final String name;
@@ -20,6 +61,7 @@ class UserStats {
   final bool ttsEnabled;
   final String tableTheme;
   final String cardBack;
+  final AiDifficulty aiDifficulty;
 
   const UserStats({
     required this.name,
@@ -35,6 +77,7 @@ class UserStats {
     this.ttsEnabled = false,
     this.tableTheme = 'green',
     this.cardBack = 'classic_blue',
+    this.aiDifficulty = AiDifficulty.medium,
   });
 
   UserStats copyWith({
@@ -51,6 +94,7 @@ class UserStats {
     bool? ttsEnabled,
     String? tableTheme,
     String? cardBack,
+    AiDifficulty? aiDifficulty,
   }) {
     return UserStats(
       name: name ?? this.name,
@@ -66,6 +110,7 @@ class UserStats {
       ttsEnabled: ttsEnabled ?? this.ttsEnabled,
       tableTheme: tableTheme ?? this.tableTheme,
       cardBack: cardBack ?? this.cardBack,
+      aiDifficulty: aiDifficulty ?? this.aiDifficulty,
     );
   }
 }
@@ -92,6 +137,11 @@ class StatsNotifier extends AsyncNotifier<UserStats> {
       final ttsEnabled = prefs.getBool('tts_enabled') ?? false;
       final tableTheme = prefs.getString('table_theme') ?? 'green';
       final cardBack = prefs.getString('card_back') ?? 'classic_blue';
+      final aiDifficultyStr = prefs.getString('ai_difficulty') ?? 'medium';
+      final aiDifficulty = AiDifficulty.values.firstWhere(
+        (d) => d.name == aiDifficultyStr,
+        orElse: () => AiDifficulty.medium,
+      );
 
       // Initialize SoundManager state
       SoundManager().setEnabled(soundEnabled);
@@ -111,6 +161,7 @@ class StatsNotifier extends AsyncNotifier<UserStats> {
         ttsEnabled: ttsEnabled,
         tableTheme: tableTheme,
         cardBack: cardBack,
+        aiDifficulty: aiDifficulty,
       );
     } catch (e, stack) {
       debugPrint('Failed to load stats: $e\n$stack');
@@ -370,6 +421,24 @@ class StatsNotifier extends AsyncNotifier<UserStats> {
     }
   }
 
+  Future<void> setAiDifficulty(AiDifficulty difficulty) async {
+    final current = state.value ?? const UserStats(
+      name: 'Guest Player',
+      coins: 5000,
+      gamesPlayed: 0,
+      gamesWon: 0,
+      highestBidWon: 0,
+    );
+    final updated = current.copyWith(aiDifficulty: difficulty);
+    state = AsyncValue.data(updated);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('ai_difficulty', difficulty.name);
+    } catch (e, stack) {
+      debugPrint('Failed to save AI difficulty: $e\n$stack');
+    }
+  }
+
   Future<void> resetStats() async {
     const reset = UserStats(
       name: 'Guest Player',
@@ -400,6 +469,7 @@ class StatsNotifier extends AsyncNotifier<UserStats> {
       await prefs.setBool('tts_enabled', false);
       await prefs.setString('table_theme', 'green');
       await prefs.setString('card_back', 'classic_blue');
+      await prefs.remove('game_history');
     } catch (e, stack) {
       debugPrint('Failed to reset stats: $e\n$stack');
     }
@@ -409,3 +479,51 @@ class StatsNotifier extends AsyncNotifier<UserStats> {
 final statsProvider = AsyncNotifierProvider<StatsNotifier, UserStats>(() {
   return StatsNotifier();
 });
+
+// ---------------------------------------------------------------------------
+// Separate provider for game history (list of last 50 GameRecords)
+// ---------------------------------------------------------------------------
+
+class GameHistoryNotifier extends AsyncNotifier<List<GameRecord>> {
+  static const _historyKey = 'game_history';
+  static const _maxRecords = 50;
+
+  @override
+  Future<List<GameRecord>> build() async {
+    return _loadHistory();
+  }
+
+  Future<List<GameRecord>> _loadHistory() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_historyKey);
+      if (raw == null || raw.isEmpty) return [];
+      final list = jsonDecode(raw) as List<dynamic>;
+      return list
+          .map((e) => GameRecord.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } catch (e, stack) {
+      debugPrint('Failed to load game history: $e\n$stack');
+      return [];
+    }
+  }
+
+  Future<void> addRecord(GameRecord record) async {
+    final current = state.value ?? [];
+    final updated = [record, ...current].take(_maxRecords).toList();
+    state = AsyncValue.data(updated);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final encoded = jsonEncode(updated.map((r) => r.toJson()).toList());
+      await prefs.setString(_historyKey, encoded);
+    } catch (e, stack) {
+      debugPrint('Failed to save game history: $e\n$stack');
+    }
+  }
+}
+
+final gameHistoryProvider =
+    AsyncNotifierProvider<GameHistoryNotifier, List<GameRecord>>(
+  () => GameHistoryNotifier(),
+);
+

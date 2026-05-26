@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/theme.dart';
 import '../providers/stats_provider.dart';
@@ -15,7 +16,6 @@ import 'private_room_screen.dart';
 import 'leaderboard_screen.dart';
 import '../l10n/app_localizations.dart';
 import '../widgets/credits_dialog.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../models/celebrity_model.dart';
 import 'avatar_selection_screen.dart';
 import '../widgets/avatar_image.dart';
@@ -217,6 +217,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           onChanged: (val) {
                             if (val != null) {
                               ref.read(statsProvider.notifier).setCardBack(val);
+                            }
+                          },
+                        ),
+                      ),
+                      const Divider(color: Colors.white10),
+                      // AI Difficulty toggle
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text('AI Difficulty', style: TextStyle(color: GameTheme.textWhite)),
+                        trailing: DropdownButton<AiDifficulty>(
+                          value: stats.aiDifficulty,
+                          dropdownColor: GameTheme.darkBackground,
+                          style: const TextStyle(color: GameTheme.neonCyan),
+                          underline: const SizedBox(),
+                          items: const [
+                            DropdownMenuItem(value: AiDifficulty.easy, child: Text('Easy')),
+                            DropdownMenuItem(value: AiDifficulty.medium, child: Text('Medium')),
+                            DropdownMenuItem(value: AiDifficulty.hard, child: Text('Hard')),
+                          ],
+                          onChanged: (val) {
+                            if (val != null) {
+                              ref.read(statsProvider.notifier).setAiDifficulty(val);
                             }
                           },
                         ),
@@ -687,7 +709,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                                 Expanded(
                                                   child: _buildModeCard(
                                                     context, 
-                                                    AppLocalizations.of(context)?.trainingMode?.toUpperCase() ?? 'TRAINING', 
+                                                    (AppLocalizations.of(context)?.trainingMode ?? 'Training').toUpperCase(), 
                                                     Icons.school_rounded,
                                                     GameTheme.neonPink,
                                                     true,
@@ -714,6 +736,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                                 ),
                                               ],
                                             ),
+                                          ),
+                                          // History Button row
+                                          const SizedBox(height: 10),
+                                          _buildModeCard(
+                                            context,
+                                            'MATCH HISTORY',
+                                            Icons.history_rounded,
+                                            Colors.purpleAccent.shade100,
+                                            false,
+                                            () => context.go('/history'),
                                           ),
                                         ],
                                       ),

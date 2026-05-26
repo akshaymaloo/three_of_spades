@@ -9,7 +9,6 @@ import 'core/router.dart';
 import 'firebase_options.dart';
 import 'providers/config_provider.dart';
 import 'providers/notification_provider.dart';
-import 'providers/notification_provider.dart';
 import 'providers/stats_provider.dart';
 import 'l10n/app_localizations.dart';
 
@@ -51,6 +50,7 @@ void main() async {
 
   runApp(
     ProviderScope(
+      // ignore: deprecated_member_use
       parent: container,
       child: const ThreeOfSpadesApp(),
     ),
@@ -72,7 +72,7 @@ class ThreeOfSpadesApp extends ConsumerWidget {
       locale: ref.watch(statsProvider).when(
         data: (stats) => Locale(stats.languageCode),
         loading: () => const Locale('en'),
-        error: (_, __) => const Locale('en'),
+        error: (_, err) => const Locale('en'),
       ),
       theme: ThemeData(
         brightness: Brightness.dark,

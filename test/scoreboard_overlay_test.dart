@@ -4,8 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:three_of_spades_flutter/widgets/scoreboard_overlay.dart';
 import 'package:three_of_spades_flutter/models/game_state.dart';
 import 'package:three_of_spades_flutter/models/player_model.dart';
-import 'package:three_of_spades_flutter/providers/game_notifier.dart';
-import 'package:three_of_spades_flutter/providers/ad_provider.dart';
 
 void main() {
   final testPlayers = [

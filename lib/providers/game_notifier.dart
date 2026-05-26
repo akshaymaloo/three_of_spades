@@ -1,9 +1,7 @@
 import 'dart:async';
 import 'dart:math';
-import 'package:flutter/semantics.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/card_model.dart';
 import '../models/player_model.dart';
 import '../models/game_state.dart';
@@ -166,7 +164,7 @@ class GameNotifier extends Notifier<GameState> {
           isPartnerRevealed: false,
         ));
       } catch (e, st) {
-        print('Error initializing player $i: $e\n$st');
+        debugPrint('Error initializing player $i: $e\n$st');
         rethrow;
       }
     }
@@ -651,6 +649,20 @@ class GameNotifier extends Notifier<GameState> {
     statsNotifier.updateCoins(coinDelta[0]);
     statsNotifier.recordGame(humanWon, isHumanBidderOrPartner ? state.winningBid : 0);
 
+    // Record in game history log
+    final opponentNames = finalPlayers
+        .where((p) => !p.isHuman)
+        .map((p) => p.name)
+        .toList();
+    ref.read(gameHistoryProvider.notifier).addRecord(GameRecord(
+      dateTime: DateTime.now().toIso8601String(),
+      won: humanWon,
+      coinsChange: coinDelta[0],
+      tricksTaken: finalPlayers[0].roundPoints,
+      bid: state.winningBid,
+      opponentNames: opponentNames,
+    ));
+
     // Play final sound
     if (humanWon) {
       SoundManager().playSound('sounds/game_win.mp3');
@@ -710,13 +722,24 @@ class GameNotifier extends Notifier<GameState> {
   void _botBid() {
     if (state.phase != GamePhase.bidding) return;
 
+    final difficulty = ref.read(statsProvider).value?.aiDifficulty ?? AiDifficulty.medium;
     final bot = state.players[state.activePlayerIndex];
+
+    // Easy: bots always pass
+    if (difficulty == AiDifficulty.easy) {
+      passBid();
+      return;
+    }
+
     final maxBid = _calculateBotBidStrength(bot.hand);
 
     int nextBid = ((state.winningBid) ~/ 5 * 5) + 5;
     if (nextBid < 175) nextBid = 175;
 
-    if (nextBid <= maxBid) {
+    // Hard: bid up to calculated strength + 10 bonus to be more aggressive
+    final bidCap = difficulty == AiDifficulty.hard ? maxBid + 10 : maxBid;
+
+    if (nextBid <= bidCap) {
       placeBid(nextBid);
     } else {
       passBid();
@@ -925,6 +948,20 @@ class GameNotifier extends Notifier<GameState> {
     final bot = state.players[state.activePlayerIndex];
     if (bot.hand.isEmpty) return;
     CardModel? cardToPlay;
+
+    final difficulty = ref.read(statsProvider).value?.aiDifficulty ?? AiDifficulty.medium;
+
+    // Easy: play a random valid card (no strategy)
+    if (difficulty == AiDifficulty.easy) {
+      final validCards = bot.hand.where((c) {
+        if (state.gameTurn == 1) return true;
+        final mustFollowSuit = bot.hand.any((h) => h.suit == state.trumpStart);
+        return mustFollowSuit ? c.suit == state.trumpStart : true;
+      }).toList();
+      validCards.shuffle();
+      playCard(validCards.isNotEmpty ? validCards.first : bot.hand.first);
+      return;
+    }
 
     if (state.gameTurn == 1) {
       // Leading a trick

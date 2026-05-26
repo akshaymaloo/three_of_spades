@@ -103,9 +103,7 @@ class MultiplayerNotifier extends Notifier<MultiplayerState> {
         }
       }
 
-      if (joinedCode == null) {
-        joinedCode = await service.createRoom(userName);
-      }
+      joinedCode ??= await service.createRoom(userName);
 
       state = state.copyWith(roomCode: joinedCode);
       _startListeningToChat(joinedCode);
@@ -157,8 +155,8 @@ class MultiplayerNotifier extends Notifier<MultiplayerState> {
     _chatSubscription?.cancel();
 
     final config = ref.read(configProvider);
-    if (config.onlineMode && state.roomCode != null) {
-      ref.read(multiplayerSyncServiceProvider).leaveRoom(state.roomCode!);
+    if (config.onlineMode && state.roomCode.isNotEmpty) {
+      ref.read(multiplayerSyncServiceProvider).leaveRoom(state.roomCode);
     }
 
     state = MultiplayerState.initial();
@@ -331,8 +329,8 @@ class MultiplayerNotifier extends Notifier<MultiplayerState> {
     );
 
     final config = ref.read(configProvider);
-    if (config.onlineMode && state.roomCode != null) {
-      ref.read(multiplayerSyncServiceProvider).sendChat(state.roomCode!, userName, text);
+    if (config.onlineMode && state.roomCode.isNotEmpty) {
+      ref.read(multiplayerSyncServiceProvider).sendChat(state.roomCode, userName, text);
       return;
     }
 

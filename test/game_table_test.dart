@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -45,9 +44,6 @@ void main() {
     tableTheme: 'green',
   );
 
-  final mockStatsProvider = AsyncNotifierProvider<StatsNotifier, UserStats>(() {
-    return _MockStatsNotifier(dummyStats);
-  });
 
   group('GameTable Tests', () {
     testWidgets('renders 4 players correctly', (WidgetTester tester) async {

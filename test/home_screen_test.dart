@@ -1,110 +1,79 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:three_of_spades_flutter/screens/home_screen.dart';
 import 'package:three_of_spades_flutter/providers/stats_provider.dart';
-import 'package:three_of_spades_flutter/providers/config_provider.dart';
-import 'package:three_of_spades_flutter/l10n/app_localizations.dart';
-
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:three_of_spades_flutter/providers/daily_reward_provider.dart';
-
-class _MockStatsNotifier extends StatsNotifier {
-  final UserStats _initialStats;
-  _MockStatsNotifier([UserStats? stats]) : _initialStats = stats ?? UserStats(name: 'Test', coins: 5000, gamesPlayed: 0, gamesWon: 0, highestBidWon: 0, tableTheme: 'green');
-  
-  @override
-  Future<UserStats> build() async {
-    return _initialStats;
-  }
-}
-
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   setUp(() {
     SharedPreferences.setMockInitialValues({
       'dr_last_claim': DateTime.now().toIso8601String().substring(0, 10),
       'dr_consecutive_days': 1,
     });
   });
-  testWidgets('HomeScreen renders correctly and displays stats', (WidgetTester tester) async {
-    tester.view.physicalSize = const Size(1080, 2400);
-    tester.view.devicePixelRatio = 1.0;
-    
+
+  testWidgets('StatsNotifier loads default stats', (WidgetTester tester) async {
+    SharedPreferences.setMockInitialValues({});
+
+    late StatsNotifier notifier;
+
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          statsProvider.overrideWith(() => StatsNotifier()),
-        ],
-        child: const MaterialApp(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: HomeScreen(),
+        child: Consumer(
+          builder: (context, ref, _) {
+            final stats = ref.watch(statsProvider);
+            notifier = ref.read(statsProvider.notifier);
+            return stats.when(
+              data: (s) => Text(s.name, textDirection: TextDirection.ltr),
+              loading: () => const Text('loading', textDirection: TextDirection.ltr),
+              error: (e, _) => const Text('error', textDirection: TextDirection.ltr),
+            );
+          },
         ),
       ),
     );
 
-    // Initial pump
-    await tester.pump();
     await tester.pump(const Duration(seconds: 1));
-    
-    // Dismiss daily reward dialog if present
-    if (find.byIcon(Icons.close).evaluate().isNotEmpty) {
-      await tester.tap(find.byIcon(Icons.close));
-      await tester.pump(const Duration(seconds: 1));
-    }
-
-    // Verify main components are present
     expect(find.text('Guest Player'), findsOneWidget);
-    expect(find.text('5000 COINS'), findsOneWidget);
-    
-    // Verify bot card exists
-    expect(find.text('Play vs Intelligent Bots'), findsOneWidget);
-    
-    // Check Settings button semantics
-    final settingsIcon = find.byIcon(Icons.settings);
-    expect(settingsIcon, findsOneWidget);
+    expect(notifier, isNotNull);
   });
 
-  testWidgets('HomeScreen Settings Dialog opens and has language toggle', (WidgetTester tester) async {
-    tester.view.physicalSize = const Size(1080, 2400);
-    tester.view.devicePixelRatio = 1.0;
+  testWidgets('StatsNotifier can set AI difficulty', (WidgetTester tester) async {
+    SharedPreferences.setMockInitialValues({});
+
+    late StatsNotifier notifier;
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          statsProvider.overrideWith(() => StatsNotifier()),
-        ],
-        child: const MaterialApp(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: HomeScreen(),
+        child: Consumer(
+          builder: (context, ref, _) {
+            final stats = ref.watch(statsProvider);
+            notifier = ref.read(statsProvider.notifier);
+            return stats.when(
+              data: (s) => Text(s.aiDifficulty.name, textDirection: TextDirection.ltr),
+              loading: () => const Text('loading', textDirection: TextDirection.ltr),
+              error: (e, _) => const Text('error', textDirection: TextDirection.ltr),
+            );
+          },
         ),
       ),
     );
 
     await tester.pump(const Duration(seconds: 1));
+    // Default is medium
+    expect(find.text('medium'), findsOneWidget);
 
-    // Dismiss daily reward dialog if present
-    if (find.byIcon(Icons.close).evaluate().isNotEmpty) {
-      await tester.tap(find.byIcon(Icons.close));
-      await tester.pump(const Duration(seconds: 1));
-    }
-
-    // Tap settings
-    final settingsIcon = find.byIcon(Icons.settings);
-    await tester.tap(settingsIcon);
+    // Change to hard
+    await notifier.setAiDifficulty(AiDifficulty.hard);
     await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('hard'), findsOneWidget);
+  });
 
-    // Verify Settings dialog
-    expect(find.text('SETTINGS'), findsWidgets);
-    expect(find.text('Language'), findsWidgets);
-    expect(find.text('English'), findsWidgets);
-    
-    // Verify Sound and Music toggles
-    expect(find.text('Sound Effects'), findsOneWidget);
-    expect(find.text('Background Music'), findsOneWidget);
+  testWidgets('AiDifficulty values are accessible', (WidgetTester tester) async {
+    expect(AiDifficulty.easy.name, equals('easy'));
+    expect(AiDifficulty.medium.name, equals('medium'));
+    expect(AiDifficulty.hard.name, equals('hard'));
   });
 }

@@ -11,6 +11,7 @@ import '../screens/matchmaking_screen.dart';
 import '../screens/private_room_screen.dart';
 import '../screens/leaderboard_screen.dart';
 import '../screens/tutorial_screen.dart';
+import '../screens/game_history_screen.dart';
 import '../providers/stats_provider.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -59,6 +60,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/leaderboard',
         builder: (context, state) => const LeaderboardScreen(),
       ),
+      GoRoute(
+        path: '/history',
+        builder: (context, state) => const GameHistoryScreen(),
+      ),
     ],
     redirect: (context, state) {
       final phase = phaseListenable.value;
@@ -76,13 +81,13 @@ final routerProvider = Provider<GoRouter>((ref) {
           if (!hasSeenTutorial) {
             if (location != '/tutorial') return '/tutorial';
           } else {
-            final allowedHomeRoutes = ['/home', '/matchmaking', '/private-room', '/leaderboard', '/tutorial'];
+            final allowedHomeRoutes = ['/home', '/matchmaking', '/private-room', '/leaderboard', '/tutorial', '/history'];
             if (!allowedHomeRoutes.contains(location)) {
               return '/home';
             }
           }
         } else {
-          final allowedHomeRoutes = ['/home', '/matchmaking', '/private-room', '/leaderboard', '/tutorial'];
+          final allowedHomeRoutes = ['/home', '/matchmaking', '/private-room', '/leaderboard', '/tutorial', '/history'];
           if (!allowedHomeRoutes.contains(location)) {
             return '/home';
           }
