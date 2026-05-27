@@ -13,6 +13,7 @@ class SoundManager {
   bool musicEnabled = true;
   final Map<String, AudioPlayer> _players = {};
   AudioPlayer? _musicPlayer;
+  bool _isPlayingMusic = false;
 
   void setEnabled(bool isEnabled) {
     enabled = isEnabled;
@@ -37,19 +38,23 @@ class SoundManager {
   Future<void> playBackgroundMusic() async {
     if (_isTesting) return;
     if (!musicEnabled || !enabled) return;
+    if (_isPlayingMusic) return;
     try {
       if (_musicPlayer == null) {
         _musicPlayer = AudioPlayer();
         await _musicPlayer!.setReleaseMode(ReleaseMode.loop);
       }
+      _isPlayingMusic = true;
       await _musicPlayer!.play(AssetSource('sounds/music.mp3'));
     } catch (e) {
+      _isPlayingMusic = false;
       debugPrint('Music playback error: $e');
     }
   }
 
   Future<void> stopBackgroundMusic() async {
     if (_isTesting) return;
+    _isPlayingMusic = false;
     try {
       await _musicPlayer?.stop();
     } catch (e) {
