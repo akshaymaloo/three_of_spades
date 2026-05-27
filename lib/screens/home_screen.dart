@@ -1292,16 +1292,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               children: [
                 Icon(icon, color: finalColor, size: isSmallHeight ? 18 : 22),
                 SizedBox(height: isSmallHeight ? 4 : 8),
-                Flexible(
-                  child: Text(
-                    title,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: enabled ? GameTheme.textWhite : GameTheme.textGrey,
-                      fontSize: isSmallHeight ? 9 : 11,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.0,
-                    ),
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: enabled ? GameTheme.textWhite : GameTheme.textGrey,
+                    fontSize: isSmallHeight ? 9 : 11,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.0,
                   ),
                 ),
                 SizedBox(height: isSmallHeight ? 2 : 4),
