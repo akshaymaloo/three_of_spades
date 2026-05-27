@@ -54,7 +54,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     });
   }
 
-  void _checkDailyReward() {
+  Future<void> _checkDailyReward() async {
+    await ref.read(dailyRewardProvider.notifier).initialized;
+    if (!mounted) return;
+
     final rewardState = ref.read(dailyRewardProvider);
     if (!rewardState.todayClaimed) {
       if (rewardState.consecutiveDays >= DailyRewardNotifier.rewardSchedule.length) {
